@@ -59,6 +59,7 @@ def _reseal(text):
 def _strip(d):
     d = json.loads(json.dumps(d))
     d["scorer"].pop("sha256", None)
+    d["scorer"].pop("kit_version", None)  # the version is recorded, not tested: a pin is not a test
     return d
 
 
