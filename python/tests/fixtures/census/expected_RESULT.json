@@ -585,7 +585,7 @@
  },
  "schema": "styxx.ledger/census_result/v1",
  "scorer": {
-  "kit_version": "1.0.0a1",
+  "kit_version": "1.0.0a2",
   "module": "styxx_ledger.census",
   "sha256": "8077a7669e42a193ca4d4914aedcb3fafb9c6642a5cfdea7568f7b077d740894"
  },
