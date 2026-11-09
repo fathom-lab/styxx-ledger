@@ -23,19 +23,24 @@ the python package in `../python` implements the same protocol; both are held to
                                                          exhibit.test.js 20: cases a-e and the review-3e regressions)
     exhibit, live, 2026-11-09 05:28Z (npx, packed tarball) 68 of 69 checks, 1 pending, exit 0; 14 of 15 anchor proofs
                                                          and 22 of 22 witness proofs verify; 14 of 14 blocks agree
-    ubuntu, node 20 and 22                               not run here; ci.yml's matrix reads them
+    ubuntu, node 20 and 22                               not run: ci.yml is written, not pushed (0 runs as of
+                                                         2026-11-09)
 
 the vectors' expected values were computed once by the python package; this package answers them on its own code
 (its canonicalizer is the exhibit verify.js v0 `dump`, unchanged).
 
 ## quickstart
 
-    npx styxx-ledger init agent.jsonl --agent mybot --certifies "one line per tool call mybot was handed." --tz Europe/Berlin
-    npx styxx-ledger append agent.jsonl --kind note --fields '{"note":"hello"}'
-    npx styxx-ledger anchor-text agent.jsonl            # after midnight in anchor_tz: prints the text for yesterday
-    npx styxx-ledger anchor-text agent.jsonl --date 2026-11-08 --record   # after posting it: the anchor entry
-    npx styxx-ledger verify agent.jsonl --anchor "mybot anchor 2026-11-08 head <64 hex> seq <n>"
-    npx styxx-ledger head agent.jsonl
+from a checkout, in `js/` (the package is not on npm: as of 2026-11-09 the name answers 404 there, so `npx
+styxx-ledger` would run whatever someone else publishes under it; after publication `npx styxx-ledger` replaces
+`node bin/styxx-ledger.cjs` below):
+
+    node bin/styxx-ledger.cjs init agent.jsonl --agent mybot --certifies "one line per tool call mybot was handed." --tz Europe/Berlin
+    node bin/styxx-ledger.cjs append agent.jsonl --kind note --fields '{"note":"hello"}'
+    node bin/styxx-ledger.cjs anchor-text agent.jsonl            # after midnight in anchor_tz: prints the text for yesterday
+    node bin/styxx-ledger.cjs anchor-text agent.jsonl --date 2026-11-08 --record   # after posting it: the anchor entry
+    node bin/styxx-ledger.cjs verify agent.jsonl --anchor "mybot anchor 2026-11-08 head <64 hex> seq <n>"
+    node bin/styxx-ledger.cjs head agent.jsonl
 
 `init` writes the header (`--tz` is required; `--kinds a,b` adds kinds, `anchor` and `started` are always there)
 and one `started` entry at `--timestamp` or now (`--no-started` or `--no-start` for the header alone). `anchor-text`
@@ -122,9 +127,9 @@ v1 (and a v0 file then gets `no_header`, "this verifier reads v1 only"). the exh
 
 ## exhibit: re-derive a published exhibit by url
 
-    npx styxx-ledger exhibit https://fathom-lab.github.io/styxx/ledger/
-    npx styxx-ledger exhibit <url> [--explorer <esplora api url> ...] [--sample <n>] [--no-ots] [--save <dir>]
-                           [--allow-redirect] [--today <YYYY-MM-DD>] [--json]
+    node bin/styxx-ledger.cjs exhibit https://fathom-lab.github.io/styxx/ledger/
+    node bin/styxx-ledger.cjs exhibit <url> [--explorer <esplora api url> ...] [--sample <n>] [--no-ots] [--save <dir>]
+                                    [--allow-redirect] [--today <YYYY-MM-DD>] [--json]
 
 not on npm yet: from a checkout, `npm pack` here and `npx --package=./styxx-ledger-1.0.0-alpha.2.tgz styxx-ledger
 exhibit <url>`, or `node bin/styxx-ledger.cjs exhibit <url>`. it fetches `ledger.jsonl`, `withheld.json`,

@@ -2,6 +2,10 @@
 > `docs/outside_ledgers.json`, `docs/reports/`), and `census.SHELF_HAS_V1_ROW` is set True in the kit. the register holds
 > v1 rows 0 of 2 (both rows are the lab's own). sentences below that said "the shelf has no v1 row" now read "no
 > outside ledger has been published"; the condition (c) check is the scorer's, against the shelf's report.
+> change log — 2026-11-09 (the lab's improvement sweep, kit group): "how to fill" (h) says a prereg saved with crlf
+> line ends is refused with code `crlf` (the digests are over lf bytes); (i) and §3 (c) name the shelf's kept reads,
+> `https://fathom-lab.github.io/styxx-shelf/reports/reads/`, as the only host a shelf report is fetched from (the
+> kit's `census.SHELF_REPORT_PREFIX`); a report on any other host fails (c) unfetched.
 
 # PREREG_census — {{agent}} under the styxx ledger: a census of one outside agent's deliveries against its published ledger, counted for 28 days under a rule frozen before the window opens — {{registration_date}}
 
@@ -10,7 +14,8 @@ in the form "how to fill" gives, the filled bytes are published at `{{registrati
 the time, and the dated entries under §15 name the registration digest (the sha256 of the filled file's bytes before
 the line that starts `## 15.`), the shelf's read and the operator's signature line. a placeholder left anywhere in a
 filled file is a refusal of the registration, not a gap to read around. written 2026-11-09 by fathom lab (THE_PLAN
-item 3d, the opening half; revised the same day after the lab's adversarial review, `REVIEW_3d.md`) from
+item 3d, the opening half; revised the same day after the lab's adversarial review, which this repository does not
+carry) from
 `PREREG_darkflobi_gate_2026_10_23.md` (here: `DPR`), cut to what an outside ledger can support: protocol v1 lines
 (`PROTOCOL_v1.md`, here: `P1`), a public url, anchors per day in the operator's `anchor_tz`, numerals counted only
 where the operator's own lines carry them, kinds and `certifies` read from the ledger's header.
@@ -136,7 +141,9 @@ the registration digest is the sha256 of the filled file's bytes before the line
 registration commit stores them (lf), by `git show <commit>:<path> | sed '/^## 15\./,$d' | sha256sum`. the kit
 prints both, and the gates block's assignment walk (here:4), by `styxx-ledger census-digests --prereg <file>`.
 `{{registration_url}}` is a pull request or branch-path url, so the bytes above §15 can name it before the commit
-exists.
+exists. both digests are over lf line ends: a copy saved with crlf (notepad, or a windows checkout with
+`core.autocrlf`) is refused with code `crlf` by the scorer and by `census-digests`; save with lf (git: `* -text` in
+`.gitattributes`, or `dos2unix`).
 
 **(i) the entries under §15**, one line each, in these forms (angle brackets mark the values):
 
@@ -144,7 +151,10 @@ exists.
     shelf read: <the shelf report's url> sha256 <64 hex of the report's bytes> at <YYYY-MM-DDTHH:MM:SSZ>
     window 1: I, <operator>, run <agent> and register the census of <registration digest>, opening <d0> 00:00 <anchor_tz>; signed <YYYY-MM-DDTHH:MM:SSZ>.
 
-each form appears once. §15 is append-only and outside the registration digest; every byte above it is inside.
+each form appears once. §15 is append-only and outside the registration digest; every byte above it is inside. the
+shelf read names a report under the shelf's kept reads, `https://fathom-lab.github.io/styxx-shelf/reports/reads/`
+(`census.SHELF_REPORT_PREFIX` in the kit); a report on any other host, the operator's own included, fails (c)
+unfetched.
 
 ---
 
@@ -242,8 +252,9 @@ what they say. `DPR` §2: "Correctness is not coverage."
   line for this window is under §15 (§12), naming the registration digest and `{{d0}}`, signed before 00:00 `{{d0}}`;
   (c) the shelf has read `{{ledger_url}}`: its §15 entry names the shelf report's url and sha256, and the scorer
   fetches the report, checks its sha256, checks that it names `{{ledger_url}}` and `{{earliest_anchor}}` (which carries
-  the head), that `{{earliest_anchor}}` holds on the chain, and that the read falls after the anchor's day ended and
-  before 00:00 `{{d0}}`. **until the shelf has read the outside ledger and written its report, (c) does not hold**; (d) the
+  the head), that `{{earliest_anchor}}` holds on the chain, that the report's url is under the shelf's kept reads,
+  `https://fathom-lab.github.io/styxx-shelf/reports/reads/` (a report on any other host fails (c) unfetched), and
+  that the read falls after the anchor's day ended and before 00:00 `{{d0}}`. **until the shelf has read the outside ledger and written its report, (c) does not hold**; (d) the
   registration names `{{header_digest}}` (here:3). a header read at close that differs is a chain problem (§5), not a
   failure of (d), because one read at close cannot date a change. **the earliest external window opens when the
   outside ledger exists and is read by the shelf**: (c) is that rule, and no date stands in for it.

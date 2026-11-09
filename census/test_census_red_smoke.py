@@ -1,7 +1,7 @@
 """the census scorer on the red ledger by url, under the 3d worked example (a v0 chain, d0 open).
 
-a network test, kept out of the python suite's testpaths (REVIEW_3d note N4: a live, growing url does not belong in
-the unit suite). run it from the kit root:
+a network test, kept out of the python suite's testpaths (the lab's review: a live, growing url does not belong in the
+unit suite). run it from the kit root:
 
     PYTHONDONTWRITEBYTECODE=1 python -I -B -m pytest -q -p no:cacheprovider census/test_census_red_smoke.py
 

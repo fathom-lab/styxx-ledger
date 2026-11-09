@@ -2,18 +2,28 @@
 
 a reference writer and verifier for the styxx ledger protocol v1 (`PROTOCOL_v1.md`), in python and in javascript.
 
-## verify it yourself, one command
+## verify it yourself, from a checkout
 
 darkflobi publishes its send ledger at https://fathom-lab.github.io/styxx/ledger/. one command fetches it and
-re-derives it on your own machine, with no browser and no trust in the lab's page:
+re-derives it on your own machine, with no browser and no trust in the lab's page. neither package is on npm or pypi
+yet, so run it from a clone:
 
-    npx styxx-ledger exhibit https://fathom-lab.github.io/styxx/ledger/        # javascript (node 20+)
-    styxx-ledger exhibit https://fathom-lab.github.io/styxx/ledger/            # python (3.10+)
+    git clone https://github.com/fathom-lab/styxx-ledger && cd styxx-ledger
+    node js/bin/styxx-ledger.cjs exhibit https://fathom-lab.github.io/styxx/ledger/     # javascript (node 20+), no install
+    pip install ./python                                                                  # python (3.10+), in a venv
+    styxx-ledger exhibit https://fathom-lab.github.io/styxx/ledger/
 
-neither package is on npm or pypi yet. from a checkout today: `cd js && npm pack`, then
-`npx --package=./styxx-ledger-1.0.0-alpha.2.tgz styxx-ledger exhibit <url>` (or `node js/bin/styxx-ledger.cjs exhibit
-<url>`); `pip install ./python`, then `styxx-ledger exhibit <url>` (or `python -m styxx_ledger exhibit <url>` with
-`python/src` on the path). the opentimestamps proofs are read natively, by code in each package.
+python without installing the package: on windows, `pip install tzdata` before anything else (python.org windows
+builds carry no zone database; `pip install ./python` pulls it in), then `python -m styxx_ledger exhibit <url>` with
+`python/src` on the path (`PYTHONPATH=python/src`; in powershell `$env:PYTHONPATH = "python/src"`). a python with no
+zone database ends exit 2 with "this python has no zone database: pip install tzdata" and verifies nothing; it never
+reports the chain as broken. the opentimestamps proofs are read natively, by code in each package.
+
+after publication (not yet: as of 2026-11-09 both names answer 404 on npm and on pypi, so do not run these until the
+lab has published them; whoever holds a name runs their code on the machine that types it):
+
+    npx styxx-ledger exhibit https://fathom-lab.github.io/styxx/ledger/
+    pip install styxx-ledger
 
 what it fetches: `ledger.jsonl`, `withheld.json`, `anchors/index.json` and every anchor `.txt` and `.txt.ots` it names,
 `witness/index.json` and a sample of the witness proofs (30 s timeout and a 20 MB cap per file). what it asks: two
@@ -44,7 +54,7 @@ bitcoin block a proof names. what each line of the report means:
                      explorer still answering HTTP 429 after 5 tries (on its Retry-After, at most 60 s, else 2, 4, 8,
                      16 s) is named as rate-limited and left out for the run
     result           k of n checks; exit 0 every check passed, 1 any failed, 2 usage, or a file or an explorer did
-                     not answer
+                     not answer, or this python has no zone database (python only: "pip install tzdata")
 
 flags (both): `--explorer <url>` (repeatable; replaces the default two; any esplora instance), `--sample <n>`,
 `--no-ots` (no proof, no explorer), `--save <dir>` (keep every fetched byte and every explorer answer),
@@ -84,7 +94,8 @@ as read on this box (windows 11, 2026-11-09 05:28Z, both clis against the live e
                          5.8 s wall clock)
 
 an earlier run the same hour (04:55Z) met blockstream.info's rate limit after this box's review runs: 0 of 14 blocks
-answered there, 36 of 66 checks could not be made, exit 2, nothing called verified (exhibit_runs in the build log).
+answered there, 36 of 66 checks could not be made, exit 2, nothing called verified (recorded in the lab's build log,
+which this repository does not carry).
 
 the two clis print the same report, line for line, apart from the implementation's name and the wall clock.
 
@@ -104,7 +115,9 @@ no key.
     python/             package styxx_ledger (pypi name styxx-ledger), writer + verifier + cli, pytest suite
     js/                 package styxx-ledger (npm), commonjs, writer + verifier + cli, node:test suite
     tools/              cross_verify.py: the two clis against each other's bytes
-    .github/workflows/  ci.yml: ubuntu + windows, python 3.10 / 3.12 / 3.13, node 20 / 22, and the cross job
+    ci.yml              written, not pushed (the lab's tokens cannot push .github/; the operator pastes it); 0 runs
+                        as of 2026-11-09. it runs ubuntu + windows, python 3.10 / 3.12 / 3.13, node 20 / 22, the
+                        census tests and the cross job once it is in .github/workflows/
 
 ## what it is not
 
@@ -122,22 +135,28 @@ no key.
 
 ## counts, as read on this box
 
-windows 11, 2026-11-08 and 09. ubuntu, python 3.10 / 3.13 and node 20 / 22 are ci's to read (`.github/workflows/ci.yml`);
-no ubuntu number is claimed here until ci has run.
+windows 11, 2026-11-08 and 09. ci has not run (the workflow is written, not pushed: 0 runs as of 2026-11-09), so
+python 3.10 / 3.13 and node 20 / 22 carry no number here. one ubuntu leg was read by hand on this box under WSL on
+2026-11-09 (ubuntu, python 3.12.3, no node; the kit-user pass of the lab's improvement sweep), python
+package only: vectors 118 of 118 answered as the file says, and the live exhibit from the checkout 68 of 69 checks,
+exit 0.
 
     vectors, python package (python 3.12.10, tzdata 2025.3)     118 of 118 answered as the file says
     vectors, javascript package (node 24.13.0)                   118 of 118 answered as the file says
     v0 vectors (vectors/v0, the exhibit's), python package        10 of 10 answered as the file says
     v0 vectors (vectors/v0, the exhibit's), javascript package    10 of 10 answered as the file says
     ots proofs (vectors/ots), each package, offline               36 of 36 agree with javascript-opentimestamps 0.4.9
-    vectors, python 3.14.2 without tzdata                         58 of 118 (why the windows tzdata dependency exists)
+    vectors, python 3.14.2 without tzdata                         exit 2, "this python has no zone database: pip
+                                                                  install tzdata", 0 answered (58 of 118 before the
+                                                                  2026-11-09 fix counted the missing database as misses)
     ots crafted proofs (vectors/ots/crafted), each package        10 of 10 answered as crafted.json says
     exhibit end to end, offline (local server, fake explorers)   cases a-e and the review-3e regressions f-m pass in
                                                                   each (31 pytest, 20 node tests)
     exhibit, both clis on one served copy, 14 cases               14 of 14 reports identical line for line
     exhibit, live (fathom-lab.github.io/styxx/ledger/)            68 of 69 checks, 1 pending, exit 0, in each cli
-    pytest (python/), the ledger kit's tests                      353 passed of 353 collected (tests/test_census.py,
-                                                                  another workstream's, not counted here)
+    pytest (python/), the ledger kit's tests                      365 passed of 365 collected without
+                                                                  tests/test_census.py; 413 of 413 with it (2026-11-09)
+    pytest census (the readme check, the red smoke)               9 passed of 9 (2026-11-09)
     node --test (js/)                                             94 passed of 94, 0 skipped
     tools/cross_verify.py                                         13 of 13 cross checks hold
     vectors/mutate_core.py (python core mutants)                  57 of 57 applied mutants killed

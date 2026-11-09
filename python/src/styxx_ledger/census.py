@@ -75,6 +75,10 @@ INTERVAL_S = 3600
 # the report this scorer fetches (docs/reports/<name>.json, kept reads under docs/reports/reads/). the register holds
 # v1 rows 0 of 2 until an outside operator publishes one; the shape exists, the row does not.
 SHELF_HAS_V1_ROW = True
+# the shelf's kept reads (styxx-shelf README: docs/reports/reads/<name>/<read_at>.json, served by github pages). the §15
+# shelf read entry must name a report under this prefix: a report on any other host, or a local path, is a file the
+# operator could have written, not the shelf's read, and (c) fails without fetching it (improvements 2026-11-09 rank 4).
+SHELF_REPORT_PREFIX = "https://fathom-lab.github.io/styxx-shelf/reports/reads/"
 NORMALISATION_RULES = ("none", "strip", "nfc", "nfc+strip", "crlf-to-lf", "crlf-to-lf+strip")
 
 PLACEHOLDERS = (
@@ -579,6 +583,11 @@ def digests(prereg_path) -> Dict[str, Any]:
     text = b.decode("utf-8")
     out: Dict[str, Any] = {"file": Path(prereg_path).name, "registration_sha256": reg, "bytes_before_section_15": n,
                            "section_15_found": found}
+    if b"\r\n" in b:   # a digest over crlf bytes is not the one the scorer recomputes: never hand it out as sealable
+        out["refused"] = {"code": "crlf", "reason": "the file carries crlf line ends (%d of them); the digests are over "
+                          "lf bytes; save with lf (git: * -text, or dos2unix)" % b.count(b"\r\n")}
+        out["gates"] = None
+        return out
     blk = gates_block(text)
     if blk is None:
         out["gates"] = None
@@ -640,6 +649,9 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
         raise Refused("now", "now_utc is not YYYY-MM-DDTHH:MM:SSZ: %r" % now_s)
     if anchor_place is not None and anchor_place != "holds" and not anchor_place.startswith("fails: "):
         raise Refused("anchor_place", "anchor_place is None, 'holds' or 'fails: <why>'")
+    if b"\r\n" in pre_bytes:   # before any parse: a crlf copy otherwise reads as "no gates block" (rank 21, 2026-11-09)
+        raise Refused("crlf", "the prereg carries crlf line ends (%d of them); the digests are over lf bytes; save "
+                      "with lf (git: * -text, or dos2unix)" % pre_bytes.count(b"\r\n"))
     try:
         text = pre_bytes.decode("utf-8")
     except UnicodeDecodeError:
@@ -680,9 +692,8 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
             registration["entry"] = {"url": url, "commit": commit, "registration_sha256": sha}
             if sha != reg_read:
                 raise Refused("registration_mismatch", "the bytes before section 15 hash to %s; the registration entry "
-                              "names %s. a bar, value or rule edited after the registration is not scored%s"
-                              % (reg_read, sha, " (the file carries crlf line ends; the digest is over the committed lf bytes)"
-                                 if b"\r\n" in pre_bytes else ""))
+                              "names %s. a bar, value or rule edited after the registration is not scored"
+                              % (reg_read, sha))
     norm, norm_name = _normaliser(v["normalisation_rule"])
     natives = _native_list(None if _is_open(pr["values"]["native_strings"]) else pr["values"]["native_strings"])
     gates_doc, gates_src, gates_sha = _gates(pr["gates_block"], min_del)
@@ -1159,6 +1170,21 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
     return body
 
 
+def _on_the_shelf(url: str, prefix: Optional[str] = None) -> bool:
+    """True when url is a plain https url under the shelf's kept reads: same scheme and host, the prefix's path, no
+    userinfo, port, query, fragment, backslash, percent-escape or dot segment that could step out of it."""
+    import urllib.parse as _up
+    prefix = SHELF_REPORT_PREFIX if prefix is None else prefix
+    if not isinstance(url, str) or not url.startswith(prefix) or len(url) == len(prefix):
+        return False
+    if any(c in url for c in "\\%?#@") or any(ord(c) <= 0x20 or ord(c) >= 0x7f for c in url):
+        return False
+    u, w = _up.urlsplit(url), _up.urlsplit(prefix)
+    if (u.scheme, u.netloc) != (w.scheme, w.netloc) or u.port is not None:
+        return False
+    return not any(seg in (".", "..") for seg in u.path.split("/"))
+
+
 def _shelf(entry, v, r, wh, tz, d0_at, tries, interval_s, sleep, proto) -> Dict[str, Any]:
     """opening condition (c): the shelf's report of the outside ledger."""
     if entry is None:
@@ -1171,6 +1197,11 @@ def _shelf(entry, v, r, wh, tz, d0_at, tries, interval_s, sleep, proto) -> Dict[
     if entry is None:
         return {"held": False, "verified": False, "evidence": stated}
     url, sha, at = entry
+    if not _on_the_shelf(url):
+        return {"held": False, "verified": True,
+                "evidence": stated + "; report_on_the_shelf FAILS: the report url is not under the shelf's kept reads "
+                "%s, so it is a file the operator could have written, not the shelf's read; not fetched"
+                % SHELF_REPORT_PREFIX}
     checks: Dict[str, bool] = {}
     rb, rm = _fetch_tries(url, tries, interval_s, sleep)
     checks["report_answers"] = rb is not None

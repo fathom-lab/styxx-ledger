@@ -23,7 +23,8 @@ expected_RESULT.json  with --expected: the scorer's output at now 2026-11-01T00:
 a fixture is a receipt: an existing file with other bytes is refused, never overwritten.
 
 the test seams (used by tests/test_census.py and --expected): census._fetch_once answers the fixture's example.invalid
-urls from the files here; census.SHELF_HAS_V1_ROW is set True so (c) can hold; census._js_verify is answered by the
+urls from the files here; census.SHELF_HAS_V1_ROW is set True so (c) can hold; census.SHELF_REPORT_PREFIX is set to
+the fixture's shelf (https://example.invalid/shelf/) so its report is the shelf's; census._js_verify is answered by the
 python verifier (the real js leg is exercised by test_js_leg_agrees_when_node_is_here).
 """
 from __future__ import annotations
@@ -49,6 +50,7 @@ WRITER = {"name": "styxx-ledger", "version": "1.0.0a1", "language": "python"}
 CERTIFIES = "one line per message censusbot delivered, chained; the sha256 of the delivered text, never the text"
 LEDGER_URL = "https://example.invalid/censusbot/ledger.jsonl"
 SHELF_URL = "https://example.invalid/shelf/censusbot.json"
+FIXTURE_SHELF_PREFIX = "https://example.invalid/shelf/"   # the seams' stand-in for census.SHELF_REPORT_PREFIX
 REG_URL = "https://example.invalid/opfixture/census/pull/1"
 REG_COMMIT = hashlib.sha1(b"census fixture registration commit").hexdigest()
 SHELF_AT = "2026-09-30T12:00:00Z"
@@ -236,19 +238,20 @@ def install_seams(census, setattr_):
                 "protocol": r["protocol"]}
     setattr_(census, "_fetch_once", fake_fetch)
     setattr_(census, "SHELF_HAS_V1_ROW", True)
+    setattr_(census, "SHELF_REPORT_PREFIX", FIXTURE_SHELF_PREFIX)
     setattr_(census, "_js_verify", fake_js)
 
 
 def expected_bytes() -> bytes:
     from styxx_ledger import census
-    saved = (census._fetch_once, census.SHELF_HAS_V1_ROW, census._js_verify)
+    saved = (census._fetch_once, census.SHELF_HAS_V1_ROW, census.SHELF_REPORT_PREFIX, census._js_verify)
     try:
         install_seams(census, setattr)
         with tempfile.TemporaryDirectory() as d:
             census.score(FIX / "PREREG_filled.md", LEDGER_URL, Path(d), NOW, js=True)
             return (Path(d) / "RESULT.json").read_bytes()
     finally:
-        census._fetch_once, census.SHELF_HAS_V1_ROW, census._js_verify = saved
+        census._fetch_once, census.SHELF_HAS_V1_ROW, census.SHELF_REPORT_PREFIX, census._js_verify = saved
 
 
 def main(argv=None) -> int:

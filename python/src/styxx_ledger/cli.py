@@ -1,7 +1,7 @@
 """cli.py: styxx-ledger init | append | verify | anchor-text | head | exhibit.
 
 exit codes: 0 done / re-derives; 1 refused, or the log does not re-derive, or an anchor does not hold;
-2 usage or i/o error. machine output with --json; the anchor text alone on stdout for anchor-text.
+2 usage or i/o error, or this python has no zone database ("pip install tzdata"). machine output with --json; the anchor text alone on stdout for anchor-text.
 
 verify reads the header's schema: a v1 log is read as v1, a v0 log (darkflobi.gate/log/v0) under v0's rules (v0.py);
 --protocol v1|v0 forces one. head is v1 only, as before.
@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 from ._version import __version__
+from .day import ZoneDatabaseMissing, require_zone_database
 from .jcs import LedgerValueError
 from .v0 import check_anchor_auto, parse_anchor_auto, verify_auto
 from .verify import coverage
@@ -225,6 +226,7 @@ def cmd_exhibit(a) -> int:
         raise _Usage("--sample wants a count of 0 or more")
     if a.today is not None and not re.match(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$", a.today):
         raise _Usage("--today wants a date YYYY-MM-DD")
+    require_zone_database()   # no zone database: exit 2 before anything is fetched, never a chain verdict
     rep = run_exhibit(u, explorers=exps, sample=a.sample, no_ots=a.no_ots, save_dir=a.save,
                       allow_redirect=a.allow_redirect, today=a.today)
     if a.json:
@@ -372,6 +374,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     except LedgerError as e:
         print("styxx-ledger: %s" % e, file=sys.stderr)
         return 1
+    except ZoneDatabaseMissing as e:
+        print("styxx-ledger: %s; nothing was verified (exit 2)" % e, file=sys.stderr)
+        return 2
     except OSError as e:
         print("styxx-ledger: i/o error: %s" % e, file=sys.stderr)
         return 2

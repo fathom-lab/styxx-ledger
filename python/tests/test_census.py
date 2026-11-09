@@ -209,6 +209,93 @@ def test_m6_shelf_read_before_anchor_day_fails(seams, tmp_path):
     assert "read_after_the_anchors_day_ended FAILS" in res["window"]["opening_condition"]["c"]["evidence"]
 
 
+# ---- rank 4 (improvements 2026-11-09): the shelf report must be on the shelf, never on a host the operator holds
+
+OPERATOR_SHELF = "https://kestrel-ops.github.io/shelf/censusbot.json"
+
+
+def test_rank4_operator_hosted_report_is_refused(tmp_path, monkeypatch):
+    """the same report bytes, served from the operator's own host: (c) fails, the window does not open, and the
+    scorer never fetches the operator's url."""
+    mp = M.fetch_map()
+    mp[OPERATOR_SHELF] = FIX / "shelf_report.json"
+    monkeypatch.setattr(M, "fetch_map", lambda: mp)
+    M.install_seams(census, monkeypatch.setattr)
+    fetched = []
+    inner = census._fetch_once
+    monkeypatch.setattr(census, "_fetch_once", lambda src: (fetched.append(src), inner(src))[1])
+    t = PREREG.read_text(encoding="utf-8").replace(M.SHELF_URL, OPERATOR_SHELF)
+    assert OPERATOR_SHELF in t
+    res, _ = _run(tmp_path, "r4", prereg=_write(tmp_path, "r4.md", t), export=HELD, anchors=ANCHORS)
+    c = res["window"]["opening_condition"]["c"]
+    assert c["held"] is False and c["verified"] is True
+    assert "report_on_the_shelf FAILS" in c["evidence"] and census.SHELF_REPORT_PREFIX in c["evidence"]
+    assert res["verdict"] == "NOT_RUN__window_did_not_open"
+    assert OPERATOR_SHELF not in fetched
+
+
+def test_rank4_the_kit_constant_is_the_shelfs_kept_reads(tmp_path, monkeypatch):
+    """without the seams' stand-in prefix, the fixture's own example.invalid report is not the shelf's either."""
+    real = census.SHELF_REPORT_PREFIX
+    assert real == "https://fathom-lab.github.io/styxx-shelf/reports/reads/"
+    M.install_seams(census, monkeypatch.setattr)
+    monkeypatch.setattr(census, "SHELF_REPORT_PREFIX", real)
+    res, _ = _run(tmp_path, "r4k", export=HELD, anchors=ANCHORS)
+    assert "report_on_the_shelf FAILS" in res["window"]["opening_condition"]["c"]["evidence"]
+    assert res["verdict"] == "NOT_RUN__window_did_not_open"
+
+
+def test_rank4_the_same_report_on_the_shelf_holds(seams, tmp_path):
+    res, _ = _run(tmp_path, "r4h", export=HELD, anchors=ANCHORS)
+    c = res["window"]["opening_condition"]["c"]
+    assert c["held"] is True and "report_on_the_shelf" not in c["evidence"]
+    assert res["verdict"] == "HELD__every_exported_delivery_has_a_line"
+
+
+@pytest.mark.parametrize("url,ok", [
+    ("https://fathom-lab.github.io/styxx-shelf/reports/reads/kestrel/2026-11-09T06-00-35Z.json", True),
+    ("https://fathom-lab.github.io/styxx-shelf/reports/reads/", False),
+    ("http://fathom-lab.github.io/styxx-shelf/reports/reads/kestrel/a.json", False),
+    ("https://fathom-lab.github.io/styxx-shelf/reports/kestrel.json", False),
+    ("https://fathom-lab.github.io/styxx-shelf/reports/reads/../../../evil/a.json", False),
+    ("https://fathom-lab.github.io/styxx-shelf/reports/reads/%2e%2e/a.json", False),
+    ("https://fathom-lab.github.io/styxx-shelf/reports/reads/a.json?x=1", False),
+    ("https://fathom-lab.github.io/styxx-shelf/reports/reads/a.json#x", False),
+    ("https://fathom-lab.github.io/styxx-shelf/reports/reads/a\\..\\b.json", False),
+    ("https://fathom-lab.github.io.evil.example/styxx-shelf/reports/reads/a.json", False),
+    ("https://kestrel-ops.github.io/styxx-shelf/reports/reads/a.json", False),
+    ("C:/shelf/reports/reads/a.json", False),
+])
+def test_rank4_on_the_shelf_rule(url, ok):
+    assert census._on_the_shelf(url) is ok
+
+
+# ---- rank 21 (improvements 2026-11-09): a crlf copy is refused as crlf, never as "no gates block"
+
+def test_rank21_crlf_prereg_is_refused_as_crlf(seams, tmp_path):
+    crlf = tmp_path / "crlf.md"
+    crlf.write_bytes(PREREG.read_bytes().replace(b"\n", b"\r\n"))
+    res, _ = _run(tmp_path, "crlf", prereg=crlf, export=HELD, anchors=ANCHORS)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "crlf", res.get("refusal")
+    assert "lf bytes" in res["refusal"]["reason"] and "dos2unix" in res["refusal"]["reason"]
+
+
+def test_rank21_one_crlf_is_enough(seams, tmp_path):
+    one = tmp_path / "one.md"
+    one.write_bytes(PREREG.read_bytes().replace(b"\n", b"\r\n", 1))
+    res, _ = _run(tmp_path, "one", prereg=one)
+    assert res["refusal"]["code"] == "crlf"
+
+
+def test_rank21_digests_refuse_crlf(cli, tmp_path):
+    crlf = tmp_path / "crlf.md"
+    crlf.write_bytes(PREREG.read_bytes().replace(b"\n", b"\r\n"))
+    r = cli("census-digests", "--prereg", crlf)
+    assert r.returncode == 1, r.stdout + r.stderr
+    d = json.loads(r.stdout)
+    assert d["refused"]["code"] == "crlf" and d["gates"] is None
+
+
 # ---- M7: a chain that does not re-derive is scored to BROKEN; unreachable is a component
 
 def test_m7_broken_chain_is_broken(seams, tmp_path, monkeypatch):
@@ -374,8 +461,8 @@ def test_cli_census(cli, tmp_path):
     assert doc["verdict"] == "NOT_RUN__window_did_not_open"
     assert doc["chain_problem_components"]["unreachable"] == 1
     c = doc["window"]["opening_condition"]["c"]
-    # the scorer checks (c) itself against the shelf report the prereg names; example.invalid does not answer, so the
-    # check ran (verified) and did not hold
+    # the scorer checks (c) itself against the shelf report the prereg names; example.invalid is not the shelf's
+    # kept reads (census.SHELF_REPORT_PREFIX), so the check ran (verified) and did not hold
     assert c["held"] is False and c["verified"] is True, c
     bad = tmp_path / "half.md"
     bad.write_text("{{d0}}\n", encoding="utf-8")

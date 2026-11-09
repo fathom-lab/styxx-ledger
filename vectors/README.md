@@ -17,12 +17,14 @@ by default each runner answers the v0 set first ("k of n v0 vectors answered as 
 v0 read mode) and then the v1 set, whose tally stays the last line; the exit is 0 only when both are answered in full.
 
 each prints its per-group tallies, the implementation and platform, then `k of n vectors answered as the file says`,
-and exits 0 only when k == n (1 on a miss, 2 when the base file or the module cannot be read). a checkout that
-turned lf into crlf changes the base's sha256 and the runner says so; keep `* -text` for this folder.
+and exits 0 only when k == n (1 on a miss, 2 when the base file or the module cannot be read, or when this python
+has no zone database). a checkout that turned lf into crlf changes the base's sha256 and the runner says so; keep
+`* -text` for this folder.
 
 `make_vectors.py` refuses to overwrite either file with other bytes unless `--force` is given: a receipt is history,
-and every forced regeneration goes in BUILD_LOG_3a.md. `--check` recomputes and compares only. `base_v1.jsonl` has
-kept one sha256 (`09fcf1d7...a8e4`) through every regeneration; only `vectors_v1.json` has grown.
+and every forced regeneration so far is recorded in the lab's build log, which this repository does not carry.
+`--check` recomputes and compares only. `base_v1.jsonl` has kept one sha256 (`09fcf1d7...a8e4`) through every
+regeneration; only `vectors_v1.json` has grown.
 
 ## what the cases are
 
@@ -170,8 +172,12 @@ to another host, a block no explorer knows, a 2^60 height, a rate-limited explor
     js/lib/verify.js, node 24.13.0, win32                                      118 of 118
     python/src/styxx_ledger/v0.py, v0 set                                       10 of 10
     js/lib/v0.js, v0 set                                                        10 of 10
-    python/src/styxx_ledger, python 3.14.2, win32 (no tzdata installed)         58 of 118
+    python/src/styxx_ledger, python 3.14.2, win32 (no tzdata installed)         exit 2 (2026-11-09; 58 of 118 before)
 
-the 3.14 line is the dependency the readmes name: without `tzdata`, windows python has no zone database, every
-named zone is refused, and 60 vectors miss. the ubuntu rows, and python 3.10 / 3.13 and node 20 / 22, come from ci,
-not from this box.
+the 3.14 line is the dependency the readmes name: without `tzdata`, windows python has no zone database. the runner
+now says "this python has no zone database: pip install tzdata" and ends exit 2 before any case; before the
+2026-11-09 fix every named zone was refused and 60 vectors missed, which read like a fault in the package.
+
+ci has not run (the workflow is written, not pushed: 0 runs as of 2026-11-09), so python 3.10 / 3.13 and
+node 20 / 22 carry no number here. one ubuntu leg was read by hand on this box under WSL on 2026-11-09 (ubuntu,
+python 3.12.3, no node), python package only: vectors 118 of 118 answered as the file says.

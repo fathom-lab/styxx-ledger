@@ -4,7 +4,7 @@
 
 RESULT is the census scorer's own expected fixture (python/tests/fixtures/census/expected_RESULT.json):
 n_deliveries 4, anchored 0 of 3 days with lines (no posted texts), missing 2026-10-01 at index 0, unledgered null (no
-export), verdict UNANCHORED (fixture rebuilt in the review round, REVIEW_3d; the readme check itself is unchanged).
+export), verdict UNANCHORED (fixture rebuilt in the review round; the readme check itself is unchanged).
 """
 import json
 import subprocess

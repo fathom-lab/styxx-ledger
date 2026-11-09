@@ -14,6 +14,9 @@ Protocol v0 (vectors/v0/, the exhibit's 10 cases over its base.jsonl, copied byt
 package's v0 read mode (styxx_ledger.v0) and the exhibit runner's transforms; printed first, as
 "k of n v0 vectors answered as the file says". `--only v1` or `--only v0` runs one set; the default runs both, the
 v1 tally stays the last line, and the exit is 0 only when both sets are answered in full.
+
+A python with no zone database (python.org windows without the `tzdata` package) cannot read a day: the runner
+says "this python has no zone database: pip install tzdata" and ends exit 2 before any case, never a miss count.
 """
 from __future__ import annotations
 
@@ -274,6 +277,8 @@ def run_v0(S, vpath: Path, verbose: bool):
     for c in doc["cases"]:
         try:
             ok, got = check_v0(S, base, c)
+        except S.ZoneDatabaseMissing:
+            raise
         except Exception as e:  # noqa: BLE001
             ok, got = False, {"raised": "%s: %s" % (type(e).__name__, str(e)[:200])}
         good += 1 if ok else 0
@@ -296,6 +301,15 @@ def main(argv=None) -> int:
     ap.add_argument("-v", "--verbose", action="store_true")
     a = ap.parse_args(argv)
     S = load_pkg(Path(a.src))
+    try:
+        return _main(S, a)
+    except S.ZoneDatabaseMissing as e:
+        print("%s; no vector was answered (exit 2)" % e)
+        return 2
+
+
+def _main(S, a) -> int:
+    S.require_zone_database()
     v0_failed = False
     if a.only in ("v0", "both"):
         res = run_v0(S, Path(a.v0_vectors), a.verbose)
@@ -322,6 +336,8 @@ def main(argv=None) -> int:
                 got = answer_read(S, text, c)
                 keys = c.get("compare") or list(c["expect"])
                 ok = all(got.get(k) == c["expect"].get(k) for k in keys)
+        except S.ZoneDatabaseMissing:
+            raise
         except Exception as e:  # noqa: BLE001 - an implementation that throws on a case misses that case
             ok, got = False, {"raised": "%s: %s" % (type(e).__name__, str(e)[:200])}
         g = "read"
@@ -338,6 +354,8 @@ def main(argv=None) -> int:
     for c in doc["write"]:
         try:
             ok, got = check_write(S, c)
+        except S.ZoneDatabaseMissing:
+            raise
         except Exception as e:  # noqa: BLE001 - an uncoded exception is a miss, not a refusal
             ok, got = False, {"raised": "%s: %s" % (type(e).__name__, str(e)[:200])}
         g = "write:" + c["fn"]

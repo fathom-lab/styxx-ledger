@@ -6,7 +6,7 @@ exhibit re-derives a published exhibit by url (the `exhibit` command).
 """
 from ._version import __version__  # noqa: F401
 from .jcs import LedgerValueError, MAX_DEPTH, check_value, depth_exceeds, dump, jcs, canonical_line  # noqa: F401
-from .day import day_of, late_of, next_day, parse_timestamp, now_utc  # noqa: F401
+from .day import day_of, late_of, next_day, parse_timestamp, now_utc, ZoneDatabaseMissing, require_zone_database  # noqa: F401
 from .chain import (  # noqa: F401
     LOG_SCHEMA, ENTRY_SCHEMA, HEADER_DOMAIN, core_of, entry_id_of, header_digest, check_header, make_header,
     build_entry, anchor_text, parse_anchor_text, read_bytes, read_log, check_chain, head_of,

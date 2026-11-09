@@ -7,8 +7,8 @@
 
 THE_PLAN item 3d, the second half. a github actions job an outside operator pastes into **their own** repository,
 under their own `.github/workflows/`. nothing here is a workflow file in the styxx-ledger kit, and the kit carries
-none for this. written 2026-11-09 by fathom lab; revised the same day after the lab's adversarial review
-(`REVIEW_3d.md` M4, M8, S8).
+none for this. written 2026-11-09 by fathom lab; revised the same day after the lab's adversarial review (which this
+repository does not carry).
 
 **what this snippet does not lower.** the sentence "the barrier to being checked is one file" is held, not said: as
 built, a stranger also needs a shelf read of their ledger (the shelf has the v1 row shape since 2026-11-09; the read
@@ -39,8 +39,12 @@ scoring date is the one cited (template §8); the operator's ci is a re-run.
 
 replace the two values marked `<...>` before pasting. `KIT_COMMIT` must be a commit of
 `github.com/fathom-lab/styxx-ledger` that carries `python/src/styxx_ledger/census.py` and
-`census/census_check_readme.py` (as of 2026-11-09 these are in the lab's working tree, not yet committed: the lead
-commits them; until then there is no commit to pin and this job cannot run).
+`census/census_check_readme.py`; both are committed since fa0c78c. f49615aadfe807bcd5b770d8bee87f03cba4dbed is the
+commit checked on 2026-11-09: on windows 11 the lab's outside-operator pass ran the job's steps by hand from a pasted
+copy, not in github actions, with `KIT_COMMIT` set to it; the js leg read `measured`, RESULT.json was written, and
+the readme check passed with a matching status marker and failed with a stale one. a later commit carries the
+shelf-host pin and the crlf refusal (the notes below); the commit after it names that commit's hash here. until it
+does, pin f49615a only knowing that it lacks both.
 
 ```yaml
 name: census
@@ -123,6 +127,10 @@ notes on the job:
   passes `--tries 1` so a job does not sleep for two hours, and RESULT.json records the tries allowed and used. a
   ledger url that does not answer is the `unreachable` component of `chain_problems`, not a refusal; an anchors url
   that does not answer reads every day unanchored.
+- the shelf read entry must name a report under `https://fathom-lab.github.io/styxx-shelf/reports/reads/`; a report
+  hosted anywhere else, the operator's own repository included, fails condition (c) without being fetched.
+- a prereg saved with crlf line ends is refused with code `crlf` (the digests are over lf bytes); keep `* -text` for
+  it in `.gitattributes`.
 - `--ledger` is left out on purpose: a url other than `ledger_url` is refused, and a local copy is scored only when
   its sha256 equals the url's bytes fetched in the same run.
 - readme markers: put markers on `status` only while the window runs (`nothing_counted` before d0, `in_progress`

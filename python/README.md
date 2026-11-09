@@ -17,11 +17,14 @@ this is the python half. the javascript half is `../js/`; both are held to `../v
 
 ## install
 
-    pip install styxx-ledger            # not published yet; from a checkout: pip install ./python
+    pip install ./python                # from a checkout, in a venv
+    pip install styxx-ledger            # after publication only: the name is not on pypi (404 as of 2026-11-09)
 
 runtime requirements: python >= 3.10 and, on windows only, the `tzdata` package (declared in pyproject, installed with
-the package). windows python has no iana zone database of its own; without `tzdata` every named zone is refused
-(code `anchor_tz`) and 60 of the 118 vectors miss (read on this box with python 3.14.2, which has no tzdata).
+the package). windows python has no iana zone database of its own. without `tzdata` no day can be read: the verifier
+raises `ZoneDatabaseMissing` (never a problem record), and the cli and the vectors runner end exit 2 with "this python
+has no zone database: pip install tzdata" (read on this box with python 3.14.2, which has no tzdata, 2026-11-09;
+before that fix every named zone was refused as `anchor_tz` and 60 of the 118 vectors missed).
 
 ## quickstart (cli)
 
@@ -162,10 +165,11 @@ as read on this box (windows 11, python 3.12.10, tzdata 2025.3, 2026-11-08 and 0
 
     vectors (run_vectors.py)          118 of 118 vectors answered as the file says
     v0 vectors (run_vectors.py)       10 of 10 v0 vectors answered as the file says
-    vectors, python 3.14.2, no tzdata 58 of 118 (the windows zone database is the tzdata package)
-    pytest                            353 passed of 353 collected without tests/test_census.py (another
-                                      workstream's; tests/test_v0.py 37, tests/test_ots.py 73, tests/test_exhibit.py
-                                      31: cases a-e and the review-3e regressions against a local server)
+    vectors, python 3.14.2, no tzdata exit 2, "pip install tzdata" (58 of 118 before the 2026-11-09 fix)
+    pytest                            365 passed of 365 collected without tests/test_census.py, 413 of 413 with
+                                      it (2026-11-09; the 365 include tests/test_zone_database.py 12,
+                                      tests/test_v0.py 37, tests/test_ots.py 73, tests/test_exhibit.py 31: cases
+                                      a-e and the review-3e regressions against a local server)
     exhibit, live, 2026-11-09 05:28Z  68 of 69 checks, 1 pending (the 2026-11-08 anchor, as the index says), exit
                                       0; 14 of 15 anchor proofs, 22 of 22 witness proofs verify; 2 explorers agree
                                       on 14 of 14 blocks (15.5 s wall clock)
@@ -176,7 +180,9 @@ as read on this box (windows 11, python 3.12.10, tzdata 2025.3, 2026-11-08 and 0
                                       with the same head
 
 the pytest count includes the 118 vectors once more, one case each. without js/ present the two js cross tests skip
-and say why. ubuntu counts come from ci, not from this box.
+and say why. ci has not run (the workflow is written, not pushed: 0 runs as of 2026-11-09), so python 3.10 / 3.13
+carry no number here; one ubuntu leg was read by hand on this box under WSL on 2026-11-09 (python 3.12.3): vectors
+118 of 118 answered as the file says. pytest was not run on that leg.
 
 the cross tests: `tests/fixtures/py_written.jsonl` (12 entries, agent pybot, Europe/Berlin across the 2026-10-25 dst
 end, 2 anchors, 1 of them late) is what `tests/make_fixture.py` writes with the Ledger class; the javascript suite verifies it and must

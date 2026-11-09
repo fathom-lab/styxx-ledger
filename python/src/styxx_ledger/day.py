@@ -7,6 +7,11 @@ v1 timestamps are exactly `YYYY-MM-DDTHH:MM:SSZ` (UTC, no fraction, no offset, a
 it is, exactly and case for case, a name the database lists (zoneinfo.available_timezones()), and never "Factory".
 There is no written fallback rule: a zone the database does not hold is refused (code anchor_tz), never
 approximated. Codes: timestamp, anchor_tz, anchor_form.
+
+A python with no zone database at all (python.org windows builds without the `tzdata` package: available_timezones()
+is empty, or a listed zone's file cannot be found) cannot read any day. That is this machine's state, not the
+ledger's: zone() raises ZoneDatabaseMissing (not a LedgerValueError, so no reader turns it into a problem record),
+and the cli and the vectors runner end exit 2 with "this python has no zone database: pip install tzdata".
 """
 from __future__ import annotations
 
@@ -21,6 +26,15 @@ DATE_RX = re.compile(r"\A([0-9]{4})-([0-9]{2})-([0-9]{2})\Z")
 YEAR_MIN, YEAR_MAX = 1000, 9998
 REFUSED_ZONES = ("Factory",)
 LATE_AFTER = "00:10:00"   # an anchor written later than this, local, on the day after its date is late
+NO_ZONE_DATABASE = "this python has no zone database: pip install tzdata"
+
+
+class ZoneDatabaseMissing(RuntimeError):
+    """The platform has no IANA zone database, so no day can be read: a fault of this machine, never of the ledger.
+    Deliberately not a LedgerValueError (nor a ValueError): every reader lets it through to the caller."""
+
+    def __init__(self, detail: str = ""):
+        super().__init__(NO_ZONE_DATABASE + (" (%s)" % detail if detail else ""))
 
 
 def parse_timestamp(ts: object) -> _dt.datetime:
@@ -54,15 +68,32 @@ def _zone(tz: str):
     return zoneinfo.ZoneInfo(tz)
 
 
+def require_zone_database() -> None:
+    """Raise ZoneDatabaseMissing when this python lists no zone at all, or cannot load UTC, which every database
+    holds (call it before a run that reads days)."""
+    if not _available():
+        raise ZoneDatabaseMissing("zoneinfo.available_timezones() is empty")
+    import zoneinfo
+    try:
+        _zone("UTC")
+    except zoneinfo.ZoneInfoNotFoundError:
+        raise ZoneDatabaseMissing("zone 'UTC' is listed but its file was not found") from None
+
+
 def zone(tz: object):
-    """The ZoneInfo for an IANA name the database lists exactly; LedgerValueError(code=anchor_tz) otherwise."""
+    """The ZoneInfo for an IANA name the database lists exactly; LedgerValueError(code=anchor_tz) otherwise.
+    ZoneDatabaseMissing when the platform has no zone database (nothing listed, or a listed zone's file missing)."""
     if not isinstance(tz, str) or not tz or tz.startswith("/") or ".." in tz or tz in REFUSED_ZONES:
         raise LedgerValueError("anchor_tz", "anchor_tz is not an IANA zone name: %r" % (tz,))
+    require_zone_database()
     if tz not in _available():
         raise LedgerValueError("anchor_tz", "zone %r is not, case for case, a name in this platform's zone database" % (tz,))
     try:
         return _zone(tz)
     except Exception as e:  # noqa: BLE001 - ZoneInfoNotFoundError, ValueError, OSError
+        import zoneinfo
+        if isinstance(e, zoneinfo.ZoneInfoNotFoundError):   # listed, yet no file: the database, not the name
+            raise ZoneDatabaseMissing("zone %r is listed but its file was not found" % (tz,)) from None
         raise LedgerValueError("anchor_tz", "zone %r not in this platform's zone database (%s)" % (tz, type(e).__name__)) from None
 
 
