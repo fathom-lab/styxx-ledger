@@ -89,3 +89,26 @@ def test_python_written_ledger_verifies_under_js(tmp_path):
         r = S.verify_bytes(p.read_bytes())
         assert r["ok"] and g["ok"] is True, g
         assert g["head"] == r["head"] and g["n"] == len(r["entries"])
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node is not on PATH")
+def test_field_k_v_writes_the_same_bytes_in_both_clis(tmp_path):
+    """--field k=v through the python cli and the javascript cli (improvements 2026-11-09 rank 32): byte-identical
+    files, so the README's quickstart line runs the same under either cli."""
+    clis = {"python": [sys.executable, "-B", "-m", "styxx_ledger"], "js": ["node", str(JS / "bin" / "styxx-ledger.cjs")]}
+    calls = [["init", "--agent", "fieldbot", "--tz", "UTC", "--certifies", "field parity.", "--kinds", "note,tool_call",
+              "--created", "2026-11-01T00:00:00Z", "--no-started"],
+             ["append", "--kind", "tool_call", "--field", "tool=search", "--field", "args_sha256=" + "c" * 64,
+              "--timestamp", "2026-11-01T00:00:02Z"],
+             ["append", "--kind", "note", "--fields", '{"n":1,"tool":"x"}', "--field", "tool=y", "--field", "q=a=b c",
+              "--timestamp", "2026-11-01T00:00:03Z"]]
+    out = {}
+    for who, cmd in clis.items():
+        log = tmp_path / ("%s.jsonl" % who)
+        for c in calls:
+            cp = subprocess.run(cmd + [c[0], str(log)] + c[1:], capture_output=True, text=True, encoding="utf-8",
+                                env=child_env(), timeout=60)
+            assert cp.returncode == 0, (who, c[0], cp.stdout, cp.stderr)
+        out[who] = log.read_bytes()
+    assert out["python"] == out["js"]
+    assert out["python"].count(b"\n") == 3

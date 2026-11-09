@@ -43,6 +43,13 @@ KIND_RX = re.compile(r"\A[a-z][a-z0-9_]{0,31}\Z")
 DATE_RX = re.compile(r"\A[0-9]{4}-[0-9]{2}-[0-9]{2}\Z")
 HEX64_RX = re.compile(r"\A[0-9a-f]{64}\Z")
 ANCHOR_RX = re.compile(r"\A([a-z0-9_-]{1,32}) anchor ([0-9]{4}-[0-9]{2}-[0-9]{2}) head ([0-9a-f]{64}) seq (0|[1-9][0-9]*)\n?\Z")
+# section 1: a `certifies` made only of these 30 code points is blank and refused. the set is spelled out, never a
+# runtime's notion of whitespace: it is the union of python's str.isspace (which alone holds u+001c..u+001f and
+# u+0085) and javascript's String.prototype.trim (which alone holds u+feff), so the two writers refuse the same
+# headers and either can append to the other's log (improvements 2026-11-09 rank 43)
+CERTIFIES_BLANK = ("\t\n\x0b\x0c\r\x1c\x1d\x1e\x1f \x85\xa0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006"
+                   "\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff")
+CERTIFIES_MAX = 500
 
 
 def _is_int(v: Any) -> bool:
@@ -97,8 +104,8 @@ def check_header(header: Any) -> None:
     if not isinstance(header["agent"], str) or not AGENT_RX.match(header["agent"]):
         bad("agent is not 1-32 chars of [a-z0-9_-]")
     c = header["certifies"]
-    if not isinstance(c, str) or not c.strip() or "\n" in c or len(c) > 500:
-        bad("certifies is not one sentence (a non-empty line of at most 500 chars)")
+    if not isinstance(c, str) or not c.strip(CERTIFIES_BLANK) or "\n" in c or len(c) > CERTIFIES_MAX:
+        bad("certifies is not one sentence (1 to 500 characters, no lf, not only whitespace: protocol section 1)")
     k = header["kinds"]
     if not isinstance(k, list) or not all(isinstance(x, str) and KIND_RX.match(x) for x in k):
         bad("kinds is not a list of kind names ([a-z][a-z0-9_]{0,31})")

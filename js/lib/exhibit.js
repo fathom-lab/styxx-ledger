@@ -58,6 +58,32 @@ const CAVEATS = [
   "posts, and with a run of your own on another day.",
 ];
 
+/* What a fetch that got no http answer says, in the same words in both packages (exhibit.py's network_reason maps
+   python's exceptions to them): until 2026-11-09 a dns failure read "TypeError: ENOTFOUND" here and "URLError: [Errno
+   11001] getaddrinfo failed" there (improvements rank 45). */
+const NET_DNS = "the host name did not resolve (dns)";
+const NET_REFUSED = "the connection was refused";
+const NET_RESET = "the connection was reset";
+const NET_TLS = "the tls handshake failed (a certificate or protocol error)";
+const netTimeout = ms => "no answer within " + ms / 1000 + " s";
+const EXHIBIT_URL_EXAMPLE = "https://fathom-lab.github.io/styxx/ledger/";
+/* a proof whose every block an explorer left unanswered: one reason, so the report says it once (rank 44) */
+const EXPLORERS_SILENT = "the explorers did not all answer for the proof's blocks";
+
+/* the shared words for a fetch that got no http answer: dns, refused, reset, tls, timeout; anything else reads
+   "no answer (<name>: <detail>)". fetch() puts node's code on e.cause (an AggregateError's on its errors too). */
+function networkReason(e, timeoutMs) {
+  const c = e && e.cause;
+  const code = [c, c && Array.isArray(c.errors) ? c.errors[0] : null, e]
+    .map(x => (x && typeof x.code === "string" ? x.code : "")).find(Boolean) || "";
+  if (["ENOTFOUND", "EAI_AGAIN", "EAI_NONAME", "EAI_NODATA", "EAI_FAIL"].includes(code)) return NET_DNS;
+  if (code === "ECONNREFUSED") return NET_REFUSED;
+  if (["ECONNRESET", "ECONNABORTED", "EPIPE", "UND_ERR_SOCKET", "UND_ERR_CLOSED"].includes(code)) return NET_RESET;
+  if (["ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "UND_ERR_HEADERS_TIMEOUT"].includes(code)) return netTimeout(timeoutMs);
+  if (/CERT|SSL|TLS|EPROTO/.test(code)) return NET_TLS;
+  return "no answer (" + ((e && e.name) || "Error") + ": " + (code || (c && c.message) || (e && e.message) || String(e)) + ")";
+}
+
 class FetchError extends Error {
   /* kind: http (a status the server gave), network (no answer, timeout), too_large (over the cap). */
   constructor(url, kind, message, status, retryAfter) {
@@ -81,8 +107,7 @@ async function httpGet(url, opts) {
     try {
       res = await fetch(url, { signal: ac.signal, redirect: "follow", headers: { "User-Agent": "styxx-ledger/" + VERSION + " (javascript)", Accept: "*/*" } });
     } catch (e) {
-      const why = ac.signal.aborted ? "no answer within " + timeout / 1000 + " s" : (e && e.cause && (e.cause.code || e.cause.message)) || (e && e.message) || String(e);
-      throw new FetchError(url, "network", (e && e.name ? e.name : "Error") + ": " + why);
+      throw new FetchError(url, "network", ac.signal.aborted ? netTimeout(timeout) : networkReason(e, timeout));
     }
     if (!res.ok) {
       try { await res.body?.cancel(); } catch (e) { /* the status is the answer */ }
@@ -105,7 +130,7 @@ async function httpGet(url, opts) {
       }
     } catch (e) {
       if (e instanceof FetchError) throw e;
-      throw new FetchError(url, "network", ac.signal.aborted ? "no complete answer within " + timeout / 1000 + " s" : (e && e.message) || String(e));
+      throw new FetchError(url, "network", ac.signal.aborted ? "no complete answer within " + timeout / 1000 + " s" : networkReason(e, timeout));
     }
     return { status: res.status, body: Buffer.concat(chunks), url: res.url || url };
   } finally { clearTimeout(timer); }
@@ -281,7 +306,10 @@ function judgeProof(rep, ex, statedBlock, statedTime, indexStatus, wantTime, pen
     return ["fail", "the index does not mark it pending (block " + (statedBlock === null ? "none" : statedBlock) + "); the proof carries calendar receipts only"];
   }
   const unanswered = heights.filter(h => ex && ex.verdict(h) === "unanswered");
-  if (st === "unverified") return ["unchecked", "no block header for any of the proof's blocks (" + heights.join(", ") + ")"];
+  if (st === "unverified") {   // one reason for every proof whose blocks all went unanswered, so the report collapses them
+    if (heights.length && unanswered.length === heights.length) return ["unchecked", EXPLORERS_SILENT];
+    return ["unchecked", "no block header for any of the proof's blocks (" + heights.join(", ") + ")"];
+  }
   const lo = rep.lowest;
   if (indexStatus === "pending") return ["fail", "the index says pending; the proof verifies to block " + lo.height];
   if (statedBlock === null) return ["fail", "the index names no block; the proof's lowest verified block is " + lo.height];
@@ -294,6 +322,18 @@ function judgeProof(rep, ex, statedBlock, statedTime, indexStatus, wantTime, pen
   let note = "verified, block " + lo.height + " (" + utc(lo.time) + ")";
   if (unanswered.length) note += "; not every explorer answered for block" + s_(unanswered.length) + " " + unanswered.join(", ");
   return ["pass", note];
+}
+
+/* why the ledger did not arrive, with the url fetched and what to check. a typo in the url is not evidence against
+   the publisher, so the check is unchecked (exit 2), never failed (improvements 2026-11-09 rank 45). */
+function ledgerMissing(rec) {
+  if (rec.error_kind === "http" && rec.status === 404) {
+    return rec.url + " answered HTTP 404: there is no ledger.jsonl at that url; check that the url names the exhibit's " +
+      "folder, the one that holds ledger.jsonl (e.g. " + EXHIBIT_URL_EXAMPLE + ")";
+  }
+  if (rec.error_kind === "http") return rec.url + " answered " + rec.error;
+  if (rec.error_kind === "network") return rec.url + " did not answer: " + rec.error + "; check the url and this machine's network";
+  return rec.url + ": " + rec.error;
 }
 
 const ranges = rs => rs.map(([a, b]) => (a === b ? String(a) : a + "-" + b)).join(", ");
@@ -339,6 +379,8 @@ async function runExhibit(baseUrl, opts) {
     rep.explorer_calls = f.explorerCalls;
     rep.explorer_answers = ex ? Array.from(ex.heights.keys()).sort((a, b) => a - b).map(h => ex.heights.get(h)) : [];
     rep.explorers_rate_limited = ex ? Object.fromEntries(ex.limited) : {};
+    // an explorer that gave no answer at all (dns, refused, timeout, ...): asked once, then left out for the run
+    rep.explorers_unanswered = ex ? Object.fromEntries(exps.filter(b => ex.dead.has(b)).map(b => [b, ex.dead.get(b)])) : {};
     rep.retry_wait_s = Math.round(f.waitedMs / 100) / 10;
     rep.finished_at = now();
     rep.wall_clock_s = Math.round(Date.now() - t0) / 1000;
@@ -347,8 +389,8 @@ async function runExhibit(baseUrl, opts) {
 
   // ---- the ledger and its withheld list
   const lr = await f.file(base, "ledger.jsonl");
-  if (lr.body === null) {
-    check("ledger.jsonl fetched", lr.rec.error_kind === "http" ? "fail" : "unchecked", lr.rec.error);
+  if (lr.body === null) {   // nothing can be verified, so nothing failed: exit 2, never the exit of a failed check
+    check("ledger.jsonl fetched", "unchecked", ledgerMissing(lr.rec));
     rep.chain = null;
     return finish();
   }
@@ -574,11 +616,16 @@ function renderText(rep) {
   const nexp = rep.explorer_answers.length;
   say("fetched " + rep.fetched.length + " files (" + rep.fetched_bytes + " bytes) from the exhibit; " + rep.explorer_calls + " explorer calls for " + nexp + " block" + s_(nexp) + "; every sha256 and answer is in --json");
   if (rep.ripemd160_available === false) say("note: this node's crypto has no ripemd160; a proof that needs it is refused (ripemd160_unavailable)");
+  const silent = rep.explorers_unanswered || {};
+  for (const b of rep.explorers || []) {   // the reason, once, before the lines it explains (rank 44)
+    if (Object.prototype.hasOwnProperty.call(silent, b)) say("explorer " + b + " did not answer: " + silent[b] + "; check the network, or pass --explorer <url> to ask another esplora api");
+  }
   say();
   const c = rep.chain;
   if (!c) {
     const bad = rep.checks.filter(x => x.verdict !== "pass");
     say("ledger.jsonl: " + (bad.length ? bad[0].detail : "not fetched"));
+    say("nothing was verified: every other check needs the ledger");
   } else {
     say("chain (protocol " + c.protocol + "): " + (c.rederives ? "re-derives:" : "DOES NOT re-derive:") + " " + c.lines + " lines = " + c.published + " published + " + c.withheld + " withheld, head " + c.head + " (seq " + c.last_seq + "), " + c.problems + " problem record" + s_(c.problems));
     if (c.bridged.length) say("  withheld lines bridged on their published digests (the publisher's word for what they hold back): seq " + c.bridged.join(","));
@@ -599,7 +646,8 @@ function renderText(rep) {
       for (const a of pv) lows.set(a.proof.lowest.height, (lows.get(a.proof.lowest.height) || 0) + 1);
       const lowText = Array.from(lows.entries()).sort((x, y) => x[0] - y[0]).map(([h, n]) => (n > 1 ? h + " x" + n : String(h))).join(", ") || "none";
       const npend = an.filter(a => (a.proof || {}).verdict === "pending").length;
-      say("anchor proofs: " + pv.length + " of " + an.length + " verify natively against bitcoin block headers, each to the block the index names (lowest blocks: " + lowText + ")" + (npend ? "; " + npend + " of " + an.length + " pending" : ""));
+      const nunch = an.filter(a => (a.proof || {}).verdict === "unchecked").length;
+      say("anchor proofs: " + pv.length + " of " + an.length + " verify natively against bitcoin block headers, each to the block the index names (lowest blocks: " + lowText + ")" + (npend ? "; " + npend + " of " + an.length + " pending" : "") + (nunch ? "; " + nunch + " of " + an.length + " not checked" : ""));
       const late = pv.filter(a => a.proof.late);
       say("  lag from an anchor's date to its lowest block: " + lagSummary(pv) + "; " + late.length + " of " + pv.length + " over " + LATE_DAYS + " days (the proof pins such a text from its block, not from its date)");
     }
@@ -610,10 +658,11 @@ function renderText(rep) {
       if (cc) parts.push("chain: " + cc.why);
       if (pf) parts.push(pf.verdict === "pass" ? "proof " + pf.why + ", index says block " + pf.stated_block + ", " + pf.lag_days + " day" + s_(pf.lag_days) + " after the anchor date" + (pf.late ? " (late)" : "") : "proof " + (pf.verdict === "fail" ? "FAILS" : pf.verdict) + ": " + pf.why);
       const vs = [tc, cc, pf].filter(Boolean).filter(x => Object.keys(x).length).map(x => x.verdict);
-      const label = vs.every(v => v === "pass") ? "ok  " : (vs.every(v => v === "pass" || v === "pending") ? "PEND" : "FAIL");
+      const label = vs.every(v => v === "pass") ? "ok  " : (vs.every(v => v === "pass" || v === "pending") ? "PEND"
+        : (vs.includes("fail") ? "FAIL" : "----"));   // ----: nothing failed, something could not be checked
       say("  " + a.date + " seq " + String(a.seq === undefined ? "?" : a.seq).padEnd(4) + " " + label + " " + parts.join("; "));
     }
-  } else say("anchors: none read");
+  } else if (c) say("anchors: none read");
   const cov = rep.coverage;
   const la = rep.last_holding_anchor;
   if (c && cov) say("coverage: " + cov.pinned + " of " + c.published + " published entries pinned by holding anchors; " + cov.unpinned_by_withholding + " unpinned by withholding [" + ranges(cov.unpinned_ranges) + "]; " + cov.after_last_anchor + " after the last holding anchor (seq " + cov.last_anchor_seq + "); " + cov.withheld + " withheld");
@@ -629,11 +678,23 @@ function renderText(rep) {
       const seeded = sm.filter(x => x.picked.startsWith("seeded")).length;
       const ends = sm.filter(x => x.picked.includes("attested line")).map(x => x.seq);
       say("witness proofs: " + sm.length + " sampled of " + w.attested + " attested (" + seeded + " by the seeded rule, seed = the ledger's sha256 " + short(w.seed) + ", plus the earliest and latest attested lines, seq " + (ends.join(" and ") || "-") + "): " + ok.length + " of " + sm.length + " commit to their entry_id and verify to their stated block (" + (blocks.join(", ") || "none") + ")");
-      for (const x of sm) if (x.verdict !== "pass") say("  seq " + x.seq + " " + short(x.entry_id) + ": " + (x.verdict === "fail" ? "FAILS" : x.verdict) + ": " + x.why);
+      const unch = new Map();   // unchecked proofs that share a reason: said once, with their seqs (rank 44)
+      for (const x of sm) if (x.verdict === "unchecked") { if (!unch.has(x.why)) unch.set(x.why, []); unch.get(x.why).push(x.seq); }
+      const said = new Set();
+      for (const x of sm) {
+        if (x.verdict === "pass") continue;
+        if (x.verdict === "unchecked" && unch.get(x.why).length > 1) {
+          if (!said.has(x.why)) { said.add(x.why); say("  " + unch.get(x.why).length + " of " + sm.length + " sampled, seq " + unch.get(x.why).join(",") + ": unchecked: " + x.why); }
+          continue;
+        }
+        say("  seq " + x.seq + " " + short(x.entry_id) + ": " + (x.verdict === "fail" ? "FAILS" : x.verdict) + ": " + x.why);
+      }
     } else if (!rep.ots) say("witness proofs: not checked (--no-ots)");
     else say("witness proofs: not sampled (--sample 0)");
   } else if (w.note) say("witness: " + w.note);
-  if (rep.ots) {
+  if (!c) {
+    // no ledger: nothing was asked of an explorer, and the lines below would only count zeros
+  } else if (rep.ots) {
     const ea = rep.explorer_answers;
     const agree = ea.filter(h => h.verdict === "agree").length;
     const dis = ea.filter(h => h.verdict === "disagree").map(h => String(h.height));
@@ -653,7 +714,18 @@ function renderText(rep) {
   if (rep.exit_code === 0) say("result: every check passed, " + n.pass + " of " + n.total + (n.pending ? "; " + n.pending + " pending, as the index says" : "") + " (exit 0)");
   else {
     say("result: " + n.pass + " of " + n.total + " checks passed; " + n.fail + " failed; " + n.unchecked + " could not be made" + (n.pending ? "; " + n.pending + " pending" : "") + " (exit " + rep.exit_code + ")");
-    for (const x of rep.checks) if (x.verdict === "fail" || x.verdict === "unchecked") say("  " + (x.verdict === "fail" ? "FAILED" : "not made") + ": " + x.name + ": " + x.detail);
+    const same = new Map();   // checks not made for one reason: one line (rank 44); each failure keeps its own
+    for (const x of rep.checks) if (x.verdict === "unchecked") { if (!same.has(x.detail)) same.set(x.detail, []); same.get(x.detail).push(x.name); }
+    const said = new Set();
+    for (const x of rep.checks) {
+      if (x.verdict === "fail") say("  FAILED: " + x.name + ": " + x.detail);
+      else if (x.verdict === "unchecked" && same.get(x.detail).length === 1) say("  not made: " + x.name + ": " + x.detail);
+      else if (x.verdict === "unchecked" && !said.has(x.detail)) {
+        said.add(x.detail);
+        const names = same.get(x.detail);
+        say("  not made: " + names.length + " checks, " + names[0] + " to " + names[names.length - 1] + ": " + x.detail);
+      }
+    }
   }
   for (const x of rep.off_host || []) say("  served from another host: " + x.path + " -> " + x.final_url);
   say("wall clock " + rep.wall_clock_s.toFixed(1) + " s");
@@ -663,4 +735,4 @@ function renderText(rep) {
   return L.join("\n") + "\n";
 }
 
-module.exports = { runExhibit, renderText, httpGet, FetchError, DEFAULT_EXPLORERS, DEFAULT_SAMPLE, TIMEOUT_MS, CAP_BYTES, CAVEATS, LATE_DAYS, PENDING_MAX_DAYS, RATE_TRIES };
+module.exports = { runExhibit, renderText, httpGet, FetchError, networkReason, DEFAULT_EXPLORERS, DEFAULT_SAMPLE, TIMEOUT_MS, CAP_BYTES, CAVEATS, LATE_DAYS, PENDING_MAX_DAYS, RATE_TRIES, EXPLORERS_SILENT };

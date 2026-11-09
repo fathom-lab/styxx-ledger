@@ -37,14 +37,21 @@ scoring date is the one cited (template §8); the operator's ci is a re-run.
 
 ## the job
 
-replace the two values marked `<...>` before pasting. `KIT_COMMIT` must be a commit of
+replace the value marked `<...>` (`PREREG`) before pasting. `KIT_COMMIT` must be a commit of
 `github.com/fathom-lab/styxx-ledger` that carries `python/src/styxx_ledger/census.py` and
 `census/census_check_readme.py`; both are committed since fa0c78c. f49615aadfe807bcd5b770d8bee87f03cba4dbed is the
 commit checked on 2026-11-09: on windows 11 the lab's outside-operator pass ran the job's steps by hand from a pasted
 copy, not in github actions, with `KIT_COMMIT` set to it; the js leg read `measured`, RESULT.json was written, and
-the readme check passed with a matching status marker and failed with a stale one. a later commit carries the
-shelf-host pin and the crlf refusal (the notes below); the commit after it names that commit's hash here. until it
-does, pin f49615a only knowing that it lacks both.
+the readme check passed with a matching status marker and failed with a stale one. the yaml pins
+94e41817cc12eb992d9725c9f075baf5dda88c46, which adds the shelf-host pin and the crlf refusal (the notes below). the
+census changes of the improvement sweep's census group (2026-11-09: `--runner`, `--rehearse`, the locks of template
+§11, https only, retries announced, exit 2 on a url that does not answer) are in a later commit, which the commit
+after it names here; the notes below that name them describe that kit, not 94e4181.
+
+pin the kit you registered: the template's `scorer_sha256` is the sha256 of that commit's
+`python/src/styxx_ledger/census.py`, and its `kit_version` names that commit's `vectors/vectors_v1.json` sha256
+(`styxx-ledger census-digests` prints both from the editable install). a kit that carries the locks refuses a run
+whose census.py or vectors file is another (codes `scorer_sha256`, `kit_version`), and prints both hashes.
 
 ```yaml
 name: census
@@ -90,8 +97,10 @@ jobs:
 
       - name: run the census
         run: |
-          styxx-ledger census --prereg "$PREREG" --out census_out --tries 1 || true
+          rc=0
+          styxx-ledger census --prereg "$PREREG" --out census_out --tries 1 || rc=$?
           test -f census_out/RESULT.json
+          if [ "$rc" = 2 ]; then echo "::error::a url the census reads did not answer (named above)"; exit 2; fi
 
       - name: refuse a refused census, and a readme that misquotes it
         run: python -I -B styxx-ledger-kit/census/census_check_readme.py census_out/RESULT.json README.md --require 1
@@ -106,9 +115,18 @@ jobs:
 
 notes on the job:
 
-- `|| true` on the census step is deliberate: the scorer exits 1 on a refusal **after** writing RESULT.json, and the
-  next step is the one that fails the job on it, with the reason printed. a missing RESULT.json (exit 2: a usage or
-  i/o error) fails at `test -f`.
+- the census step keeps the scorer's exit code: a refusal (exit 1) is written to RESULT.json **before** the exit,
+  and the next step is the one that fails the job on it, with the reason printed. exit 2 with RESULT.json written
+  means a url or file the scorer reads did not answer: the summary line names each one, RESULT.json lists them under
+  `fetch_failures`, and the job fails at this step (the receipt is still kept). a missing RESULT.json (exit 2: a
+  usage or i/o error, or no file at `$PREREG`) fails at `test -f`. a kit before the census group's commit exits 0
+  when a url does not answer, so the `rc` line never fires there.
+- `--runner operator`: add it to the census step once `KIT_COMMIT` carries it (`styxx-ledger census --help` lists
+  it). RESULT.json then names the operator as the run's runner, and a held sentence says "counted by its operator";
+  without it the runner reads "not stated". the lab's own run at the scoring date passes `--runner lab`.
+- the schedule runs the workflow file of the repository's default branch and checks out the default branch, so a
+  registration kept on an unmerged pull request has no file at `$PREREG` there and every scheduled run fails at
+  `test -f`: merge the registration's pull request before relying on the daily run.
 - `--now` is left to the scorer's default (the runner's utc clock), so a run before the scoring date reads
   `in_progress` or `nothing_counted`, never a verdict. until the shelf has read the outside ledger every run reads
   `nothing_counted`. pin `--now 2026-11-09T05:00:00Z` (any utc time) to reproduce
@@ -122,11 +140,16 @@ notes on the job:
   "git+https://github.com/fathom-lab/styxx-ledger.git@<commit>#subdirectory=python"` also works, but the js cli is
   then not beside the package and the leg reads `unmeasured`: G_C is then unmeasured and a run at the scoring date
   reads `UNDECIDED__a_gate_the_row_needs_is_unmeasured`, never agreement.
-- network: the scorer fetches `ledger_url`, `withheld_url` and `anchors_url` when the prereg names them (30 s per
-  try). the template's rule is three tries an hour apart (the lab's run at the scoring date uses it); a ci re-run
-  passes `--tries 1` so a job does not sleep for two hours, and RESULT.json records the tries allowed and used. a
-  ledger url that does not answer is the `unreachable` component of `chain_problems`, not a refusal; an anchors url
-  that does not answer reads every day unanchored.
+- network: the scorer fetches `ledger_url`, `withheld_url` and `anchors_url` when the prereg names them, and the
+  shelf's report (30 s per try). every url is https: an http url in the prereg or on the command line is refused
+  (code `http`, or the row's own name). the template's rule is three tries an hour apart (the lab's run at the
+  scoring date uses it); a ci re-run passes `--tries 1` so a job does not sleep for two hours, and RESULT.json
+  records the tries allowed and used. each failed try and each wait is said on stderr. a ledger url that does not
+  answer is the `unreachable` component of `chain_problems`, not a refusal; an anchors url that does not answer
+  reads every day unanchored.
+- before publishing, the fill can be rehearsed offline on the operator's own machine (template §12, "a rehearsal"):
+  `styxx-ledger census --prereg PREREG_census.md --rehearse --ledger <a local copy> --now <the scoring date> --out
+  rehearsal` fetches nothing and prints no verdict, and the readme check below refuses its RESULT.json.
 - the shelf read entry must name a report under `https://fathom-lab.github.io/styxx-shelf/reports/reads/`; a report
   hosted anywhere else, the operator's own repository included, fails condition (c) without being fetched.
 - a prereg saved with crlf line ends is refused with code `crlf` (the digests are over lf bytes); keep `* -text` for
@@ -152,7 +175,7 @@ in the same sentence, in either form:
 the path is dotted into RESULT.json; integers index lists (`anchors.window.missing_days.0`). the value is json (`0`,
 `null`, `"2026-10-03"`) or a bare word compared with the string at that path. the check fails when:
 
-1. RESULT.json's `status` is `refused` (the reason is printed);
+1. RESULT.json's `status` is `refused` (the reason is printed), or `rehearsal` (a `--rehearse` run is never quoted);
 2. a marker's path is not in RESULT.json;
 3. RESULT.json's value at the path is not the marker's value (type included: `"4"` is not `4`);
 4. a numeric marker's sentence (from the previous `. ` `! ` `? ` or the line start, up to the marker) does not say the
@@ -164,9 +187,10 @@ exit 0 every check passed, 1 any failed, 2 usage or i/o. what it does not catch:
 marker at all. a census number written without its receipt path is the operator's sentence, not the census's, and
 the check cannot tell it from any other numeral; the house rule it serves is "every number names its receipt".
 
-its tests: `census/test_census_check_readme.py`, 8 of 8 passing on this box (windows 11, python 3.12.10,
-2026-11-09), run with `python -I -B -m pytest -q -p no:cacheprovider census/test_census_check_readme.py` from the kit
-root. ubuntu is not claimed here.
+its tests: `census/test_census_check_readme.py`, 9 of 9 passing on this box (windows 11, python 3.12.10,
+2026-11-09; the 9th, added the same day, refuses a rehearsal's RESULT.json), run with
+`python -I -B -m pytest -q -p no:cacheprovider census/test_census_check_readme.py` from the kit root. ubuntu is not
+claimed here.
 
 ## the filled prereg's form, as the scorer reads it
 

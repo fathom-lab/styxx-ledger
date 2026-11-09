@@ -160,6 +160,14 @@ async function callWrite(c) {           // -> {value, error}
       case "anchor_text": v = await V.anchorText(c.agent, c.date, c.head, c.seq); break;
       case "late_of": v = await V.lateOf(c.anchor_date, c.timestamp, c.tz); break;
       case "build_entry": v = await V.dump(await V.buildEntry(c.header, c.seq, c.prev, c.kind, c.timestamp, c.fields)); break;
+      // the header's digest when the header is one a writer may write (else the refusal's code)
+      case "check_header": await V.checkHeader(c.header); v = await V.headerDigest(c.header); break;
+      // the anchor text, composed over the base's header and entries (else the refusal's code)
+      case "compose_anchor": {
+        const r = await V.verifyBytes(new Uint8Array(base), { withheld: [] });
+        v = (await V.composeAnchor(r.header, r.entries, c.date, c.now)).text;
+        break;
+      }
       default: throw Object.assign(new Error("unknown write fn " + c.fn), { code: "runner_unknown_fn" });
     }
     return { value: v, error: null };

@@ -19,4 +19,5 @@ from .v0 import (  # noqa: F401
 )
 from .writer import (  # noqa: F401
     Ledger, LedgerError, LedgerLocked, LedgerBroken, LedgerStateError, DEFAULT_WRITER, LOCK_STALE_S, pid_alive,
+    compose_anchor,
 )

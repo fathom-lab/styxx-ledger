@@ -27,9 +27,9 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ._version import __version__
-from .chain import REQUIRED_KINDS, anchor_text, build_entry, check_header, make_header
+from .chain import DATE_RX, REQUIRED_KINDS, anchor_text, build_entry, check_header, make_header
 from .day import day_of, late_of, now_utc
-from .jcs import dump
+from .jcs import LedgerValueError, dump
 from .verify import verify_bytes
 
 LOCK_STALE_S = 30.0
@@ -58,7 +58,12 @@ class LedgerBroken(LedgerError):
 
 class LedgerStateError(LedgerError):
     """the request does not fit the log's state: no log yet, a log already there, nothing to anchor, a day
-    not yet closed, a day already anchored."""
+    not yet closed, a day already anchored. `.code` names the anchor refusals as the javascript writer does
+    (day_open, already_anchored, nothing_to_anchor; section 5); it is None for the others."""
+
+    def __init__(self, message: str, code: Optional[str] = None):
+        super().__init__(message)
+        self.code = code
 
 
 def pid_alive(pid: int) -> bool:
@@ -114,6 +119,32 @@ def _fsync_dir(d: Path) -> None:
 
 def _previous_day(day: str) -> str:
     return (_dt.date.fromisoformat(day) - _dt.timedelta(days=1)).isoformat()
+
+
+def compose_anchor(header: Dict[str, Any], entries: List[dict], date: Any, now: str) -> Dict[str, Any]:
+    """the anchor text of `date` as a writer may compose it at `now` (section 5), over a re-derived log's header and
+    entries ([{line, entry}]): pure, nothing is read or written. refuses, in this order, a date not YYYY-MM-DD
+    (LedgerValueError anchor_form), a day that has not closed in anchor_tz at `now` (LedgerStateError day_open), a
+    day the ledger already holds an anchor entry for (already_anchored), and a day no entry has (nothing_to_anchor);
+    the javascript writer's composeAnchor refuses the same, with the same codes (the write-side vectors pin both).
+    returns {agent, date, head, seq, text}: head and seq are those of the last entry whose day is `date`."""
+    if not isinstance(date, str) or not DATE_RX.match(date):
+        raise LedgerValueError("anchor_form", "date is not YYYY-MM-DD")
+    tz = header["anchor_tz"]
+    today = day_of(now, tz)
+    if date >= today:
+        raise LedgerStateError("%s has not closed in %s (it is %s there)" % (date, tz, today), code="day_open")
+    if any(it["entry"].get("kind") == "anchor" and it["entry"].get("anchor_date") == date for it in entries):
+        raise LedgerStateError("the ledger already holds an anchor entry for %s" % date, code="already_anchored")
+    last = None
+    for it in entries:
+        e = it["entry"]
+        if e.get("day") == date and (last is None or e["seq"] > last["seq"]):
+            last = e
+    if last is None:
+        raise LedgerStateError("no entry has day %s; there is nothing to anchor" % date, code="nothing_to_anchor")
+    text = anchor_text(header["agent"], date, last["entry_id"], last["seq"])
+    return {"agent": header["agent"], "date": date, "head": last["entry_id"], "seq": last["seq"], "text": text}
 
 
 Builder = Callable[[dict, List[dict], int, str, str], Tuple[str, Dict[str, Any]]]
@@ -337,39 +368,28 @@ class Ledger:
         return self.append("started", f, timestamp)
 
     # ------------------------------------------------------------------------------------------- anchor
-    @staticmethod
-    def _anchor_of(header: dict, entries: List[dict], date: str) -> Dict[str, Any]:
-        day_entries = [it["entry"] for it in entries if it["entry"].get("day") == date]
-        if not day_entries:
-            raise LedgerStateError("no entry has day %s; there is nothing to anchor" % date)
-        last = day_entries[-1]
-        text = anchor_text(header["agent"], date, last["entry_id"], last["seq"])
-        return {"agent": header["agent"], "date": date, "head": last["entry_id"], "seq": last["seq"], "text": text}
-
     def compose_anchor(self, date: Optional[str] = None, now: Optional[str] = None) -> Dict[str, Any]:
         """{agent, date, head, seq, text} for `date` (default: the day before `now` in anchor_tz). read-only:
-        the caller posts the text; append_anchor records it."""
+        the caller posts the text; append_anchor records it. refuses as compose_anchor (the module function)
+        does: a day not yet closed in anchor_tz at `now` (day_open), a day already anchored (already_anchored),
+        a day with no entry (nothing_to_anchor). until 2026-11-09 this composed for an open or an anchored day,
+        a text bound to fail section 5's check (improvements rank 42)."""
         _raw, r = self._read_rederived()
         header = r["header"]
-        date = date or _previous_day(day_of(now or now_utc(), header["anchor_tz"]))
-        return self._anchor_of(header, r["entries"], date)
+        now = now or now_utc()
+        date = date or _previous_day(day_of(now, header["anchor_tz"]))
+        return compose_anchor(header, r["entries"], date, now)
 
     def append_anchor(self, date: Optional[str] = None, timestamp: Optional[str] = None) -> Dict[str, Any]:
         """compose the anchor text for `date` (default: the day before the entry's own day) and write the anchor
         entry (anchor_date, anchor_head, anchor_head_seq, anchor_text_sha256, late). `late` is section 5's rule
         (late_of: written after 00:10:00 local on the following day, or on a later day), never the caller's.
-        refuses a day not yet closed in anchor_tz and a day already anchored. returns {"text", "entry"}."""
+        refuses as compose_anchor does, at the anchor entry's own timestamp. returns {"text", "entry"}."""
         out: Dict[str, Any] = {}
 
         def build(header, entries, seq, prev, ts):
-            today = day_of(ts, header["anchor_tz"])
-            d = date or _previous_day(today)
-            if d >= today:
-                raise LedgerStateError("%s is not closed in %s (the anchor entry's own day is %s)"
-                                       % (d, header["anchor_tz"], today))
-            if any(it["entry"].get("kind") == "anchor" and it["entry"].get("anchor_date") == d for it in entries):
-                raise LedgerStateError("%s is already anchored" % d)
-            a = self._anchor_of(header, entries, d)
+            d = date or _previous_day(day_of(ts, header["anchor_tz"]))
+            a = compose_anchor(header, entries, d, ts)
             out["text"] = a["text"]
             return "anchor", {"anchor_date": d, "anchor_head": a["head"], "anchor_head_seq": a["seq"],
                               "anchor_text_sha256": hashlib.sha256(a["text"].encode("utf-8")).hexdigest(),

@@ -12,7 +12,7 @@
  "base_lines": 60,
  "base_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
  "made_by": "vectors/make_vectors.py with styxx_ledger (python); every expect is the python answer, re-asked by both runners",
- "note": "read: apply `transform` to the base (the result must hash to input_sha256), verify it with `withheld` and the `anchors` texts, and answer as `expect` says (only the keys in `compare` when a case names them). problem_seqs: the seqs carrying a problem; problems_without_seq: the count of problem records naming no seq (reading and header problems); problem_codes: the sorted set of codes; anchors_ok: check_anchor(...).ok per text, with the header; coverage: coverage(entries, withheld, coverage_anchor_seqs). write: call `fn` on the given arguments and compare the string value (build_entry: the canonical line of the entry), or the refusal's code.",
+ "note": "read: apply `transform` to the base (the result must hash to input_sha256), verify it with `withheld` and the `anchors` texts, and answer as `expect` says (only the keys in `compare` when a case names them). problem_seqs: the seqs carrying a problem; problems_without_seq: the count of problem records naming no seq (reading and header problems); problem_codes: the sorted set of codes; anchors_ok: check_anchor(...).ok per text, with the header; coverage: coverage(entries, withheld, coverage_anchor_seqs). write: call `fn` on the given arguments and compare the string value (build_entry: the canonical line of the entry; check_header: the header's digest, when the header is one a writer may write; compose_anchor: the anchor text of `date` at `now`, composed over the base's header and entries), or the refusal's code.",
  "protocol": "PROTOCOL_v1.md",
  "read": [
   {
@@ -1999,6 +1999,361 @@
    "prev": "0000000000000000000000000000000000000000000000000000000000000000",
    "seq": 2,
    "timestamp": "2026-11-01T05:00:00Z"
+  },
+  {
+   "expect": "{\"angstrom_sign\":\"\u212b\",\"fullwidth_a\":\"\uff21\",\"jamo\":\"\u1100\u1161\",\"nfc\":\"\u00e9\",\"nfd\":\"e\u0301\",\"nfkc_ligature\":\"\ufb01\"}",
+   "expect_sha256": "219f06ded05db119a09d5747b3788643d36a1400e453c701183617b3f43153c9",
+   "fn": "jcs",
+   "input": {
+    "angstrom_sign": "\u212b",
+    "fullwidth_a": "\uff21",
+    "jamo": "\u1100\u1161",
+    "nfc": "\u00e9",
+    "nfd": "e\u0301",
+    "nfkc_ligature": "\ufb01"
+   },
+   "name": "dump-strings-never-normalised"
+  },
+  {
+   "core": {
+    "day": "2027-03-01",
+    "kind": "note",
+    "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+    "schema": "styxx.ledger/entry/v1",
+    "seq": 1,
+    "timestamp": "2027-03-01T00:00:00Z",
+    "x": "u\u0308"
+   },
+   "expect": "058feb45dbe38554cfa8d9e47096caa719afc065ab6d04b7980342e3143004c1",
+   "fn": "entry_id",
+   "name": "entry-id-minimal-in-nfd"
+  },
+  {
+   "expect": "2e0c7f7e8868309cdf973291ed6aed0a4d5f921b66414243bc6996df11ed8e4d",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-certifies-base"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-empty"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": " ",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-space"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\ufeff",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-u+feff"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\u001c",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-u+001c"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\u001f",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-u+001f"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\u0085",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-u+0085"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\t\u000b\f\r\u001c\u001d\u001e\u001f \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-the-30-but-lf"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line\nand another",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-lf"
+  },
+  {
+   "expect_error": "header_form",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-refuse-certifies-501-chars"
+  },
+  {
+   "expect": "693d77c0cce606c00d38822c97d3fc55ac88c094ab08a254b9eea199d90d03d1",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\u200b",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-certifies-u+200b-is-not-blank"
+  },
+  {
+   "expect": "21a7bf7751836e6b69425cea7cdfa419298a2025e276c848261b0702af5359d8",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\u180e",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-certifies-u+180e-is-not-blank"
+  },
+  {
+   "expect": "900062a67e965b9fa15cc8f634c7c123309adb19e122f85708b892a3420a2f37",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": " certifies, with blanks around it ",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-certifies-padded"
+  },
+  {
+   "expect": "207583205be9ba7d6c179fb95d3c75335f8de25972aba1530ebdb2a46f27887b",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-certifies-500-chars"
+  },
+  {
+   "expect": "9f3d018b0bcc8b8980f0f8e739b949846031a32530b84b323aac95a07849eac7",
+   "fn": "check_header",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42\ud83d\ude42",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-certifies-500-astral-chars"
+  },
+  {
+   "date": "2027-01-02",
+   "expect": "kitbot anchor 2027-01-02 head cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a seq 59",
+   "expect_sha256": "b0aefa963b8a1805b46f1eb832d595a827149f1ad7aad004eca73b336ceacfc9",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-closed-at-local-midnight",
+   "now": "2027-01-03T05:00:00Z"
+  },
+  {
+   "date": "2026-11-03",
+   "expect": "kitbot anchor 2026-11-03 head 3161fa5ef1ba1da5952c56bd45f7c1be0e6e1640ead5baaa40cea8613da88593 seq 32",
+   "expect_sha256": "66fef2b72c9bbc9548a8563f2cdb98330944455dc94c0c52ed134b855a4497df",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-a-skipped-day-weeks-later",
+   "now": "2027-01-03T12:00:00Z"
+  },
+  {
+   "date": "2027-01-02",
+   "expect_error": "day_open",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-open-last-second",
+   "now": "2027-01-03T04:59:59Z"
+  },
+  {
+   "date": "2027-01-02",
+   "expect_error": "day_open",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-open-same-day",
+   "now": "2027-01-02T12:00:00Z"
+  },
+  {
+   "date": "2026-11-01",
+   "expect_error": "day_open",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-open-at-dst-end",
+   "now": "2026-11-02T04:30:00Z"
+  },
+  {
+   "date": "2027-01-05",
+   "expect_error": "day_open",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-a-future-day",
+   "now": "2027-01-03T12:00:00Z"
+  },
+  {
+   "date": "2027-01-01",
+   "expect_error": "already_anchored",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-already-anchored",
+   "now": "2027-01-03T12:00:00Z"
+  },
+  {
+   "date": "2027-01-01",
+   "expect_error": "day_open",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-open-before-anchored",
+   "now": "2027-01-01T12:00:00Z"
+  },
+  {
+   "date": "2026-12-01",
+   "expect_error": "nothing_to_anchor",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-a-day-with-no-line",
+   "now": "2027-01-03T12:00:00Z"
+  },
+  {
+   "date": "2027-1-2",
+   "expect_error": "anchor_form",
+   "fn": "compose_anchor",
+   "name": "compose-anchor-refuse-date-out-of-form",
+   "now": "2027-01-03T12:00:00Z"
   }
  ]
 }

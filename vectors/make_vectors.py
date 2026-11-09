@@ -138,7 +138,80 @@ def nested(depth: int):
     return {"d": v}
 
 
-def write_cases(entries):
+def sweep_cases(entries, base):
+    """write-side cases added 2026-11-09 (the lab's improvement sweep), appended after the earlier cases so those keep
+    their places. every non-ascii string is spelled with chr(), so the bytes of this source say which code point is
+    meant. ranks 68, 43 and 42 of the sweep's list."""
+    c = []
+    # rank 68, section 2: strings are never normalised. nfc and nfd, a compatibility ligature, a fullwidth letter,
+    # conjoining jamo and the angstrom sign keep their own code points and bytes
+    s = {"nfc": chr(0xE9), "nfd": "e" + chr(0x301), "nfkc_ligature": chr(0xFB01), "fullwidth_a": chr(0xFF21),
+         "jamo": chr(0x1100) + chr(0x1161), "angstrom_sign": chr(0x212B)}
+    v = S.jcs(s)
+    c.append({"name": "dump-strings-never-normalised", "fn": "jcs", "input": s, "expect": v,
+              "expect_sha256": hashlib.sha256(v.encode("utf-8")).hexdigest()})
+    nfc = {"schema": S.ENTRY_SCHEMA, "seq": 1, "prev": P0, "kind": "note", "timestamp": "2027-03-01T00:00:00Z",
+           "day": "2027-03-01", "x": chr(0xFC)}
+    nfd = dict(nfc, x="u" + chr(0x308))
+    assert S.entry_id_of(nfc) != S.entry_id_of(nfd)     # the core of entry-id-minimal, its string in nfd
+    c.append({"name": "entry-id-minimal-in-nfd", "fn": "entry_id", "core": nfd, "expect": S.entry_id_of(nfd)})
+    # rank 43, section 1: a certifies of whitespace only is refused (header_form), whitespace being exactly these 30
+    # code points, the union of python's str.isspace and javascript's String.prototype.trim
+    blank30 = [0x9, 0xA, 0xB, 0xC, 0xD, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x85, 0xA0, 0x1680] + list(range(0x2000, 0x200B)) \
+        + [0x2028, 0x2029, 0x202F, 0x205F, 0x3000, 0xFEFF]
+    assert len(set(blank30)) == 30
+    headers = [
+        ("header-certifies-base", HEADER["certifies"], None),
+        ("header-refuse-certifies-empty", "", "header_form"),
+        ("header-refuse-certifies-space", " ", "header_form"),
+        ("header-refuse-certifies-u+feff", chr(0xFEFF), "header_form"),   # blank to javascript's trim, not to python's strip
+        ("header-refuse-certifies-u+001c", chr(0x1C), "header_form"),     # blank to python's strip, not to javascript's trim
+        ("header-refuse-certifies-u+001f", chr(0x1F), "header_form"),
+        ("header-refuse-certifies-u+0085", chr(0x85), "header_form"),
+        ("header-refuse-certifies-the-30-but-lf", "".join(chr(x) for x in blank30 if x != 0xA), "header_form"),
+        ("header-refuse-certifies-lf", "one line" + chr(0xA) + "and another", "header_form"),
+        ("header-refuse-certifies-501-chars", "x" * 501, "header_form"),
+        ("header-certifies-u+200b-is-not-blank", chr(0x200B), None),      # zero width space: outside the 30
+        ("header-certifies-u+180e-is-not-blank", chr(0x180E), None),      # mongolian vowel separator: outside the 30
+        ("header-certifies-padded", " certifies, with blanks around it ", None),
+        ("header-certifies-500-chars", "x" * 500, None),
+        ("header-certifies-500-astral-chars", chr(0x1F642) * 500, None),  # characters are code points, not utf-16 units
+    ]
+    for name, cert, code in headers:
+        h = dict(HEADER, certifies=cert)
+        x = {"name": name, "fn": "check_header", "header": h}
+        if code:
+            x["expect_error"] = code
+        else:
+            x["expect"] = S.header_digest(h)
+        c.append(x)
+    # rank 42, section 5: the anchor text is composed for a day that has closed in anchor_tz, that the ledger has not
+    # anchored, and that has a line; over the base's header and entries (america/new_york)
+    composes = [
+        ("compose-anchor-closed-at-local-midnight", "2027-01-02", "2027-01-03T05:00:00Z", None),   # 00:00:00 est, the 3rd
+        ("compose-anchor-a-skipped-day-weeks-later", "2026-11-03", "2027-01-03T12:00:00Z", None),
+        ("compose-anchor-refuse-open-last-second", "2027-01-02", "2027-01-03T04:59:59Z", "day_open"),  # 23:59:59 est
+        ("compose-anchor-refuse-open-same-day", "2027-01-02", "2027-01-02T12:00:00Z", "day_open"),
+        ("compose-anchor-refuse-open-at-dst-end", "2026-11-01", "2026-11-02T04:30:00Z", "day_open"),   # 23:30 est, the 1st
+        ("compose-anchor-refuse-a-future-day", "2027-01-05", "2027-01-03T12:00:00Z", "day_open"),
+        ("compose-anchor-refuse-already-anchored", "2027-01-01", "2027-01-03T12:00:00Z", "already_anchored"),
+        ("compose-anchor-refuse-open-before-anchored", "2027-01-01", "2027-01-01T12:00:00Z", "day_open"),  # before already_anchored
+        ("compose-anchor-refuse-a-day-with-no-line", "2026-12-01", "2027-01-03T12:00:00Z", "nothing_to_anchor"),
+        ("compose-anchor-refuse-date-out-of-form", "2027-1-2", "2027-01-03T12:00:00Z", "anchor_form"),
+    ]
+    for name, d, now, code in composes:
+        x = {"name": name, "fn": "compose_anchor", "date": d, "now": now}
+        v, err = RV.call_write(S, x, base)
+        if code:
+            x["expect_error"] = code
+        else:
+            x["expect"] = v
+            x["expect_sha256"] = hashlib.sha256(v.encode("utf-8")).hexdigest()
+        c.append(x)
+    return c
+
+
+def write_cases(entries, base):
     c = []
     dumps = [
         ("dump-nested", {"z": {"b": [1, {"d": None, "c": True}], "a": False}, "a": []}),
@@ -266,8 +339,9 @@ def write_cases(entries):
     for name, h, s, p, k, ts, f, code in build_bad:
         c.append({"name": name, "fn": "build_entry", "header": h, "seq": s, "prev": p, "kind": k, "timestamp": ts,
                   "fields": f, "expect_error": code})
+    c.extend(sweep_cases(entries, base))
     for x in c:
-        v, err = RV.call_write(S, x)
+        v, err = RV.call_write(S, x, base)
         if "expect_error" in x:
             assert err == x["expect_error"], (x["name"], err, v)
         else:
@@ -394,9 +468,11 @@ def main(argv=None) -> int:
                  "the seqs carrying a problem; problems_without_seq: the count of problem records naming no seq (reading and "
                  "header problems); problem_codes: the sorted set of codes; anchors_ok: check_anchor(...).ok per text, with the "
                  "header; coverage: coverage(entries, withheld, coverage_anchor_seqs). write: call `fn` on the given arguments "
-                 "and compare the string value (build_entry: the canonical line of the entry), or the refusal's code."),
+                 "and compare the string value (build_entry: the canonical line of the entry; check_header: the header's "
+                 "digest, when the header is one a writer may write; compose_anchor: the anchor text of `date` at `now`, "
+                 "composed over the base's header and entries), or the refusal's code."),
         "read": read_cases(base, entries, anchors),
-        "write": write_cases(entries),
+        "write": write_cases(entries, base),
     }
     vtext = (json.dumps(doc, indent=1, sort_keys=True, ensure_ascii=True) + "\n").encode("ascii")
     targets = [(HERE / "base_v1.jsonl", base), (HERE / "vectors_v1.json", vtext)]

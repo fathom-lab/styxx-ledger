@@ -204,10 +204,10 @@ def fill(template: str, vals: dict, shelf_sha: str) -> str:
         return "| %s = `%s` |" % (m.group(1), vals[m.group(1)])
     out = re.sub(r"^\| `\{\{([a-z0-9_]+)\}\}` \|", row, template, flags=re.M)
 
-    def cut(v: str) -> str:
+    def cut(name: str, v: str) -> str:   # the template's comment rule; certifies is read whole (how to fill (a))
         i = v.find(" (")
-        return v[:i] if i > 0 and v.endswith(")") else v
-    out = re.sub(r"\{\{([a-z0-9_]+)\}\}", lambda m: cut(vals[m.group(1)]), out)
+        return v[:i] if i > 0 and v.endswith(")") and name != "certifies" else v
+    out = re.sub(r"\{\{([a-z0-9_]+)\}\}", lambda m: cut(m.group(1), vals[m.group(1)]), out)
     g = re.search(r"^```gates[ \t]*\n(.*?)^```[ \t]*$", out, re.M | re.S)
     out = out.replace("GATES_SHA", hashlib.sha256(g.group(1).encode("utf-8")).hexdigest())
     return seal(out, shelf_sha)
@@ -279,8 +279,9 @@ def main(argv=None) -> int:
             got = json.loads(expected_bytes())
             want = json.loads(e.read_bytes()) if e.exists() else None
             if want is not None:
-                got["scorer"].pop("sha256", None)
-                want["scorer"].pop("sha256", None)
+                for d in (got, want):   # the running scorer's and the kit's own hashes move with every edit
+                    d["scorer"].pop("sha256", None)
+                    d["scorer"].pop("vectors_sha256", None)
             if got != want:
                 differs.append(e.name)
         print(json.dumps({"differs": differs, "anchors": meta["anchors"]}))
@@ -302,6 +303,7 @@ def main(argv=None) -> int:
         def core(x: bytes) -> dict:
             d = json.loads(x)
             d["scorer"].pop("sha256", None)
+            d["scorer"].pop("vectors_sha256", None)
             return d
         if e.exists() and core(e.read_bytes()) != core(b):
             print("refusing: expected_RESULT.json exists with other bytes (delete it by hand and log why)")

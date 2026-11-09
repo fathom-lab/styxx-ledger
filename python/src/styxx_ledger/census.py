@@ -3,15 +3,19 @@ and writes RESULT.json and RESULT.md: the result dict of the template's section 
 instrument check of section 7, and the section-10 sentence the counts select.
 
     score(prereg_path, ledger_url_or_path, out_dir, now_utc, export=None, anchors=None, withheld=None, js=True,
-          anchor_place=None, tries=3, interval_s=3600, sleep=None)
+          anchor_place=None, tries=3, interval_s=3600, sleep=None, runner=None, rehearse=False, say=None)
     digests(prereg_path)   the registration digest and the gates digest, and the gates block's assignment walk
+    fill_values(raw, withheld=None)  the values a fill copies from a ledger (header_digest, writer, earliest_anchor)
+    kit_values()           the values a fill copies from this kit (scorer_sha256, kit_version)
 
 what it does, in order:
 
 1. reads the prereg. any double-brace placeholder left anywhere is a refusal. the placeholder table is read in the
    filled form the template's "how to fill" section gives: `| name = `value` | ... |`; a value ending in a
-   parenthesis opened by " (" carries a comment, which is cut. a value starting `[builder-set: open]` is open (the
-   worked example's mark): with `d0` open nothing is counted; with `d0` filled every open value is a refusal.
+   parenthesis opened by " (" carries a comment, which is cut, except in the verbatim rows (VERBATIM_ROWS:
+   `certifies`, whose header sentence may itself end in a parenthesis), which are read whole. a value starting
+   `[builder-set: open]` is open (the worked example's mark): with `d0` open nothing is counted; with `d0` filled every
+   open value is a refusal. the locks of the template's section 11 are compared (LOCKS below).
 2. reads the dated entries under `## 15.`: the registration (`registered: <url> commit <40 hex> registration_sha256
    <64 hex>`), the shelf read (`shelf read: <url> sha256 <64 hex> at <utc>`) and the signature line. the registration
    digest is the sha256 of the file's bytes before the line that starts `## 15.`; the scorer recomputes it and refuses
@@ -19,7 +23,14 @@ what it does, in order:
    gates block's bytes between its fences; a mismatch with `gates_sha256` is a refusal.
 3. fetches the ledger: `ledger_url` (three tries an hour apart by default), or a local copy whose sha256 must equal
    the url's bytes fetched in the same run. any other source is a refusal. a url that does not answer after the tries
-   is the `unreachable` component of chain_problems, not a refusal.
+   is the `unreachable` component of chain_problems, not a refusal. every url fetched is https (an http url is a
+   refusal, code `http`: the template names https urls). each failed try and each wait is announced through `say`
+   (stderr unless a caller passes its own), and every source that did not answer, the export included, is listed in
+   `fetch_failures` with its url and reason (the cli names them and exits 2; a refused RESULT.json still lists them,
+   and the locks once compared). with `rehearse` nothing is fetched: a local copy is scored offline, the shelf's
+   report is checked only in the parts that need no fetch, and the status is `rehearsal`, never a verdict
+   (`rehearsal.row_if_report_holds` names the row the fill reaches if the checks of (c) that need the shelf's report
+   hold); its one sentence says so, and no G-1, G-2, anchor or instrument sentence is printed from a rehearsal.
 4. re-derives it with this package's verifier (v1, or v0 through v0.py when the header names v0). problem records
    are the `verifier_problems` component of chain_problems and walk to the BROKEN row. with node and the kit's js cli
    beside the package, the javascript reference implementation re-derives the same bytes; the two must agree on line
@@ -27,11 +38,22 @@ what it does, in order:
    wrong, and the row is UNDECIDED.
 5. counts: lines by kind per cell (pre-window / window / after, by each line's `day`), deliveries by population,
    posted anchors per window day, delivery lines on days with no holding posted anchor, numerals, and, given an
-   export, matched / unledgered deliveries, one published line per exported message at most.
+   export, matched / unledgered deliveries, one published line per exported message at most. the export is read
+   through the same fetch as every source: one that does not answer (a url after its tries, or a file that cannot be
+   read) is a fetch failure, `census_run` is 0 and `census.why_not_run` says so; bytes that arrive and are not the
+   export's json are refused (code `export`).
 6. the instrument check: the census matching re-run on copies of the export with planted misses (a message no line
    carries, a duplicate of a ledgered text, an edited text, a last-day message at 23:59:59, one line removed); each
    must raise the unledgered count.
 7. evaluates the gates block against the lab-set bars, walks its rows, selects the sentence.
+
+LOCKS (template section 11), compared on every run and printed under `locks`, the running side beside the registered
+one: `scorer_sha256` against the sha256 of this census.py; the 64 hex in `kit_version` against the sha256 of the
+kit's vectors/vectors_v1.json beside this package; `writer` against the `writer` of the ledger's started entries
+before d0. with `d0` filled a mismatch is a refusal (codes `scorer_sha256`, `kit_version`, `writer`), except
+`scorer_sha256` = `not built at the freeze`, which is printed; a `kit_version` naming no sha256 is printed "not
+compared". `runner` (lab, operator or other; default "not stated") is the run's own statement of who ran it: the
+held sentence says "counted by" that runner, never the lab by default.
 
 nothing here prints a line's text or an exported message's text; RESULT.md carries counts only. deterministic for
 fixed bytes and a fixed now_utc; no wall clock is read inside score() (the tries sleep, they never read the clock).
@@ -46,6 +68,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import unicodedata
@@ -80,6 +103,12 @@ SHELF_HAS_V1_ROW = True
 # operator could have written, not the shelf's read, and (c) fails without fetching it (improvements 2026-11-09 rank 4).
 SHELF_REPORT_PREFIX = "https://fathom-lab.github.io/styxx-shelf/reports/reads/"
 NORMALISATION_RULES = ("none", "strip", "nfc", "nfc+strip", "crlf-to-lf", "crlf-to-lf+strip")
+# the rows read whole, never cut by the comment rule: the header's own sentence may end in a parenthesis, and a cut
+# would turn a verbatim copy into a mismatch (improvements 2026-11-09 rank 69). agent, anchor_tz, kinds and
+# earliest_anchor are verbatim too, but their forms hold no " (", so a comment on them is cut safely.
+VERBATIM_ROWS = ("certifies",)
+SCORER_NOT_BUILT = "not built at the freeze"
+RUNNERS = ("lab", "operator", "other")          # --runner; None reads "not stated" (rank 48)
 
 PLACEHOLDERS = (
     "operator", "agent", "agent_description", "agent_account", "ledger_url", "withheld_url", "anchors_url",
@@ -162,9 +191,35 @@ def _is_url(s: Optional[str]) -> bool:
     return isinstance(s, str) and (s.startswith("https://") or s.startswith("http://"))
 
 
-def _fetch_tries(src: str, tries: int, interval_s: float, sleep: Callable[[float], None]
+def _is_https(s: Optional[str]) -> bool:
+    return isinstance(s, str) and s.startswith("https://")
+
+
+def _require_https(src: str, what: str) -> None:
+    """an http url is refused before any fetch: the template's urls are https, and bytes read over http could have
+    been changed on the way (improvements 2026-11-09 rank 70)."""
+    if _is_url(src) and not _is_https(src):
+        raise Refused("http", "%s %s is an http url; the scorer fetches https urls only (template, the placeholders: "
+                      "ledger_url, withheld_url and anchors_url are https urls)" % (what, src))
+
+
+def _say_stderr(s: str) -> None:
+    try:
+        print(s, file=sys.stderr, flush=True)
+    except (OSError, ValueError):
+        pass
+
+
+def _secs(x: float) -> str:
+    return ("%d" % x) if float(x).is_integer() else ("%g" % x)
+
+
+def _fetch_tries(src: str, tries: int, interval_s: float, sleep: Callable[[float], None],
+                 say: Optional[Callable[[str], None]] = None, what: str = "the url"
                  ) -> Tuple[Optional[bytes], Dict[str, Any]]:
-    """(bytes | None, meta with tries_used and the last failure). a local path is read once."""
+    """(bytes | None, meta with tries_used and the last failure). a local path is read once. each failed try that
+    is tried again, and a url that does not answer after its last try, is announced through `say`, so a run never
+    waits in silence (improvements 2026-11-09 rank 31)."""
     n = max(1, int(tries)) if _is_url(src) else 1
     last: Optional[Refused] = None
     used = 0
@@ -178,7 +233,13 @@ def _fetch_tries(src: str, tries: int, interval_s: float, sleep: Callable[[float
             last = e
             if e.code != "unreachable" or i == n - 1:
                 break
+            if say is not None:
+                say("census: %s, try %d of %d: %s; the next try is in %s s (--tries 1 makes one try, --interval sets "
+                    "the wait)" % (what, used, n, e.reason, _secs(interval_s)))
             sleep(interval_s)
+    if say is not None and last is not None and _is_url(src):
+        say("census: %s did not answer after %d %s: %s; the run goes on and RESULT.json records it"
+            % (what, used, "try" if used == 1 else "tries", last.reason))
     return None, {"source": src if _is_url(src) else Path(src).name, "tries_used": used,
                   "failure": {"code": last.code, "reason": last.reason} if last else None}
 
@@ -201,7 +262,7 @@ def _usable(v: Optional[str]) -> bool:
 
 def _cut_comment(v: str) -> str:
     """the value before a trailing parenthesis: `send (105 of 106)` -> `send`. a parenthesis inside the value (not
-    closing it) is kept."""
+    closing it) is kept. never applied to VERBATIM_ROWS (parse_prereg)."""
     v = v.strip()
     i = v.find(" (")
     if i > 0 and v.endswith(")"):
@@ -256,7 +317,7 @@ def parse_prereg(text: str) -> Dict[str, Any]:
     if missing:
         raise Refused("placeholder_missing", "%d placeholder(s) not filled in the table in the form "
                       "| name = `value` | (template, how to fill (a)): %s" % (len(missing), ", ".join(missing)))
-    cut = {k: (None if _is_open(v) else _cut_comment(v)) for k, v in values.items()}
+    cut = {k: (None if _is_open(v) else (v if k in VERBATIM_ROWS else _cut_comment(v))) for k, v in values.items()}
     s15 = _section15(text)
     return {"values": values, "cut": cut, "gates_block": gates_block(text), "s15": s15}
 
@@ -522,6 +583,109 @@ def _instrument(msgs: List[Dict[str, Any]], pool: Dict[str, List[int]], norm, na
             "unbuilt": sum(1 for r in rows if not r["built"]), "base_unmatched": base["unmatched"]}
 
 
+# ------------------------------------------------------------------------------------------------ locks
+
+_HEX64 = re.compile(r"(?<![0-9a-fA-F])[0-9a-fA-F]{64}(?![0-9a-fA-F])")
+
+
+def _running_vectors() -> Tuple[Optional[str], Optional[str]]:
+    """(sha256 of the kit's vectors/vectors_v1.json beside this package, None), or (None, why)."""
+    p = Path(__file__).resolve().parents[3] / "vectors" / "vectors_v1.json"
+    try:
+        return _sha(p.read_bytes()), None
+    except OSError:
+        return None, "vectors/vectors_v1.json is not beside this package (an install without the kit's checkout)"
+
+
+def kit_values() -> Dict[str, Any]:
+    """scorer_sha256 and kit_version as a fill copies them from the kit that will score the window: the sha256 of this
+    one file (census.py), and the version with the sha256 of the vectors file beside the package."""
+    vec, why = _running_vectors()
+    kv = ("styxx-ledger %s vectors_v1.json sha256 %s" % (__version__, vec)) if vec else \
+        ("styxx-ledger %s (%s)" % (__version__, why))
+    return {"scorer_sha256": _sha(Path(__file__).read_bytes()), "kit_version": kv}
+
+
+def _lock_scorer(reg: Optional[str], running: str) -> Dict[str, Any]:
+    if reg is None:
+        return {"registered": None, "reads": "open"}
+    r = reg.strip()
+    if r == SCORER_NOT_BUILT:
+        reads = "not built at the freeze: the registration names no scorer hash, so none is compared"
+    elif re.fullmatch(r"[0-9a-f]{64}", r):
+        reads = "same" if r == running else "differs"
+    else:
+        reads = "not a sha256 (64 lowercase hex) nor %r" % SCORER_NOT_BUILT
+    return {"registered": r, "reads": reads}
+
+
+def _lock_kit(reg: Optional[str], vec: Optional[str], why: Optional[str]) -> Dict[str, Any]:
+    if reg is None:
+        return {"registered": None, "reads": "open"}
+    hexes = [h.lower() for h in _HEX64.findall(reg)]
+    out: Dict[str, Any] = {"registered": reg, "vectors_sha256_registered": hexes[0] if len(hexes) == 1 else None}
+    if not hexes:
+        out["reads"] = "not compared: the registration names no sha256 of vectors_v1.json"
+    elif len(hexes) > 1:
+        out["reads"] = "not one sha256: the registration names %d" % len(hexes)
+    elif vec is None:
+        out["reads"] = "unmeasured: %s" % why
+    else:
+        out["reads"] = "same" if hexes[0] == vec else "differs"
+    return out
+
+
+def _writer_form(w: Any) -> Optional[str]:
+    """a started entry's writer as a fill copies it: `name version`, then the language when the entry names one; the
+    object's compact json when a part is not a plain word. None when the entry carries no writer object."""
+    if not isinstance(w, dict):
+        return None
+    parts = [w.get("name"), w.get("version")] + ([w.get("language")] if "language" in w else [])
+    if all(isinstance(p, str) and p and not re.search(r"\s", p) for p in parts):
+        return " ".join(parts)
+    return json.dumps(w, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _writer_matches(reg: str, w: Any) -> bool:
+    s = reg.strip()
+    if not isinstance(w, dict):
+        return False
+    if s.startswith("{"):
+        try:
+            d = json.loads(s)
+        except ValueError:
+            return False
+        return isinstance(d, dict) and bool(d) and all(k in w and w[k] == x for k, x in d.items())
+    toks = s.split()
+    if len(toks) not in (2, 3):
+        return False
+    return w.get("name") == toks[0] and w.get("version") == toks[1] and (len(toks) == 2 or w.get("language") == toks[2])
+
+
+def _lock_writer(reg: Optional[str], entries: List[dict], d0: Optional[_dt.date]) -> Dict[str, Any]:
+    """the registered writer against the started entries the ledger carries before d0 (all of them while d0 is open):
+    the same when one of them matches it; `none ...` is the same when none of them carries a writer object."""
+    if reg is None:
+        return {"registered": None, "reads": "open"}
+    pre = [e for e in entries if e.get("kind") == "started"
+           and (d0 is None or (isinstance(e.get("day"), str) and e["day"] < d0.isoformat()))]
+    out: Dict[str, Any] = {"registered": reg, "started": [{"seq": e.get("seq"), "writer": _writer_form(e.get("writer"))}
+                                                          for e in pre]}
+    if not entries:
+        out["reads"] = "unmeasured: no line of the ledger was read"
+    elif re.match(r"none(\s|$)", reg.strip().lower()):
+        out["reads"] = "same" if not any(isinstance(e.get("writer"), dict) for e in pre) else "differs"
+    else:
+        out["reads"] = "same" if any(_writer_matches(reg, e.get("writer")) for e in pre) else "differs"
+    return out
+
+
+def _refuse_with(code: str, reason: str, partial: Dict[str, Any]) -> Refused:
+    e = Refused(code, reason)
+    e.partial = partial   # type: ignore[attr-defined]
+    return e
+
+
 # ------------------------------------------------------------------------------------------------ score
 
 def _int(v: Any) -> bool:
@@ -615,26 +779,90 @@ def digests(prereg_path) -> Dict[str, Any]:
     return out
 
 
+def fill_values(raw: bytes, withheld: Optional[List[dict]] = None) -> Dict[str, Any]:
+    """the values a fill copies from the ledger (template, the placeholders; improvements 2026-11-09 rank 51):
+    header_digest (P1 section 3: the prev of seq 1), agent, anchor_tz, certifies and kinds as the header carries them,
+    writer in the form the scorer compares (from the earliest started entry that carries one), and the earliest anchor
+    text the ledger's own anchor lines record that holds on the chain (P1 section 5). nothing is posted or written.
+    withheld: the publisher's withheld list, when the ledger leaves lines out (P1 section 6)."""
+    wh = list(withheld or [])
+    r = verify_auto(raw, withheld=wh)
+    proto = r["protocol"]
+    hdr = r["header"] if isinstance(r["header"], dict) else {}
+    entries = [it["entry"] for it in r["entries"]]
+    out: Dict[str, Any] = {"sha256": _sha(raw), "bytes": len(raw), "protocol": proto, "rederives": bool(r["ok"]),
+                           "entries": len(entries), "head": r["head"]}
+    if not hdr:
+        out["why"] = "no header was read, so there is nothing to copy"
+        return out
+    if proto == "v0":
+        out.update({"header_digest": header_digest_v0(hdr), "agent": "gate", "anchor_tz": hdr.get("anchor_tz"),
+                    "certifies": hdr.get("certifies"), "kinds": None, "kinds_why": "a v0 header carries no kinds"})
+    else:
+        out.update({"header_digest": _header_digest_v1(hdr), "agent": hdr.get("agent"), "anchor_tz": hdr.get("anchor_tz"),
+                    "certifies": hdr.get("certifies"), "kinds": ",".join(str(k) for k in (hdr.get("kinds") or []))})
+    started = [e for e in entries if e.get("kind") == "started"]
+    w = next((e for e in started if isinstance(e.get("writer"), dict)), None)
+    out["writer"] = _writer_form(w["writer"]) if w else ("none" if started else None)
+    out["writer_seq"] = w.get("seq") if w else None
+    out["earliest_anchor"] = None
+    out["earliest_anchor_line_seq"] = None
+    lines = sorted((e for e in entries if e.get("kind") == "anchor"),
+                   key=lambda e: (str(e.get("anchor_date")), e.get("seq") if _int(e.get("seq")) else 0))
+    for e in lines:
+        try:
+            text = _anchor_text_v1(out["agent"], e.get("anchor_date"), e.get("anchor_head"), e.get("anchor_head_seq"))
+        except (LedgerValueError, TypeError, ValueError):
+            continue
+        if isinstance(e.get("anchor_text_sha256"), str) and e["anchor_text_sha256"] != _sha(text.encode("utf-8")):
+            continue   # the line records another text's sha256: not this one
+        a = parse_anchor_auto(text, proto)
+        if a is not None and check_anchor_auto(r, a, wh)["ok"]:
+            out["earliest_anchor"] = text
+            out["earliest_anchor_line_seq"] = e.get("seq")
+            break
+    out["earliest_anchor_from"] = ("the ledger's own anchor line at seq %s, rebuilt from its fields (and its "
+                                   "anchor_text_sha256, when it carries one) and checked against the chain"
+                                   % out["earliest_anchor_line_seq"]
+                                   if out["earliest_anchor"] else "no anchor line of the ledger holds: post a day's "
+                                   "anchor (anchor-text --record) before filling earliest_anchor")
+    return out
+
+
 def score(prereg_path, ledger_url_or_path: Optional[str], out_dir, now_utc: str, export: Optional[str] = None,
           anchors: Optional[str] = None, withheld: Optional[str] = None, js: bool = True,
           anchor_place: Optional[str] = None, tries: int = TRIES, interval_s: float = INTERVAL_S,
-          sleep: Optional[Callable[[float], None]] = None) -> Dict[str, Any]:
+          sleep: Optional[Callable[[float], None]] = None, runner: Optional[str] = None, rehearse: bool = False,
+          say: Optional[Callable[[str], None]] = None) -> Dict[str, Any]:
     """score one census; writes RESULT.json and RESULT.md under out_dir and returns the dict written.
-    anchor_place: None (not judged in this run), "holds", or "fails: <why>" (every day prints unanchored)."""
+    anchor_place: None (not judged in this run), "holds", or "fails: <why>" (every day prints unanchored).
+    runner: who ran this run, "lab", "operator" or "other" (None: "not stated"); the held sentence says "counted by"
+    it. rehearse: score a local copy offline, fetch nothing, print no verdict. say: where each failed try, each wait
+    and each url that did not answer is announced (default: stderr)."""
     out = Path(out_dir)
     pre_bytes = Path(prereg_path).read_bytes()
+    vec, _why = _running_vectors()
     res: Dict[str, Any] = {
         "schema": RESULT_SCHEMA, "now_utc": now_utc,
         "prereg": {"file": Path(prereg_path).name, "sha256": _sha(pre_bytes), "bytes": len(pre_bytes)},
-        "scorer": {"module": "styxx_ledger.census", "sha256": _sha(Path(__file__).read_bytes()), "kit_version": __version__},
+        "scorer": {"module": "styxx_ledger.census", "sha256": _sha(Path(__file__).read_bytes()), "kit_version": __version__,
+                   "vectors_sha256": vec},
+        "runner": runner if runner is not None else "not stated",
     }
+    # what a refusal still reports (review of 2026-11-09): every source that did not answer before it, and the locks
+    # once compared. _score fills it as it goes.
+    carry: Dict[str, Any] = {"fetch_failures": []}
     try:
+        if runner is not None and runner not in RUNNERS:
+            raise Refused("runner", "runner is %r; it is one of %s, or not stated" % (runner, ", ".join(RUNNERS)))
         body = _score(pre_bytes, ledger_url_or_path, now_utc, export, anchors, withheld, js, anchor_place,
-                      tries, interval_s, sleep or time.sleep)
+                      tries, interval_s, sleep or time.sleep, runner=res["runner"], rehearse=rehearse,
+                      say=_say_stderr if say is None else say, carry=carry)
         res.update(body)
     except Refused as e:
         res.update({"status": "refused", "refusal": {"code": e.code, "reason": e.reason}, "verdict": None,
                     "sentences": ["refused: %s" % e.reason]})
+        res.update(carry)
         if getattr(e, "partial", None):
             res.update(e.partial)
     _write(out, res)
@@ -643,7 +871,26 @@ def score(prereg_path, ledger_url_or_path: Optional[str], out_dir, now_utc: str,
 
 def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[str], anchors_src: Optional[str],
            withheld_src: Optional[str], js: bool, anchor_place: Optional[str], tries: int, interval_s: float,
-           sleep: Callable[[float], None]) -> Dict[str, Any]:
+           sleep: Callable[[float], None], runner: str = "not stated", rehearse: bool = False,
+           say: Optional[Callable[[str], None]] = None, carry: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    carry = {} if carry is None else carry   # what score() keeps through a refusal: fetch_failures and the locks
+    # every source that did not answer, by name (the cli exits 2 on one)
+    fetch_failures: List[Dict[str, Any]] = carry.setdefault("fetch_failures", [])
+    not_fetched: List[Dict[str, Any]] = []      # the urls a rehearsal did not fetch
+
+    def fetch(what: str, s: str, n: Optional[int] = None) -> Tuple[Optional[bytes], Dict[str, Any]]:
+        if _is_url(s):
+            _require_https(s, what)
+            if rehearse:
+                not_fetched.append({"what": what, "url": s})
+                return None, {"source": s, "tries_used": 0,
+                              "failure": {"code": "rehearsal", "reason": "%s not fetched in a rehearsal" % s}}
+        b, m = _fetch_tries(s, tries if n is None else n, interval_s, sleep, say, what)
+        if b is None and m.get("failure"):
+            fetch_failures.append({"what": what, "source": m["source"], "tries_used": m["tries_used"],
+                                   "failure": m["failure"]})
+        return b, m
+
     now = _utc(now_s)
     if now is None:
         raise Refused("now", "now_utc is not YYYY-MM-DDTHH:MM:SSZ: %r" % now_s)
@@ -685,8 +932,11 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
                           "so the url is a pull request or a branch path (template, how to fill (h))")
         if pr["gates_block"] is None:
             raise Refused("gates_block", "d0 is filled and the file carries no ```gates block")
-        if not _is_url(v["ledger_url"]):
+        if not _is_https(v["ledger_url"]):
             raise Refused("ledger_url", "ledger_url is not an https url: %r" % v["ledger_url"])
+        for name in ("withheld_url", "anchors_url"):
+            if not _is_none(v[name]) and not _is_https(v[name]):
+                raise Refused(name, "%s is %r; it is an https url or none (template, the placeholders)" % (name, v[name]))
         if s15["registered"] is not None:
             url, commit, sha = s15["registered"]
             registration["entry"] = {"url": url, "commit": commit, "registration_sha256": sha}
@@ -701,8 +951,30 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
         raise Refused("gates_sha256", "the gates block's bytes between the fences hash to %s; gates_sha256 is %s"
                       % (gates_sha, v["gates_sha256"]))
 
+    # ---- the locks of section 11: the registered scorer and kit against the ones running (rank 49, 2026-11-09)
+    running_sha = _sha(Path(__file__).read_bytes())
+    vec, vec_why = _running_vectors()
+    locks: Dict[str, Any] = {"scorer": _lock_scorer(v["scorer_sha256"], running_sha),
+                             "kit": _lock_kit(v["kit_version"], vec, vec_why)}
+    carry["locks"] = locks   # the same dict: the writer's lock joins it below, and a refusal still prints them
+    if d0 is not None:
+        sr, kr = locks["scorer"]["reads"], locks["kit"]["reads"]
+        if sr == "differs" or sr.startswith("not a sha256"):
+            raise _refuse_with("scorer_sha256", "scorer_sha256 is %r; this scorer's census.py hashes to %s. score with "
+                               "the registered scorer (a kit commit whose python/src/styxx_ledger/census.py has that "
+                               "sha256), or record another by a dated amendment (template section 11)"
+                               % (v["scorer_sha256"], running_sha), {"locks": locks})
+        if kr == "differs" or kr.startswith("not one sha256"):
+            raise _refuse_with("kit_version", "kit_version names vectors_v1.json sha256 %s; the kit beside this scorer "
+                               "has %s (%s). score with the registered kit, or record another by a dated amendment "
+                               "(template section 11)" % (locks["kit"]["vectors_sha256_registered"] or "more than one",
+                                                          vec or "no vectors file", kr), {"locks": locks})
+
     # ---- the ledger, bound to ledger_url
     reg_url = v["ledger_url"] if _is_url(v["ledger_url"]) else None
+    if rehearse and (src is None or _is_url(src)):
+        raise Refused("rehearse", "a rehearsal scores a local copy and fetches nothing: give --ledger <the path of a "
+                      "local copy of the ledger>")
     if src is None:
         if reg_url is None:
             raise Refused("ledger_url", "no --ledger given and ledger_url is not an https url")
@@ -712,18 +984,23 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
     unreachable = 0
     raw: Optional[bytes]
     if _is_url(src):
-        raw, meta = _fetch_tries(src, tries, interval_s, sleep)
-        bound = "the bytes at ledger_url, fetched in this run"
+        raw, meta = fetch("ledger_url", src)
+        bound = ("the bytes at ledger_url, fetched in this run" if raw is not None else
+                 "ledger_url did not answer in this run (after %d %s): 0 bytes were scored"
+                 % (meta["tries_used"], "try" if meta["tries_used"] == 1 else "tries"))
         url_meta = meta
     else:
         raw, meta = _fetch_tries(src, 1, 0, sleep)
         if raw is None:
             raise Refused("unreadable", meta["failure"]["reason"])
-        if reg_url is None:
+        if rehearse:
+            bound = "rehearsal: a local copy, not bound to ledger_url (a rehearsal fetches nothing)"
+            url_meta = None
+        elif reg_url is None:
             bound = "not bound: ledger_url is open (an illustration)"
             url_meta = None
         else:
-            ub, url_meta = _fetch_tries(reg_url, tries, interval_s, sleep)
+            ub, url_meta = fetch("ledger_url", reg_url)
             if ub is None:
                 bound = "not bound: ledger_url did not answer; the local copy is not scored"
                 raw = None
@@ -746,10 +1023,13 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
     wh: List[dict] = []
     wsrc = withheld_src or (v["withheld_url"] if _usable(v["withheld_url"]) else None)
     if wsrc and not unreachable:
-        wb, wm = _fetch_tries(wsrc, tries, interval_s, sleep)
+        wb, wm = fetch("withheld_url" if wsrc != withheld_src else "the withheld list", wsrc)
         if wb is None:
             ledger["withheld"] = {"source": wm["source"], "failure": wm["failure"],
-                                  "read": "the withheld list did not answer; the chain is verified without it"}
+                                  "read": ("the withheld list was not fetched (a rehearsal fetches nothing: pass "
+                                           "--withheld <file>); the chain is verified without it")
+                                  if rehearse and _is_url(wsrc) else
+                                  "the withheld list did not answer; the chain is verified without it"}
         else:
             try:
                 wd = json.loads(wb.decode("utf-8"))
@@ -799,6 +1079,13 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
             header["mismatch_with_registration"].append(name)
     if proto == "v1" and hdr and v["kinds"] is not None and sorted(_words(v["kinds"])) != sorted(kinds):
         header["mismatch_with_registration"].append("kinds")
+    locks["writer"] = _lock_writer(v["writer"], entries, d0)
+    if d0 is not None and locks["writer"]["reads"] == "differs" and raw and not problems and r["header"] is not None:
+        raise _refuse_with("writer", "writer is %r; no started entry before d0 carries it (the ledger's: %s). the "
+                           "registration names the writer as the ledger carries it at registration (template, the "
+                           "placeholders; census-digests --ledger prints it)"
+                           % (v["writer"], "; ".join("seq %s %s" % (x["seq"], x["writer"]) for x in locks["writer"]["started"])
+                              or "none"), {"locks": locks, "ledger": ledger})
 
     # ---- cells
     def cell_of(e: dict) -> str:
@@ -857,9 +1144,11 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
     anchors_info: Dict[str, Any] = {"anchor_place": v["anchor_place"], "place_judged": judged,
                                     "ledger_own_anchor_lines": own_lines}
     if posted_src:
-        ab, am = _fetch_tries(posted_src, tries, interval_s, sleep)
+        ab, am = fetch("anchors_url" if posted_src != anchors_src else "the posted anchor texts", posted_src)
         if ab is None:
-            anchors_info.update({"source": "posted texts from %s: did not answer; every day reads unanchored" % am["source"],
+            anchors_info.update({"source": "posted texts from %s: %s; every day reads unanchored"
+                                           % (am["source"], "not fetched in a rehearsal (pass --anchors <file>)"
+                                              if rehearse and _is_url(posted_src) else "did not answer"),
                                  "failure": am["failure"], "texts": 0})
         else:
             posted = _anchor_texts_from(ab)
@@ -978,8 +1267,24 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
     unledgered: Optional[int] = None
     instrument: Optional[Dict[str, Any]] = None
     chain_ok = bool(raw) and not problems and r["header"] is not None
+    export_skipped = None
+    if export and _is_url(export):
+        _require_https(export, "the export")
+        if rehearse:
+            not_fetched.append({"what": "the export", "url": export})
+            export_skipped, export = "the export was not fetched in a rehearsal (pass --export <file>)", None
+    eb: Optional[bytes] = None
     if export and hfield is not None and close is not None:
-        eb, em = _fetch_once(export)
+        # through fetch(), as every source (review of 2026-11-09): the same tries and waits, and an export that does
+        # not answer is a fetch failure (census_run 0, the cli exits 2), never a refusal. bytes that arrive and are
+        # not the export's json are still refused below.
+        eb, em = fetch("the export", export)
+        if eb is None:
+            used = em["tries_used"]
+            census["export"] = {"source": em["source"], "tries_used": used, "failure": em["failure"]}
+            census["why_not_run"] = ("the export did not answer in this run, after %d %s; no message was read"
+                                     % (used, "try" if used == 1 else "tries"))
+    if eb is not None:
         try:
             ed = json.loads(eb.decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
@@ -1034,7 +1339,7 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
     elif export and hfield is None:
         census["why_not_run"] = "the registration names no sent-hash field: no message can match"
     elif export is None:
-        census["why_not_run"] = "no export committed with the result"
+        census["why_not_run"] = export_skipped or "no export committed with the result"
     census["withheld_seqs_in_window"] = w_in
     census["instrument"] = instrument
 
@@ -1070,7 +1375,7 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
             okB = all(checks.values())
             evB = "signature line found; " + ", ".join("%s %s" % (k, "ok" if x else "FAILS") for k, x in checks.items())
         opening["b"] = {"held": okB, "evidence": evB}
-        opening["c"] = _shelf(s15["shelf"], v, r, wh, tz, d0_at, tries, interval_s, sleep, proto)
+        opening["c"] = _shelf(s15["shelf"], v, r, wh, tz, d0_at, fetch, proto, rehearse)
         opening["d"] = {"held": hd_ok, "evidence": ev_d}
     started = d0_at is not None and now >= d0_at
     opening["window_started_by_now"] = started
@@ -1145,8 +1450,31 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
     else:
         status = "scored"
 
+    # ---- a rehearsal (rank 50, 2026-11-09): a local copy scored offline; the row is named "if the checks of (c) that
+    # need the shelf's report hold", never as a verdict
+    rehearsal: Optional[Dict[str, Any]] = None
+    if rehearse:
+        c_ok = bool(opening.get("c", {}).get("offline_held"))
+        opened_if = bool(started and all(opening[k]["held"] for k in "abd") and c_ok)
+        if not opened_if:
+            would, row = "nothing_counted", "NOT_RUN__window_did_not_open"
+        elif now < scoring_at:
+            would, row = "in_progress", None
+        else:
+            t2 = dict(truth)
+            t2["G_W_opened"] = True
+            would, row = "scored", walk(gates_doc, t2)
+        rehearsal = {"reads": "a rehearsal of this fill on a local copy, scored offline: never a verdict, and nothing "
+                              "in it is a census result",
+                     "not_fetched": not_fetched,
+                     "c": "the shelf report is not fetched in a rehearsal; the checks of (c) that need no fetch %s"
+                          % ("hold" if c_ok else "do not hold"),
+                     "status_if_report_holds": would, "row_if_report_holds": row}
+        status, verdict = "rehearsal", None
+
     body = {
         "status": status, "verdict": verdict,
+        "runner": runner, "locks": locks, "fetch_failures": fetch_failures,
         "registration": registration,
         "window": {"d0": v["d0"], "close": v["close"], "anchor_tz": tz,
                    "opens_at_utc": _iso(d0_at) if d0_at else None,
@@ -1165,6 +1493,8 @@ def _score(pre_bytes: bytes, src: Optional[str], now_s: str, export: Optional[st
         "result": metrics,
         "own_commitment": v["own_commitment"],
     }
+    if rehearsal is not None:
+        body["rehearsal"] = rehearsal
     body["now_utc"] = now_s
     body["sentences"] = _sentences(body, v)
     return body
@@ -1185,8 +1515,9 @@ def _on_the_shelf(url: str, prefix: Optional[str] = None) -> bool:
     return not any(seg in (".", "..") for seg in u.path.split("/"))
 
 
-def _shelf(entry, v, r, wh, tz, d0_at, tries, interval_s, sleep, proto) -> Dict[str, Any]:
-    """opening condition (c): the shelf's report of the outside ledger."""
+def _shelf(entry, v, r, wh, tz, d0_at, fetch, proto, rehearse=False) -> Dict[str, Any]:
+    """opening condition (c): the shelf's report of the outside ledger. in a rehearsal nothing is fetched: the checks
+    that need the report's bytes read "not fetched", and `offline_held` says whether the others hold."""
     if entry is None:
         stated = "no shelf read entry under section 15"
     else:
@@ -1203,13 +1534,14 @@ def _shelf(entry, v, r, wh, tz, d0_at, tries, interval_s, sleep, proto) -> Dict[
                 "%s, so it is a file the operator could have written, not the shelf's read; not fetched"
                 % SHELF_REPORT_PREFIX}
     checks: Dict[str, bool] = {}
-    rb, rm = _fetch_tries(url, tries, interval_s, sleep)
-    checks["report_answers"] = rb is not None
-    checks["report_sha256"] = rb is not None and _sha(rb) == sha
-    body = rb.decode("utf-8", "replace") if rb is not None else ""
     ea = v["earliest_anchor"] or ""
-    checks["names_ledger_url"] = bool(v["ledger_url"]) and v["ledger_url"] in body
-    checks["names_earliest_anchor_and_its_head"] = bool(ea) and ea in body
+    if not rehearse:
+        rb, rm = fetch("the shelf report", url)
+        checks["report_answers"] = rb is not None
+        checks["report_sha256"] = rb is not None and _sha(rb) == sha
+        body = rb.decode("utf-8", "replace") if rb is not None else ""
+        checks["names_ledger_url"] = bool(v["ledger_url"]) and v["ledger_url"] in body
+        checks["names_earliest_anchor_and_its_head"] = bool(ea) and ea in body
     a = parse_anchor_auto(ea, proto)
     checks["earliest_anchor_holds"] = bool(a) and check_anchor_auto(r, a, wh)["ok"] if r["entries"] else False
     t = _utc(at)
@@ -1220,6 +1552,11 @@ def _shelf(entry, v, r, wh, tz, d0_at, tries, interval_s, sleep, proto) -> Dict[
     checks["read_after_the_anchors_day_ended"] = after_ok
     checks["read_before_d0"] = bool(t and t < d0_at)
     held = all(checks.values())
+    if rehearse:
+        return {"held": False, "verified": False, "offline_held": held,
+                "evidence": stated + "; not fetched in a rehearsal: report_answers, report_sha256, names_ledger_url, "
+                "names_earliest_anchor_and_its_head; offline: " + ", ".join("%s %s" % (k, "ok" if x else "FAILS")
+                                                                            for k, x in checks.items())}
     return {"held": held, "verified": True,
             "evidence": stated + "; " + ", ".join("%s %s" % (k, "ok" if x else "FAILS") for k, x in checks.items())}
 
@@ -1228,6 +1565,12 @@ def _shelf(entry, v, r, wh, tz, d0_at, tries, interval_s, sleep, proto) -> Dict[
 
 def _s(v: Dict[str, Optional[str]], k: str) -> str:
     return v[k] if v[k] is not None else "[open]"
+
+
+# "counted by <runner>" (rank 48, 2026-11-09): the run's own statement of who ran it, never the lab by default
+_RUNNER_WORDS = {"lab": "the lab", "operator": "its operator",
+                 "other": "a runner other than the lab and the operator",
+                 "not stated": "a runner this run does not name"}
 
 
 def _sentences(b: Dict[str, Any], v: Dict[str, Optional[str]]) -> List[str]:
@@ -1244,6 +1587,26 @@ def _sentences(b: Dict[str, Any], v: Dict[str, Optional[str]]) -> List[str]:
     c = b["census"]
     inst = c.get("instrument")
     kinds_str = lambda bk: ", ".join("%s %d" % kv for kv in bk.items()) or "none"  # noqa: E731
+    if st == "rehearsal":
+        rh = b["rehearsal"]
+        nf = ", ".join("%s %s" % (x["what"], x["url"]) for x in rh["not_fetched"]) or "no url was named"
+        if rh["status_if_report_holds"] == "scored":
+            then = "this fill reaches %s at %s" % (rh["row_if_report_holds"], b.get("now_utc"))
+        elif rh["status_if_report_holds"] == "in_progress":
+            then = "the window is open at %s and nothing is scored before %s" % (b.get("now_utc"),
+                                                                                 b["window"]["scoring_date_utc"])
+        else:
+            op = b["window"]["opening_condition"]
+            failed = [k for k in "abd" if not op[k]["held"]] + ([] if op["c"].get("offline_held") else ["c"])
+            then = "the window still does not open (%s)" % ("; ".join(
+                "(%s) %s" % (k, op[k]["evidence"]) for k in failed) or "now is before 00:00 d0")
+        out.append("rehearsal, not a result: %s's ledger was read from a local copy (%d lines, head %s) and scored "
+                   "offline; nothing was fetched (%s), and condition (c) was checked without the shelf's report. if "
+                   "the checks that need that report hold, %s. no verdict is printed from a rehearsal."
+                   % (b["header"]["agent"], L_all, h, nf, then))
+        # nothing after it (review of 2026-11-09): the G-1, G-2, anchor and instrument lines below are counts of a
+        # copy bound to nothing, and a real run that counts nothing withholds them too
+        return out
     if verdict == "NOT_RUN__window_did_not_open":
         op = b["window"]["opening_condition"]
         failed = [k for k in "abcd" if not op[k]["held"]]
@@ -1292,8 +1655,9 @@ def _sentences(b: Dict[str, Any], v: Dict[str, Optional[str]]) -> List[str]:
         if n:
             s += (" of %d numerals the operator's writer counted, %d were marked bound and %d unbound, the writer's own "
                   "counts." % (n["Nn"], n["Nb"], n["Nu"]))
-        s += (" this is one operator's ledger counted by the lab under a frozen rule: custody of what was delivered, not "
-              "that any message is true, and nothing in it is signed.")
+        s += (" this is one operator's ledger counted by %s under a frozen rule: custody of what was delivered, not "
+              "that any message is true, and nothing in it is signed." % _RUNNER_WORDS.get(b.get("runner"),
+                                                                                       _RUNNER_WORDS["not stated"]))
         out.append(s)
     elif verdict == "BROKEN__chain_does_not_rederive":
         comp = b["chain_problem_components"]
@@ -1318,8 +1682,12 @@ def _sentences(b: Dict[str, Any], v: Dict[str, Optional[str]]) -> List[str]:
                    "of coverage is licensed." % (m["unanchored_deliveries"], D, len(days), ", ".join(days),
                                                   b["anchors"].get("source"), b["anchors"]["place_judged"]))
     elif verdict == "UNFALSIFIED__no_census_of_the_destinations":
-        why = ("the lines carry no hash of the delivered text" if v["sent_hash_field"] in (None, "none")
-               else "no export of %s for the window was committed" % _s(v, "public_destinations"))
+        if v["sent_hash_field"] in (None, "none"):
+            why = "the lines carry no hash of the delivered text"
+        elif (c.get("export") or {}).get("failure"):
+            why = "the export of %s for the window named for this run did not answer" % _s(v, "public_destinations")
+        else:
+            why = "no export of %s for the window was committed" % _s(v, "public_destinations")
         out.append("the ledger re-derives (%d lines, head %s) and was anchored on %d of %d days with lines, but %s; the "
                    "ledger has no evidence it is complete, and the census sentence reads unfalsified, not held."
                    % (L_all, h, d, dl, why))
@@ -1368,14 +1736,44 @@ def _dump(res: Dict[str, Any]) -> bytes:
     return (json.dumps(res, ensure_ascii=True, sort_keys=True, indent=1) + "\n").encode("ascii")
 
 
+def _md_locks(res: Dict[str, Any]) -> List[str]:
+    """the registered locks beside the running ones (rank 49): both values on one line each."""
+    lk = res.get("locks") or {}
+    sc = res.get("scorer") or {}
+    out = []
+    if "scorer" in lk:
+        out.append("lock scorer_sha256: registered %s; running census.py sha256 %s; %s"
+                   % (lk["scorer"].get("registered") or "open", sc.get("sha256"), lk["scorer"]["reads"]))
+    if "kit" in lk:
+        out.append("lock kit_version: registered %s; running styxx-ledger %s, vectors_v1.json sha256 %s; %s"
+                   % (lk["kit"].get("registered") or "open", sc.get("kit_version"), sc.get("vectors_sha256") or "unread",
+                      lk["kit"]["reads"]))
+    if "writer" in lk:
+        out.append("lock writer: registered %s; the ledger's started entries before d0: %s; %s"
+                   % (lk["writer"].get("registered") or "open", "; ".join("seq %s %s" % (x["seq"], x["writer"]) for x in
+                                                                       lk["writer"].get("started", [])) or "none",
+                      lk["writer"]["reads"]))
+    return out
+
+
 def render_md(res: Dict[str, Any]) -> str:
     L: List[str] = ["# census result", ""]
     L.append("status: %s" % res.get("status"))
     L.append("verdict: %s" % (res.get("verdict") or "none"))
     L.append("now_utc: %s" % res.get("now_utc"))
+    L.append("counted by: %s (--runner)" % res.get("runner", "not stated"))
     L.append("prereg: %s sha256 %s" % (res["prereg"]["file"], res["prereg"]["sha256"]))
     L.append("scorer: %s sha256 %s (styxx-ledger %s)" % (res["scorer"]["module"], res["scorer"]["sha256"],
                                                         res["scorer"]["kit_version"]))
+    L += _md_locks(res)
+    for f in res.get("fetch_failures") or []:
+        L.append("did not answer: %s, after %d %s: %s" % (f["what"], f["tries_used"],
+                                                        "try" if f["tries_used"] == 1 else "tries", f["failure"]["reason"]))
+    if res.get("rehearsal"):
+        rh = res["rehearsal"]
+        L.append("rehearsal: %s; not fetched: %s; if the checks of (c) that need the shelf's report hold: status %s, "
+                 "row %s" % (rh["reads"], ", ".join("%s %s" % (x["what"], x["url"]) for x in rh["not_fetched"]) or "none",
+                             rh["status_if_report_holds"], rh["row_if_report_holds"] or "none"))
     if res.get("status") == "refused":
         L += ["", "refused (%s): %s" % (res["refusal"]["code"], res["refusal"]["reason"])]
         return "\n".join(L) + "\n"

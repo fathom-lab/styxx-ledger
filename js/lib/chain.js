@@ -31,6 +31,14 @@ const KIND_RX = /^[a-z][a-z0-9_]{0,31}$/;
 const DATE_RX = /^\d{4}-\d{2}-\d{2}$/;
 const HEX64_RX = /^[0-9a-f]{64}$/;
 const ANCHOR_RX = /^([a-z0-9_-]{1,32}) anchor (\d{4}-\d{2}-\d{2}) head ([0-9a-f]{64}) seq (0|[1-9][0-9]*)\n?$/;
+/* section 1: a `certifies` made only of these 30 code points is blank and refused. the set is spelled out, never a
+   runtime's notion of whitespace: it is the union of python's str.isspace (which alone holds u+001c..u+001f and
+   u+0085) and javascript's String.prototype.trim (which alone holds u+feff), so the two writers refuse the same
+   headers and either can append to the other's log (improvements 2026-11-09 rank 43) */
+const CERTIFIES_BLANK = "\t\n\u000b\u000c\r\u001c\u001d\u001e\u001f \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005" +
+  "\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff";
+const CERTIFIES_BLANK_RX = /^[\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]*$/;
+const CERTIFIES_MAX = 500;
 
 const enc = new TextEncoder();
 // fatal: invalid UTF-8 is unparsable; ignoreBOM: a BOM stays in the text, so JSON.parse refuses it as python does
@@ -72,8 +80,8 @@ function checkHeader(header) {
   checkZone(header.anchor_tz);
   if (typeof header.agent !== "string" || !AGENT_RX.test(header.agent)) bad("agent is not 1-32 chars of [a-z0-9_-]");
   const c = header.certifies;
-  if (typeof c !== "string" || !c.trim() || c.includes("\n") || Array.from(c).length > 500) {
-    bad("certifies is not one sentence (a non-empty line of at most 500 chars)");
+  if (typeof c !== "string" || CERTIFIES_BLANK_RX.test(c) || c.includes("\n") || Array.from(c).length > CERTIFIES_MAX) {
+    bad("certifies is not one sentence (1 to 500 characters, no lf, not only whitespace: protocol section 1)");
   }
   const k = header.kinds;
   if (!Array.isArray(k) || !k.every(x => typeof x === "string" && KIND_RX.test(x))) bad("kinds is not a list of kind names ([a-z][a-z0-9_]{0,31})");
@@ -280,7 +288,7 @@ function headOf(header, entries) {
 
 module.exports = {
   LOG_SCHEMA, ENTRY_SCHEMA, V0_LOG_SCHEMA, HEADER_DOMAIN, HEADER_KEYS, REQUIRED_KINDS, RESERVED_FIELDS, ANCHOR_FIELDS,
-  AGENT_RX, KIND_RX, DATE_RX, HEX64_RX, ANCHOR_RX,
+  AGENT_RX, KIND_RX, DATE_RX, HEX64_RX, ANCHOR_RX, CERTIFIES_BLANK, CERTIFIES_BLANK_RX, CERTIFIES_MAX,
   isInt, asSeq, sha256Hex, coreOf, entryId, headerDigest, checkHeader, makeHeader, buildEntry, anchorText, parseAnchorText,
   readBytes, withheldMap, declaredKinds, checkChain, headOf, toU8
 };

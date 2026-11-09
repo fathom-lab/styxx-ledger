@@ -1,7 +1,7 @@
 {
   "name": "styxx-ledger",
-  "version": "1.0.0-alpha.2",
-  "description": "reference writer and verifier for the styxx ledger protocol v1: a hash-chained json-lines log an agent appends to and anyone can re-derive",
+  "version": "1.0.0-alpha.3",
+  "description": "reference writer and verifier for the styxx ledger protocol v1 (javascript): an agent's append-only, hash-chained json-lines event log with daily posted heads, re-derivable by anyone holding the file",
   "type": "commonjs",
   "main": "lib/index.js",
   "exports": {
@@ -19,7 +19,8 @@
   "files": [
     "lib/",
     "bin/",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "test": "node --test",
@@ -31,16 +32,24 @@
   "keywords": [
     "ledger",
     "hash-chain",
+    "append-only",
+    "tamper-evident",
+    "audit-log",
     "jsonl",
     "agent",
-    "audit-log",
+    "opentimestamps",
     "jcs"
   ],
+  "homepage": "https://github.com/fathom-lab/styxx-ledger/tree/main/js#readme",
+  "bugs": {
+    "url": "https://github.com/fathom-lab/styxx-ledger/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/fathom-lab/styxx-ledger.git",
     "directory": "js"
   },
+  "author": "Fathom Intelligence",
   "license": "MIT",
   "dependencies": {}
 }

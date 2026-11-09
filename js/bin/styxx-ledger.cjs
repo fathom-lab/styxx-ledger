@@ -69,10 +69,20 @@ function dayBefore(ts, tz) {
   return new Date(Date.parse(today + "T00:00:00Z") - 86400000).toISOString().slice(0, 10);
 }
 
+/* --kinds a,b: every comma-separated item is a kind name. An empty item (note,,send, a trailing comma, or "") is
+   refused as header_form, never dropped, as the python cli refuses it (improvements 2026-11-09 rank 67). */
+function kindsArg(s) {
+  const items = String(s).split(",").map(x => x.trim());
+  if (items.some(x => !x)) throw new L.LedgerValueError("header_form", "--kinds holds an empty item (" + JSON.stringify(String(s)) + "); give comma-separated kind names, e.g. note,send");
+  return items;
+}
+
 function cmdInit(log, o) {
-  if (!o.agent || !o.certifies || !o.tz) throw usage("init needs --agent, --tz and --certifies");
+  // a flag given empty (--certifies "") reaches the header check and is refused there (exit 1), as in python;
+  // only a flag not given at all is usage (exit 2)
+  if (o.agent === undefined || o.certifies === undefined || o.tz === undefined) throw usage("init needs --agent, --tz and --certifies");
   const kinds = new Set(["anchor", "started"]);
-  for (const k of String(o.kinds || "note").split(",").map(s => s.trim()).filter(Boolean)) kinds.add(k);
+  for (const k of kindsArg(o.kinds === undefined ? "note" : o.kinds)) kinds.add(k);
   const led = L.Ledger.init(log, { agent: o.agent, certifies: o.certifies, anchorTz: o.tz, kinds: [...kinds], created: o.created });
   if (!o["no-start"] && !o["no-started"]) led.start({}, o.timestamp ? { timestamp: o.timestamp } : undefined);
   const h = led.head();
@@ -81,7 +91,7 @@ function cmdInit(log, o) {
 }
 
 function cmdAppend(log, o) {
-  if (!o.kind) throw usage("append needs --kind");
+  if (o.kind === undefined) throw usage("append needs --kind");   // --kind "" is refused by the writer (kind_not_declared), as in python
   let fields = {};
   if (o.fields !== undefined) { try { fields = JSON.parse(o.fields); } catch (e) { throw usage("--fields is not json: " + e.message); } }
   else if (o["fields-file"]) fields = readJson(o["fields-file"], "--fields-file");

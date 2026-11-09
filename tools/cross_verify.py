@@ -45,7 +45,8 @@ def check(name, ok, detail=""):
 def replay(src: Path, out: Path, which: str) -> bool:
     lines = src.read_bytes().decode("utf-8").split("\n")
     hdr = json.loads(lines[0])
-    kinds = ",".join(k for k in hdr["kinds"] if k not in ("anchor", "started"))
+    # both clis refuse an empty --kinds item since 2026-11-09; a header of anchor and started alone passes "started"
+    kinds = ",".join(k for k in hdr["kinds"] if k not in ("anchor", "started")) or "started"
     calls = [["init", str(out), "--agent", hdr["agent"], "--tz", hdr["anchor_tz"], "--certifies", hdr["certifies"],
               "--kinds", kinds, "--created", hdr["created"], "--no-started"]]
     for ln in lines[1:]:

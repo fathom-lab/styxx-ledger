@@ -8,6 +8,12 @@ verify reads the header's schema: a v1 log is read as v1, a v0 log (darkflobi.ga
 
 exhibit <url> re-derives a published exhibit over the network (exhibit.py): exit 0 every check passed, 1 any
 failed, 2 usage, or a file / an explorer did not answer.
+
+census (census.py; python only, the javascript cli has none): exit 0 scored, nothing counted, in progress or a
+rehearsal; 1 refused (RESULT.json says why and still names any source that did not answer; a --ledger copy that
+cannot be read is refused); 2 usage, or a source it was to read did not answer: a url, or an --export, --anchors or
+--withheld file (each named on the summary line, with RESULT.json still written). each failed try and each wait is
+announced on stderr.
 """
 from __future__ import annotations
 
@@ -68,6 +74,19 @@ def _load_withheld(p: Optional[str]) -> List[dict]:
     return doc
 
 
+def _load_withheld_bytes(b: bytes) -> List[dict]:
+    try:
+        text = b.decode("utf-8")
+    except UnicodeDecodeError:
+        raise _Usage("the withheld file is not utf-8") from None
+    doc = _load_json(text, "the withheld file")
+    if isinstance(doc, dict):
+        doc = doc.get("withheld", [])
+    if not isinstance(doc, list):
+        raise _Usage("the withheld file is a list of {seq, entry_id, reason} (or {\"withheld\": [...]})")
+    return doc
+
+
 def _codes(p: dict) -> str:
     return ",".join(p.get("codes") or [p.get("code") or "?"])
 
@@ -78,8 +97,18 @@ def _say(s: str = "") -> None:
 
 # ------------------------------------------------------------------------------------------------ commands
 
+def _kinds_arg(s: str) -> List[str]:
+    """--kinds a,b: every comma-separated item is a kind name. an empty item (note,,send, a trailing comma, or "") is
+    refused as header_form, never dropped, as the javascript cli refuses it (improvements 2026-11-09 rank 67)."""
+    items = [k.strip() for k in s.split(",")]
+    if any(not k for k in items):
+        raise LedgerValueError("header_form", "--kinds holds an empty item (%s); give comma-separated kind names, "
+                                              "e.g. note,send" % json.dumps(s, ensure_ascii=False))
+    return items
+
+
 def cmd_init(a) -> int:
-    kinds = [k.strip() for k in a.kinds.split(",") if k.strip()] if a.kinds else []
+    kinds = _kinds_arg(a.kinds)
     led = Ledger.create(a.log, agent=a.agent, anchor_tz=a.tz, certifies=a.certifies, kinds=kinds, created=a.created)
     hdr = led.header
     if a.no_started:
@@ -104,6 +133,11 @@ def cmd_append(a) -> int:
         fields = {}
     if not isinstance(fields, dict):
         raise _Usage("fields are a json object")
+    for kv in a.field or []:   # as the javascript cli: a string value, set after --fields / --fields-file (rank 32)
+        i = kv.find("=")
+        if i <= 0:
+            raise _Usage("--field wants k=v, got %s" % json.dumps(kv, ensure_ascii=False))
+        fields[kv[:i]] = kv[i + 1:]
     e = Ledger(a.log).append(a.kind, fields, timestamp=a.timestamp)
     if a.json:
         print(json.dumps({"seq": e["seq"], "entry_id": e["entry_id"], "day": e["day"]}))
@@ -237,6 +271,8 @@ def cmd_exhibit(a) -> int:
 
 
 def cmd_census(a) -> int:
+    """exit 0 scored / nothing counted / in progress / a rehearsal; 1 refused (a source that did not answer is still
+    named); 2 usage, or a source did not answer (each named on the summary line; RESULT.json is still written)."""
     from .census import score
     from .day import now_utc
     if a.anchor_place_holds and a.anchor_place_fails:
@@ -244,22 +280,73 @@ def cmd_census(a) -> int:
         return 2
     place = "holds" if a.anchor_place_holds else ("fails: " + a.anchor_place_fails if a.anchor_place_fails else None)
     res = score(a.prereg, a.ledger, a.out, a.now or now_utc(), export=a.export, anchors=a.anchors,
-                withheld=a.withheld, js=not a.no_js, anchor_place=place, tries=a.tries, interval_s=a.interval)
-    _say("%s: verdict %s; wrote %s" % (res["status"], res.get("verdict") or "none", Path(a.out) / "RESULT.json"))
-    return 1 if res["status"] == "refused" else 0
+                withheld=a.withheld, js=not a.no_js, anchor_place=place, tries=a.tries, interval_s=a.interval,
+                runner=a.runner, rehearse=a.rehearse,
+                say=lambda s: print(s, file=sys.stderr, flush=True))
+    out = Path(a.out) / "RESULT.json"
+    fails = res.get("fetch_failures") or []
+    said = ["did not answer: " + "; ".join("%s after %d %s: %s" % (f["what"], f["tries_used"],
+                                                                   "try" if f["tries_used"] == 1 else "tries",
+                                                                   f["failure"]["reason"]) for f in fails)] if fails else []
+    if res["status"] == "refused":   # exit 1 even when a source also did not answer; the summary names both
+        _say("; ".join(["refused (%s): %s" % (res["refusal"]["code"], res["refusal"]["reason"])] + said
+                       + ["wrote %s" % out]))
+        return 1
+    if res["status"] == "rehearsal":
+        rh = res["rehearsal"]
+        _say("; ".join(["rehearsal: no verdict; if the checks of (c) that need the shelf's report hold: status %s, row %s"
+                        % (rh["status_if_report_holds"], rh["row_if_report_holds"] or "none")] + said + ["wrote %s" % out]))
+        return 2 if fails else 0
+    _say("; ".join(["%s: verdict %s" % (res["status"], res.get("verdict") or "none")] + said + ["wrote %s" % out]))
+    return 2 if fails else 0
 
 
 def cmd_census_digests(a) -> int:
-    from .census import digests
-    try:
-        d = digests(a.prereg)
-    except (OSError, UnicodeDecodeError) as e:
-        _say("census-digests: cannot read %s: %s" % (a.prereg, type(e).__name__))
-        return 2
-    _say(json.dumps(d, indent=1, sort_keys=True))
-    g = d.get("gates")
-    bad = g is None or "error" in g or g["unreached"] or g["vacuous_gates"] or g["without_power_basis"]
-    return 1 if bad else 0
+    """the digests of a filled prereg (--prereg), the values a fill copies from a ledger (--ledger, a path or an https
+    url) and from this kit. exit 0 all read and sound; 1 a gates block that does not walk, or a ledger that does not
+    re-derive; 2 a file that cannot be read."""
+    from .census import Refused, _fetch_tries, _require_https, digests, fill_values, kit_values
+    if a.prereg is None and a.ledger is None:
+        raise _Usage("census-digests wants --prereg <filled file>, --ledger <path or https url>, or both")
+    out = {"from_this_kit": kit_values()}
+    rc = 0
+    if a.prereg is not None:
+        try:
+            d = digests(a.prereg)
+        except (OSError, UnicodeDecodeError) as e:
+            _say("census-digests: cannot read %s: %s" % (a.prereg, type(e).__name__))
+            return 2
+        out.update(d)
+        g = d.get("gates")
+        if g is None or "error" in g or g["unreached"] or g["vacuous_gates"] or g["without_power_basis"]:
+            rc = 1
+    if a.ledger is not None:
+        try:
+            _require_https(a.ledger, "--ledger")
+        except Refused as e:
+            raise _Usage(e.reason) from None
+        raw, meta = _fetch_tries(a.ledger, 1, 0, lambda s: None)
+        if raw is None:
+            _say("census-digests: %s" % (meta.get("failure") or {}).get("reason"))
+            return 2
+        wh: List[dict] = []
+        if a.withheld is not None:
+            try:
+                _require_https(a.withheld, "--withheld")
+            except Refused as e:
+                raise _Usage(e.reason) from None
+            wb, wm = _fetch_tries(a.withheld, 1, 0, lambda s: None)
+            if wb is None:
+                _say("census-digests: %s" % (wm.get("failure") or {}).get("reason"))
+                return 2
+            wh = _load_withheld_bytes(wb)
+        fv = fill_values(raw, withheld=wh)
+        fv["source"] = meta["source"]
+        out["from_the_ledger"] = fv
+        if not fv["rederives"]:
+            rc = max(rc, 1)
+    _say(json.dumps(out, indent=1, sort_keys=True, ensure_ascii=False))
+    return rc
 
 
 # -------------------------------------------------------------------------------------------------- parser
@@ -285,6 +372,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--kind", required=True)
     p.add_argument("--fields", help="a json object (integers only, no floats; ascii keys), or - for stdin")
     p.add_argument("--fields-file", help="a file holding the json object, or - for stdin")
+    p.add_argument("--field", action="append", metavar="K=V", help="one string field, k=v (repeatable; set after "
+                   "--fields or --fields-file, as the javascript cli does); needs no json on the command line, so it "
+                   "reads the same in bash and in windows powershell")
     p.add_argument("--timestamp", help="utc YYYY-MM-DDTHH:MM:SSZ (default: now)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_append)
@@ -328,25 +418,36 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("census", help="score a filled PREREG_census against a published ledger; writes RESULT.json / RESULT.md")
     p.add_argument("--prereg", required=True, help="the filled PREREG_census markdown file")
     p.add_argument("--ledger", help="the ledger: default the prereg's ledger_url; a url must be ledger_url, and a local "
-                   "copy must hash to the bytes at ledger_url fetched in the same run")
+                   "copy must hash to the bytes at ledger_url fetched in the same run (with --rehearse: a local copy, "
+                   "scored without any fetch)")
     p.add_argument("--out", required=True, help="the directory RESULT.json and RESULT.md are written to")
     p.add_argument("--now", help="utc YYYY-MM-DDTHH:MM:SSZ the census is scored at (default: now)")
-    p.add_argument("--export", help="the census export (json {destinations, made_at, messages}), a path or url")
+    p.add_argument("--export", help="the census export (json {destinations, made_at, messages}), a path or an https url")
     p.add_argument("--anchors", help="posted anchor texts (an index json or one text per line), overriding anchors_url")
     p.add_argument("--withheld", help="withheld.json, overriding withheld_url")
     p.add_argument("--no-js", action="store_true", help="skip the javascript reference implementation's re-derivation "
                    "(G_C then reads unmeasured)")
-    p.add_argument("--tries", type=int, default=3, help="fetch tries for each url (default 3, the template's rule)")
+    p.add_argument("--tries", type=int, default=3, help="fetch tries for each url (default 3, the template's rule); each "
+                   "failed try and each wait is announced on stderr")
     p.add_argument("--interval", type=float, default=3600, help="seconds between tries (default 3600)")
     p.add_argument("--anchor-place-holds", action="store_true", help="the lab's judgement: the anchor place is one where "
                    "the operator cannot edit or delete a post")
     p.add_argument("--anchor-place-fails", metavar="WHY", help="the lab's judgement that the place fails, and why; "
                    "every day prints unanchored")
+    p.add_argument("--runner", choices=("lab", "operator", "other"), help="who runs this census, written into RESULT.json "
+                   "and into the held sentence's 'counted by' (default: not stated)")
+    p.add_argument("--rehearse", action="store_true", help="score a local copy (--ledger <path>) offline: nothing is "
+                   "fetched, (c) is read without the shelf's report, and no verdict is printed, only the row the fill "
+                   "reaches if the checks of (c) that need the shelf's report hold")
     p.set_defaults(fn=cmd_census)
 
     p = sub.add_parser("census-digests", help="print a prereg's registration digest (bytes before '## 15.') and gates "
-                       "digest, and walk the gates block's assignments")
-    p.add_argument("--prereg", required=True)
+                       "digest, and walk the gates block's assignments; with --ledger, the values a fill copies from "
+                       "the ledger (header_digest, writer, earliest_anchor, kinds, certifies); always, the ones it "
+                       "copies from this kit (scorer_sha256, kit_version)")
+    p.add_argument("--prereg", help="the filled PREREG_census markdown file")
+    p.add_argument("--ledger", help="the ledger: a local path or an https url")
+    p.add_argument("--withheld", help="with --ledger: the publisher's withheld.json, a local path or an https url")
     p.set_defaults(fn=cmd_census_digests)
     return ap
 
@@ -359,6 +460,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             pass
     a = build_parser().parse_args(argv)
     try:
+        if getattr(a, "log", None) == "":   # as the javascript cli: an empty <log> is usage (exit 2), not a path
+            raise _Usage("%s needs <log>, a file path (got an empty string)" % a.cmd)
         return a.fn(a)
     except _Usage as e:
         print("styxx-ledger: %s" % e, file=sys.stderr)
@@ -371,8 +474,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         for p in e.problems[:10]:
             print("  line %s seq %s %s" % (p.get("line"), p.get("seq"), _codes(p)), file=sys.stderr)
         return 1
-    except LedgerError as e:
-        print("styxx-ledger: %s" % e, file=sys.stderr)
+    except LedgerError as e:   # an anchor refusal names its code as the javascript cli does (day_open, ...)
+        code = getattr(e, "code", None)
+        print("styxx-ledger: %s%s" % ("refused (%s): " % code if code else "", e), file=sys.stderr)
         return 1
     except ZoneDatabaseMissing as e:
         print("styxx-ledger: %s; nothing was verified (exit 2)" % e, file=sys.stderr)

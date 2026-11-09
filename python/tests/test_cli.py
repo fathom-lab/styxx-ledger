@@ -121,3 +121,25 @@ def test_bad_anchor_text_fails(cli, tmp_path):
 def test_version(cli):
     cp = cli("--version")
     assert cp.returncode == 0 and S.__version__ in cp.stdout
+
+
+def test_field_k_v_as_in_javascript(cli, tmp_path):
+    """--field k=v (improvements 2026-11-09 rank 32): a string value, split at the '=' nearest its start, set after --fields, so
+    a quickstart needs no json on the command line (windows powershell 5.1 strips the quotes inside one)."""
+    log = tmp_path / "field.jsonl"
+    assert init(cli, log).returncode == 0
+    cp = cli("append", log, "--kind", "note", "--field", "tool=search", "--field", "q=a=b c", "--field", "empty=",
+             "--timestamp", "2026-11-01T03:00:00Z", "--json")
+    assert cp.returncode == 0, cp.stderr
+    last = json.loads(log.read_text(encoding="utf-8").splitlines()[-1])
+    assert (last["tool"], last["q"], last["empty"]) == ("search", "a=b c", "")
+    cp = cli("append", log, "--kind", "note", "--fields", '{"n":1,"tool":"x"}', "--field", "tool=y",
+             "--timestamp", "2026-11-01T03:00:01Z")
+    assert cp.returncode == 0, cp.stderr
+    last = json.loads(log.read_text(encoding="utf-8").splitlines()[-1])
+    assert (last["n"], last["tool"]) == (1, "y")
+    for bad in ("=v", "kv"):
+        cp = cli("append", log, "--kind", "note", "--field", bad)
+        assert cp.returncode == 2 and "--field wants k=v" in cp.stderr, cp.stderr
+    cp = cli("append", log, "--kind", "note", "--field", "seq=1")
+    assert cp.returncode == 1 and "reserved_field" in cp.stderr

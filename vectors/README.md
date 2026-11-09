@@ -1,9 +1,9 @@
 # vectors — protocol v1 conformance
 
     base_v1.jsonl      a fixed 60-line ledger (header + 59 entries), agent kitbot, kinds anchor/note/started
-    vectors_v1.json    32 read-side cases + 86 write-side cases = 118 vectors
+    vectors_v1.json    32 read-side cases + 113 write-side cases = 145 vectors
     make_vectors.py    writes both files once, every expect computed by the python package
-    mutate_core.py     mutation calibration: 57 one-line mutants of the python core against the runner
+    mutate_core.py     mutation calibration: 67 one-line mutants of the python core against the runner
     run_vectors.py     answers the vectors with python/src/styxx_ledger
     run_vectors.mjs    answers the vectors with js/lib/verify.js
     v0/                the exhibit's protocol v0 set: base.jsonl + vectors.json (10 cases), byte for byte
@@ -24,7 +24,10 @@ has no zone database). a checkout that turned lf into crlf changes the base's sh
 `make_vectors.py` refuses to overwrite either file with other bytes unless `--force` is given: a receipt is history,
 and every forced regeneration so far is recorded in the lab's build log, which this repository does not carry.
 `--check` recomputes and compares only. `base_v1.jsonl` has kept one sha256 (`09fcf1d7...a8e4`) through every
-regeneration; only `vectors_v1.json` has grown.
+regeneration; only `vectors_v1.json` has grown. the latest forced regeneration, 2026-11-09 (the lab's improvement
+sweep, ranks 42, 43 and 68), appended 27 write-side cases after the 86 before them, which kept their bytes and
+places, and widened the file's note to the two new functions: 118 vectors became 145, and the file's sha256 went
+from `9d0229e5...8281` (the one a census registration made before then names in its kit_version) to `8aceba1d...1949`.
 
 ## what the cases are
 
@@ -38,12 +41,32 @@ with a trailing lf and one with fullwidth digits (each re-chained, so only `day`
 verifier is silent on it: a writer-side refusal), a seq written `5.0`, and non-ascii keys in code-point order (the
 last two compare `ok` only, see PROTOCOL section 4).
 
-write side (86): `jcs` 20 (13 dumps, the depth-32 bound among them; 7 refusals), `day_of` 32 (17 days, among them
+write side (113): `jcs` 21 (14 dumps, the depth-32 bound among them; 7 refusals), `day_of` 32 (17 days, among them
 the 1000 and 9998 year edges; 15 refusals: offset, fraction, 30 february, hour 24, second 60, unknown zone, a
 trailing lf, fullwidth digits, years 0001 / 9999 / 0999, zones `utc`, `UTC `, `Factory`, `america/new_york`),
 `late_of` 10 (section 5's rule at its 00:10:00 edge in new york on both sides of the dst end, in utc and berlin, and
-one refusal), `anchor_text` 8 (2 texts, 6 refusals), `header_digest` 2, `entry_id` 2, `build_entry` 12 (5 lines,
-7 refusals, among them an anchor whose `late` contradicts the rule and a field 33 containers deep).
+one refusal), `anchor_text` 8 (2 texts, 6 refusals), `header_digest` 2, `entry_id` 3, `build_entry` 12 (5 lines,
+7 refusals, among them an anchor whose `late` contradicts the rule and a field 33 containers deep), and, from the
+improvement sweep of 2026-11-09, `check_header` 15 and `compose_anchor` 10.
+
+the 27 added on 2026-11-09, appended after the others, each pinning a rule PROTOCOL_v1.md now states:
+
+- section 2, strings never normalised (rank 68): one dump of strings in nfc, in nfd, a compatibility ligature, a
+  fullwidth letter, conjoining jamo and the angstrom sign, each kept as given; and `entry-id-minimal`'s core with its
+  string in nfd, whose entry_id differs.
+- section 1, the certifies rule (rank 43), `check_header` (the header's digest when a writer may write it, else the
+  refusal's code): u+feff alone, which python's `str.strip` kept and javascript's `trim` dropped; u+001c, u+001f and
+  u+0085 alone, the reverse; the 30 blanks but lf together; empty, a space, an lf, 501 characters (all
+  `header_form`); and accepted: the base header, u+200b and u+180e (outside the 30), a sentence with blanks around
+  it, 500 characters, and 500 astral characters (code points, not utf-16 units).
+- section 5, the anchor composition (rank 42), `compose_anchor` over the base's header and entries: the text at
+  00:00:00 local, a day skipped and composed weeks later; `day_open` at 23:59:59 local, on the same day, at the dst
+  end (23:30 est on 2026-11-01, which a fixed edt offset calls the 2nd), and for a later day; `already_anchored`;
+  `day_open` named before `already_anchored` when both hold; `nothing_to_anchor`; `anchor_form` for `2027-1-2`.
+
+the javascript package before these additions answers 131 of the 145 and the python package 133 (2026-11-09, this
+change's runners against the packages' code at commit 26cce4d): the new compose cases miss in both (neither package
+exported the function), and the certifies cases miss where each runtime's own notion of blank differed.
 
 ## what the javascript module must export
 
@@ -64,6 +87,8 @@ return a value or a promise.
 | `entryId` | `(coreOrEntry)` | 64 hex: sha256(jcs(core)); the runner passes an object without `entry_id` |
 | `anchorText` | `(agent, date, head, seq)` | the text; throws `anchor_form` |
 | `buildEntry` | `(header, seq, prev, kind, timestamp, fields)` | the entry object with `day` and `entry_id`; the runner compares `dump(entry)` to the expected line |
+| `checkHeader` | `(header)` | nothing, for a header a writer may write; throws `header_form` / `timestamp` / `anchor_tz`; the runner then compares `headerDigest(header)` |
+| `composeAnchor` | `(header, entries, date, now)` | `{agent, date, head, seq, text}`; throws `anchor_form`, `day_open`, `already_anchored`, `nothing_to_anchor` (section 5, in that order); the runner passes the base's header and entries and compares `text` |
 
 transform ops both runners implement: `identity`, `crlf_first_line`, `truncate_last`, `set_field`,
 `set_field_rechain`, `set_header`, `set_header_rechain`, `drop_seq`, `dup_key`, `replace_in_line` (bytes of one
@@ -72,8 +97,9 @@ seq's line, first occurrence), `append_nested` (a line `{"deep":[[...1...]]}` of
 
 refusals are thrown errors whose `.code` is exactly one of:
 `float`, `int_range`, `non_ascii_key`, `lone_surrogate`, `depth`, `type`, `reserved_field`, `kind_not_declared`,
-`started_writer`, `anchor_form`, `timestamp`, `anchor_tz` (and `header_form` for a header check, not vectored).
-an error without `.code` counts as a miss.
+`started_writer`, `anchor_form`, `timestamp`, `anchor_tz`, `header_form` (vectored since 2026-11-09, for the
+certifies rule), and for `composeAnchor` `day_open`, `already_anchored`, `nothing_to_anchor`. an error without
+`.code` counts as a miss.
 
 problem codes the read side compares (sorted set): `cr_byte`, `unparsable`, `not_object`, `not_canonical`,
 `no_header`, `header_kinds`, `core_not_canonical`, `schema`, `kind_not_declared`, `entry_id`, `prev`, `seq`, `day`
@@ -93,8 +119,14 @@ change at a time, and the runner re-run against each mutant (`python -B vectors/
                                 and made inclusive, late not enforced at build, depth bound off and off by one,
                                 the reader's depth scan off, integral-float withheld ignored, no_header only with
                                 entries, the agent regex with `$`, the anchor seq bound off)
+    this file (145 vectors):    67 of 67 mutants killed (2026-11-09 improvement sweep): the 57 above, all still
+                                applied, and 10 added for the 27 new cases (certifies blank as python's own
+                                strip, blank only when empty, the 500 bound exclusive; compose with the day of
+                                now counted as closed, an open day composed, an anchored day composed, the day's
+                                earliest line taken as its head, today read in utc, the date form unchecked; strings
+                                normalised to nfc), each killed by the cases written for it
 
-a mutant whose source line has since changed is printed as "not applied", not counted. 57 mutants are the ones
+a mutant whose source line has since changed is printed as "not applied", not counted. 67 mutants are the ones
 written, not every possible defect: a mutant nobody wrote is not measured, and the javascript package gets no
 mutation run here.
 
@@ -166,10 +198,10 @@ and the review-3e regressions built on the same copy (a phantom withheld seq aft
 naming a published line, an index without block or block_time, a pending anchor before and after 7 days, a redirect
 to another host, a block no explorer knows, a 2^60 height, a rate-limited explorer).
 
-## counts as read on this box (windows 11, 2026-11-08)
+## counts as read on this box (windows 11, 2026-11-08 and 09)
 
-    python/src/styxx_ledger, python 3.12.10, win32 (tzdata 2025.3 installed)   118 of 118
-    js/lib/verify.js, node 24.13.0, win32                                      118 of 118
+    python/src/styxx_ledger, python 3.12.10, win32 (tzdata 2025.3 installed)   145 of 145 (2026-11-09; 118 of 118 before)
+    js/lib/verify.js, node 24.13.0, win32                                      145 of 145 (2026-11-09; 118 of 118 before)
     python/src/styxx_ledger/v0.py, v0 set                                       10 of 10
     js/lib/v0.js, v0 set                                                        10 of 10
     python/src/styxx_ledger, python 3.14.2, win32 (no tzdata installed)         exit 2 (2026-11-09; 58 of 118 before)
@@ -180,4 +212,5 @@ now says "this python has no zone database: pip install tzdata" and ends exit 2 
 
 ci has not run (the workflow is written, not pushed: 0 runs as of 2026-11-09), so python 3.10 / 3.13 and
 node 20 / 22 carry no number here. one ubuntu leg was read by hand on this box under WSL on 2026-11-09 (ubuntu,
-python 3.12.3, no node), python package only: vectors 118 of 118 answered as the file says.
+python 3.12.3, no node), python package only: vectors 118 of 118 answered as the file says (the file before the
+sweep's 27 additions), and after them, the same day on the same leg (ubuntu 24.04.4): 145 of 145.

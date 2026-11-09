@@ -17,8 +17,9 @@ null, "HELD__...") or a bare word compared with the string at that path. three c
 3. when the value is a number, the sentence the marker sits in (from the previous . ! ? or line start, up to the
    marker) says that number as a standalone numeral, so the prose cannot drift from its marker.
 
-and two per file: RESULT.json's status is not "refused", and at least --require markers (default 1) exist, so a
-readme with no marker does not pass by saying nothing. exit 0 every check passed; 1 any failed; 2 usage or i/o.
+and two per file: RESULT.json's status is not "refused" nor "rehearsal" (a census --rehearse run is a local copy
+scored offline, never a verdict, so a readme never quotes one), and at least --require markers (default 1) exist,
+so a readme with no marker does not pass by saying nothing. exit 0 every check passed; 1 any failed; 2 usage or i/o.
 nothing is written. standard library only.
 """
 from __future__ import annotations
@@ -73,6 +74,9 @@ def check(result: dict, readme: str, require: int = 1) -> Tuple[List[str], int]:
     if result.get("status") == "refused":
         r = result.get("refusal") or {}
         fails.append("RESULT.json says refused (%s): %s" % (r.get("code"), r.get("reason")))
+    if result.get("status") == "rehearsal":
+        fails.append("RESULT.json is a rehearsal (census --rehearse: a local copy scored offline, never a verdict); "
+                     "a readme quotes a run that read ledger_url")
     seen = 0
     for n, line in enumerate(readme.splitlines(), start=1):
         for m in MARKER_RX.finditer(line):

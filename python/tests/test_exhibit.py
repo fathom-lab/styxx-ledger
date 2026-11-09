@@ -420,3 +420,92 @@ def test_m3_retry_after_is_capped_at_60(exhibit):
 def test_today_usage(capsys):
     assert cli.main(["exhibit", "https://example.org/ledger/", "--today", "11/09/2026"]) == 2
     capsys.readouterr()
+
+
+# ------------------------------------------------- the lab's improvement sweep of 2026-11-09: ranks 44 and 45
+
+import http.client  # noqa: E402
+import ssl  # noqa: E402
+import urllib.error  # noqa: E402
+
+from styxx_ledger import exhibit as E  # noqa: E402
+
+
+def test_n_an_explorer_that_does_not_answer_says_why_once(exhibit):
+    """rank 44: the reason is one line, before the lines it explains; no anchor line reads FAIL for a proof that was
+    not checked; the 22 witness lines and the 36 'not made' lines that repeated it are one line each (the report on
+    this copy went from 95 lines to 41 with both explorers down)."""
+    dead = "http://127.0.0.1:%d/api" % _dead_port()
+    rep = run_exhibit(exhibit.url, explorers=[exhibit.explorers[0], dead], sleep=lambda s: None, today="2026-11-09")
+    lines = render_text(rep).splitlines()
+    assert rep["exit_code"] == 2
+    assert rep["counts"] == {"pass": 30, "fail": 0, "pending": 0, "unchecked": 36, "total": 66}
+    assert rep["explorers_unanswered"] == {dead: "the connection was refused"}
+    assert lines[2] == ("explorer %s did not answer: the connection was refused; check the network, or pass "
+                        "--explorer <url> to ask another esplora api" % dead)
+    assert sum(1 for ln in lines if "did not answer" in ln) == 1
+    anchor_lines = [ln for ln in lines if ln.startswith("  2026-")]
+    assert len(anchor_lines) == 14 and all(" ---- chain: holds; proof unchecked: " + E.EXPLORERS_SILENT in ln
+                                           for ln in anchor_lines)
+    assert "; 14 of 14 not checked" in lines[[i for i, ln in enumerate(lines) if ln.startswith("anchor proofs:")][0]]
+    assert sum(1 for ln in lines if ln.startswith("  seq ") or " sampled, seq " in ln) == 1
+    assert ("  22 of 22 sampled, seq 1,21,32,47,122,137,149,346,361,386,419,446,543,564,601,608,612,614,622,632,701,"
+            "734: unchecked: " + E.EXPLORERS_SILENT) in lines
+    assert [ln for ln in lines if ln.startswith("  not made")] == [
+        "  not made: 36 checks, anchor 2026-10-24 proof verifies to witness seq 734 proof commits and verifies: "
+        + E.EXPLORERS_SILENT]
+    assert len(lines) == 40
+
+
+def test_n2_one_failure_reason_per_check_still(exhibit):
+    """failures are never collapsed: each FAILED check keeps its own line; only checks not made share one."""
+    for d in ("2026-10-28", "2026-10-29"):
+        p = exhibit.dir / "anchors" / ("%s.txt" % d)
+        p.write_bytes(p.read_bytes() + b" ")
+    rep = run_exhibit(exhibit.url, explorers=exhibit.explorers, sleep=lambda s: None, today="2026-11-09")
+    failed = [ln for ln in render_text(rep).splitlines() if ln.startswith("  FAILED: ")]
+    assert rep["exit_code"] == 1 and len(failed) == rep["counts"]["fail"] >= 4
+
+
+def test_o_a_mistyped_url_is_exit_2_with_the_url_and_what_to_check(exhibit, capsys):
+    """rank 45: a 404 on ledger.jsonl is not evidence against the publisher: exit 2 (it was 1, a failed check's
+    exit), the url that was fetched, and what to check; nothing else is counted or listed."""
+    url = exhibit.base + "/ledgr/"
+    rc = cli.main(["exhibit", url, "--explorer", exhibit.explorers[0], "--explorer", exhibit.explorers[1]])
+    out = capsys.readouterr().out
+    detail = ("%sledger.jsonl answered HTTP 404: there is no ledger.jsonl at that url; check that the url names the "
+              "exhibit's folder, the one that holds ledger.jsonl (e.g. https://fathom-lab.github.io/styxx/ledger/)" % url)
+    assert rc == 2
+    assert "\nledger.jsonl: %s\nnothing was verified: every other check needs the ledger\n" % detail in out
+    assert "result: 0 of 1 checks passed; 0 failed; 1 could not be made (exit 2)" in out
+    assert "  not made: ledger.jsonl fetched: " + detail in out
+    for gone in ("FAILED", "anchors: none read", "explorers:", "0 of 0 blocks"):
+        assert gone not in out, gone
+
+
+def test_o2_an_exhibit_that_does_not_answer_names_the_url_and_the_reason():
+    dead = "http://127.0.0.1:%d/ledger/" % _dead_port()
+    rep = run_exhibit(dead, sleep=lambda s: None)
+    assert rep["exit_code"] == 2 and rep["counts"]["fail"] == 0
+    assert rep["checks"][0]["detail"] == ("%sledger.jsonl did not answer: the connection was refused; check the url "
+                                          "and this machine's network" % dead)
+
+
+@pytest.mark.parametrize("exc,words", [
+    (urllib.error.URLError(socket.gaierror(11001, "getaddrinfo failed")), E.NET_DNS),           # windows
+    (urllib.error.URLError(socket.gaierror(-2, "Name or service not known")), E.NET_DNS),       # linux
+    (urllib.error.URLError(socket.gaierror(-3, "Temporary failure in name resolution")), E.NET_DNS),
+    (urllib.error.URLError(ConnectionRefusedError(10061, "actively refused")), E.NET_REFUSED),
+    (ConnectionResetError(104, "Connection reset by peer"), E.NET_RESET),
+    (http.client.RemoteDisconnected("Remote end closed connection without response"), E.NET_RESET),
+    (urllib.error.URLError(socket.timeout("timed out")), "no answer within 30 s"),
+    (TimeoutError("The read operation timed out"), "no answer within 30 s"),
+    (urllib.error.URLError(ssl.SSLCertVerificationError(1, "certificate verify failed")), E.NET_TLS),
+    (urllib.error.URLError("unknown url type: xyz"), "no answer (URLError: unknown url type: xyz)"),
+], ids=["dns-windows", "dns-linux", "dns-again", "refused", "reset", "remote-disconnected", "timeout", "read-timeout",
+        "tls", "other"])
+def test_o3_network_errors_read_in_the_shared_words(exc, words):
+    """rank 45: one wording for both packages; js/tests/exhibit.test.js holds node's error codes to the same words
+    (python said 'URLError: [Errno 11001] getaddrinfo failed' where javascript said 'TypeError: ENOTFOUND')."""
+    assert E.network_reason(exc) == words
+    assert E.NET_DNS == "the host name did not resolve (dns)" and E.NET_REFUSED == "the connection was refused"

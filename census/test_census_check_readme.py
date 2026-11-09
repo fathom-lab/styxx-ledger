@@ -54,6 +54,13 @@ def test_refused_fails_and_no_marker_fails():
     assert seen == 0 and len(fails) == 2
 
 
+def test_rehearsal_fails():
+    """a census --rehearse RESULT is never a verdict, so no readme may quote it (improvements 2026-11-09 rank 50)."""
+    reh = dict(RESULT, status="rehearsal", verdict=None)
+    fails, seen = check(reh, "the census counted 4 deliveries (census: result.n_deliveries = 4).\n")
+    assert seen == 1 and len(fails) == 1 and "rehearsal" in fails[0]
+
+
 def test_null_and_string_values():
     fails, _ = check(RESULT, "no export, so unledgered is unmeasured (census: result.unledgered_deliveries = null).\n")
     assert fails == []

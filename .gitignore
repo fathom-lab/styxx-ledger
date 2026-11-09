@@ -1,0 +1,13 @@
+# what the README's own steps leave in a checkout: pip install ./python builds in place (python/build/,
+# python/src/styxx_ledger.egg-info/), python -m build writes dist/, npm pack writes js/styxx-ledger-<version>.tgz,
+# the venv route makes .venv/, the census rehearsal writes census_rehearsal/, and a python run without -B, or
+# pytest without -p no:cacheprovider, leaves caches.
+build/
+dist/
+*.egg-info/
+*.tgz
+.venv/
+census_rehearsal/
+__pycache__/
+*.pyc
+.pytest_cache/

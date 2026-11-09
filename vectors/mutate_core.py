@@ -143,6 +143,25 @@ M = [
     ("coverage: withheld never severs", "verify.py", '        if any(s < w <= a for w in ws):', '        if False:'),
     ("parse anchor: trailing text tolerated", "chain.py",
      'seq (0|[1-9][0-9]*)\\n?\\Z")', 'seq (0|[1-9][0-9]*)")'),
+    # added 2026-11-09 (the lab's improvement sweep), one or more per rank whose vectors they measure
+    ("certifies: python's own whitespace, u+feff not blank (rank 43)", "chain.py",
+     'not c.strip(CERTIFIES_BLANK)', 'not c.strip()'),
+    ("certifies: only the empty string is blank (rank 43)", "chain.py", 'not c.strip(CERTIFIES_BLANK)', 'not c'),
+    ("certifies: 500 bound exclusive (rank 43)", "chain.py", 'len(c) > CERTIFIES_MAX', 'len(c) >= CERTIFIES_MAX'),
+    ("compose: the day of now counts as closed (rank 42)", "writer.py", '    if date >= today:', '    if date > today:'),
+    ("compose: an open day composed (rank 42)", "writer.py", '    if date >= today:', '    if False:'),
+    ("compose: an anchored day composed (rank 42)", "writer.py",
+     '    if any(it["entry"].get("kind") == "anchor" and it["entry"].get("anchor_date") == date for it in entries):',
+     '    if False:'),
+    ("compose: the day's earliest line taken as its head (rank 42)", "writer.py",
+     'if e.get("day") == date and (last is None or e["seq"] > last["seq"]):', 'if e.get("day") == date and last is None:'),
+    ("compose: today read in utc (rank 42)", "writer.py", '    today = day_of(now, tz)', '    today = day_of(now, "UTC")'),
+    ("compose: date form unchecked (rank 42)", "writer.py",
+     '    if not isinstance(date, str) or not DATE_RX.match(date):', '    if not isinstance(date, str):'),
+    ("dump: strings normalised to nfc (rank 68)", "jcs.py",
+     '    return json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(",", ":"))',
+     '    return __import__("unicodedata").normalize("NFC", json.dumps(obj, ensure_ascii=False, sort_keys=True, '
+     'separators=(",", ":")))'),
 ]
 
 

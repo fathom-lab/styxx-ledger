@@ -26,7 +26,14 @@ the header carries exactly six keys, no others:
   `SystemV/EST5`, which the python zone list lacks. that residual is recorded here, not vectored; use a canonical
   `Area/City` name or `UTC`.
 - `agent`: 1-32 characters of `[a-z0-9_-]`; it is the first word of the anchor text (section 5).
-- `certifies`: one sentence, the writer's promise about what a line records and what it never carries.
+- `certifies`: one sentence, the writer's promise about what a line records and what it never carries: a string of
+  1 to 500 characters (unicode code points, not utf-16 units) with no lf, not made only of whitespace. whitespace
+  here is exactly these 30 code points: u+0009..u+000d, u+001c..u+0020, u+0085, u+00a0, u+1680, u+2000..u+200a,
+  u+2028, u+2029, u+202f, u+205f, u+3000 and u+feff. that is the union of what python's `str.isspace` and
+  javascript's `String.prototype.trim` call blank (python alone counts u+001c..u+001f and u+0085, javascript alone
+  u+feff), so a certifies either runtime would call blank is refused by both writers (`header_form`), and a log
+  either writes takes appends from the other. u+200b and the other format characters are not whitespace here. the
+  writer judges the form only, never what the sentence says.
 - `kinds`: the sorted, duplicate-free list of the kinds this writer may write; it contains `anchor` and `started`.
 
 an entry carries the chain's keys (`schema`, `seq`, `prev`, `kind`, `timestamp`, `day`, `entry_id`) and the kind's
@@ -54,6 +61,9 @@ two kinds every writer has:
 a line's bytes are the compact, key-sorted dump of its object: `{` `}` `,` `:` with no spaces, keys sorted by code
 point, strings escaped as json requires (`"`, `\`, u+0000-u+001f; the short forms `\b \f \n \r \t`, `\u00xx` with
 lowercase hex for the other control characters; everything else raw utf-8, u+007f, u+2028 and u+2029 included).
+strings are never normalised: a writer and a reader keep each string's code points as given (no nfc, nfd, nfkc or
+nfkd, no case folding), so an e with an acute accent written as u+00e9 and written as u+0065 u+0301 are two strings
+with two dumps and two entry_ids. a reader compares bytes, never a normal form.
 the admitted value types are null, booleans, integers with |n| <= 2^53, strings without lone surrogates, arrays,
 and objects whose keys are u+0000..u+007e, nested at most 32 containers deep (the outermost object or array counts
 as one; a ledger line, being an object, leaves 31 for a field). for these types the dump is rfc 8785 (jcs).
@@ -107,7 +117,8 @@ is one value, and the write-side vectors pin it (`build_entry`). its refusals, b
                        for its date and timestamp, or anchor text fields out of form (seq above 2^53 included)
     timestamp          a timestamp not in the v1 form, naming no calendar instant, or outside years 1000..9998
     anchor_tz          a zone the platform's database does not list, case for case, or Factory
-    header_form        a header with a missing or extra key, or a key out of form
+    header_form        a header with a missing or extra key, or a key out of form (a certifies out of section 1's
+                       form among them)
 
 ## 4. what a verifier reports
 
@@ -153,6 +164,13 @@ where `<agent>` is `header.agent`, `<YYYY-MM-DD>` the day just closed, `<n>` the
 is that date and `<64 hex>` its `entry_id`, hands the text to the caller to post in a public place outside the
 box, and writes an `anchor` entry (`anchor_date`, `anchor_head`, `anchor_head_seq`, `anchor_text_sha256` = sha256
 of the text's utf-8 bytes, `late`).
+
+a writer composes the text only for a day that has closed. it refuses, in this order: a date not `YYYY-MM-DD`
+(`anchor_form`); a day that has not closed in `anchor_tz` at the writer's clock (`day_open`: the clock's own day
+there is that date or an earlier one); a day the ledger already holds an anchor entry for (`already_anchored`); and
+a day no entry has (`nothing_to_anchor`). a text composed for an open day would fail the stranger's check below as
+soon as one more line of that day is written. composing writes nothing; the write-side vectors pin these refusals
+(`compose_anchor`, over the base).
 
 `late` is a rule, not the caller's word: it is true when the anchor entry's own local day in `anchor_tz` is after
 the day following `anchor_date`, or is that following day with a local clock later than 00:10:00; otherwise false.
@@ -212,11 +230,15 @@ for agent `kitbot`, kinds `anchor`, `note`, `started`, timestamps crossing the a
   to check (present, after a later line, a later line with no own entry, own entry disagreeing, another agent's
   word, the strict text form), with what a verifier must answer (`ok`, problem seqs, problems without seq, problem
   codes, head, bridged seqs, anchor results, coverage).
-- write-side cases (86): the canonical dump of 13 given objects (the depth-32 bound among them) and 7 refusals of
-  values; `day` for 17 timestamps (8 in america/new_york across 2026-11-01 03:59:59z to 2026-11-02 05:00:00z, 4 in
-  europe/berlin, 3 in utc, and the year edges 1000 and 9998) and 15 refusals of timestamps and zones; `late` for 9
-  anchors and 1 refusal; 2 header digests; 2 anchor texts and 6 refusals; 2 entry ids; 5 composed entries and 7
-  refusals.
+- write-side cases (113): the canonical dump of 14 given objects (the depth-32 bound among them, and strings in nfc,
+  nfd and compatibility forms, kept as given) and 7 refusals of values; `day` for 17 timestamps (8 in
+  america/new_york across 2026-11-01 03:59:59z to 2026-11-02 05:00:00z, 4 in europe/berlin, 3 in utc, and the year
+  edges 1000 and 9998) and 15 refusals of timestamps and zones; `late` for 9 anchors and 1 refusal; 2 header
+  digests; 2 anchor texts and 6 refusals; 3 entry ids (one core with its string in nfc and in nfd); 5 composed
+  entries and 7 refusals; 15 header checks (`check_header`, section 1's certifies rule: 5 headers accepted, among
+  them u+200b and 500 astral characters, and 10 refused, among them u+feff, u+001c, u+001f, u+0085 and the 30
+  blanks but lf); 10 anchor compositions over the base (`compose_anchor`, section 5: 2 texts and 8 refusals,
+  `day_open` at local midnight and at the dst end, `already_anchored`, `nothing_to_anchor`, `anchor_form`).
 
 every expected value was computed once, by the python package (`vectors/make_vectors.py`), and both runners
 (`vectors/run_vectors.py`, `vectors/run_vectors.mjs`) re-ask it of their implementation. each prints
@@ -249,6 +271,20 @@ each is a shared vector, so both packages are held to it.
 - a writer refuses to append to a file whose header a v1 writer may not write; the verifier does not report header
   form beyond `kinds`.
 - an anchor text whose seq exceeds 2^53 is not an anchor.
+
+### decided in the improvement sweep (2026-11-09; the lead's to keep or strike)
+
+each is a shared vector too (145 in the file now: 32 read-side, 113 write-side).
+
+- `certifies` is 1 to 500 code points, no lf, not only whitespace, whitespace being the 30 code points section 1
+  lists. before, the python writer used `str.strip` and the javascript writer `trim`: u+feff alone passed python and
+  failed javascript, u+001c..u+001f and u+0085 alone the reverse, and each writer then refused to append to a log
+  the other had made.
+- strings are never normalised (section 2). both implementations already kept every string as given; the rule was
+  implied by "raw utf-8" only, and is now stated and vectored.
+- a writer composes an anchor text only for a closed day it has not anchored and that has a line (section 5:
+  `day_open`, `already_anchored`, `nothing_to_anchor`). the javascript writer refused these before; the python
+  writer's `anchor-text` (without `--record`) composed a postable text for an open day or an anchored one.
 
 v0 remains v0: darkflobi's own ledger keeps its v0 schema strings, and the v1 verifier does not read a v0 file (it
 reports `no_header` and says why).

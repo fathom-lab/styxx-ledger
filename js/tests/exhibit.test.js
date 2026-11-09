@@ -417,3 +417,59 @@ test("m: a rate-limited explorer is named and left out; Retry-After honoured, el
   assert.equal(u, 2);
   void noSleep;
 });
+
+// ------------------------------------------------- the lab's improvement sweep of 2026-11-09: ranks 44 and 45
+const { networkReason, EXPLORERS_SILENT } = require("../lib/exhibit");
+
+test("n: an explorer that does not answer says why, once; nothing unchecked reads FAIL; the repeats collapse (rank 44)", async t => {
+  const s = await serve(t);
+  const dead = "http://127.0.0.1:" + (await deadPort()) + "/api";
+  const rep = await runExhibit(s.url, { explorers: [s.explorers[0], dead], sleep: async () => {}, today: "2026-11-09" });
+  const lines = renderText(rep).split("\n").slice(0, -1);
+  assert.equal(rep.exit_code, 2);
+  assert.deepEqual(rep.counts, { pass: 30, fail: 0, pending: 0, unchecked: 36, total: 66 });
+  assert.deepEqual(rep.explorers_unanswered, { [dead]: "the connection was refused" });
+  assert.equal(lines[2], "explorer " + dead + " did not answer: the connection was refused; check the network, or pass --explorer <url> to ask another esplora api");
+  assert.equal(lines.filter(l => l.includes("did not answer")).length, 1);
+  const anchorLines = lines.filter(l => l.startsWith("  2026-"));
+  assert.equal(anchorLines.length, 14);
+  assert.ok(anchorLines.every(l => l.includes(" ---- chain: holds; proof unchecked: " + EXPLORERS_SILENT)), anchorLines[0]);
+  assert.ok(lines.find(l => l.startsWith("anchor proofs:")).endsWith("; 14 of 14 not checked"));
+  assert.ok(lines.includes("  22 of 22 sampled, seq 1,21,32,47,122,137,149,346,361,386,419,446,543,564,601,608,612,614,622,632,701,734: unchecked: " + EXPLORERS_SILENT));
+  assert.deepEqual(lines.filter(l => l.startsWith("  not made")), ["  not made: 36 checks, anchor 2026-10-24 proof verifies to witness seq 734 proof commits and verifies: " + EXPLORERS_SILENT]);
+  assert.equal(lines.length, 40);
+});
+
+test("o: a mistyped url is exit 2 with the url fetched and what to check; a dead exhibit names its reason (rank 45)", async t => {
+  const s = await serve(t);
+  const url = s.url.replace(/\/ledger\/$/, "/ledgr/");
+  const r = await new Promise(resolve => execFile(process.execPath, [BIN, "exhibit", url, "--explorer", s.explorers[0], "--explorer", s.explorers[1]],
+    { encoding: "utf8", timeout: 120000 }, (err, out) => resolve({ code: err ? err.code : 0, out })));
+  const detail = url + "ledger.jsonl answered HTTP 404: there is no ledger.jsonl at that url; check that the url names the exhibit's folder, the one that holds ledger.jsonl (e.g. https://fathom-lab.github.io/styxx/ledger/)";
+  assert.equal(r.code, 2);
+  assert.ok(r.out.includes("\nledger.jsonl: " + detail + "\nnothing was verified: every other check needs the ledger\n"), r.out);
+  assert.ok(r.out.includes("result: 0 of 1 checks passed; 0 failed; 1 could not be made (exit 2)"));
+  assert.ok(r.out.includes("  not made: ledger.jsonl fetched: " + detail));
+  for (const gone of ["FAILED", "anchors: none read", "explorers:", "0 of 0 blocks"]) assert.ok(!r.out.includes(gone), gone);
+  const dead = "http://127.0.0.1:" + (await deadPort()) + "/ledger/";
+  const rep = await runExhibit(dead, { sleep: async () => {} });
+  assert.equal(rep.exit_code, 2); assert.equal(rep.counts.fail, 0);
+  assert.equal(rep.checks[0].detail, dead + "ledger.jsonl did not answer: the connection was refused; check the url and this machine's network");
+});
+
+test("p: node's network errors read in the words the python package uses (rank 45)", () => {
+  const f = (code, extra) => Object.assign(new TypeError("fetch failed"), { cause: Object.assign(new Error("x"), { code }, extra || {}) });
+  const cases = [
+    [f("ENOTFOUND"), "the host name did not resolve (dns)"],
+    [f("EAI_AGAIN"), "the host name did not resolve (dns)"],
+    [f("ECONNREFUSED"), "the connection was refused"],
+    [Object.assign(new TypeError("fetch failed"), { cause: Object.assign(new AggregateError([Object.assign(new Error("a"), { code: "ECONNREFUSED" })], ""), {}) }), "the connection was refused"],
+    [f("ECONNRESET"), "the connection was reset"],
+    [f("UND_ERR_SOCKET"), "the connection was reset"],
+    [f("UND_ERR_CONNECT_TIMEOUT"), "no answer within 30 s"],
+    [f("CERT_HAS_EXPIRED"), "the tls handshake failed (a certificate or protocol error)"],
+    [f("DEPTH_ZERO_SELF_SIGNED_CERT"), "the tls handshake failed (a certificate or protocol error)"],
+    [f("ERR_SOMETHING_ELSE"), "no answer (TypeError: ERR_SOMETHING_ELSE)"],
+  ];
+  for (const [e, words] of cases) assert.equal(networkReason(e, 30000), words, words);
+});

@@ -29,6 +29,7 @@ a block) and what it does not (publication at a url). The fetch is injectable (r
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import re
 import socket
@@ -39,6 +40,11 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
+
+try:
+    import ssl
+except ImportError:  # a python built without ssl fetches no https url at all; its errors read "no answer (...)"
+    ssl = None  # type: ignore[assignment]
 
 from . import ots as _ots
 from ._version import __version__
@@ -70,6 +76,40 @@ CAVEATS = [
     "a copy that is older but consistent passes every check here: compare the head and the last anchor date with the "
     "posts, and with a run of your own on another day.",
 ]
+
+
+# what a fetch that got no http answer says, in the same words in both packages (exhibit.js maps node's error codes to
+# them): until 2026-11-09 a dns failure read "URLError: [Errno 11001] getaddrinfo failed" here and "TypeError: ENOTFOUND"
+# there (improvements rank 45)
+NET_DNS = "the host name did not resolve (dns)"
+NET_REFUSED = "the connection was refused"
+NET_RESET = "the connection was reset"
+NET_TLS = "the tls handshake failed (a certificate or protocol error)"
+NET_TIMEOUT = "no answer within %g s"
+EXHIBIT_URL_EXAMPLE = "https://fathom-lab.github.io/styxx/ledger/"
+# a proof whose every block an explorer left unanswered: one reason, so the report says it once (rank 44)
+EXPLORERS_SILENT = "the explorers did not all answer for the proof's blocks"
+
+
+def network_reason(e: BaseException, timeout: float = TIMEOUT_S) -> str:
+    """the shared words for a fetch that got no http answer: dns, refused, reset, tls, timeout; anything else reads
+    "no answer (<type>: <detail>)"."""
+    r = getattr(e, "reason", None)
+    r = r if isinstance(r, BaseException) else e
+    if isinstance(r, socket.gaierror):
+        return NET_DNS
+    if isinstance(r, ConnectionRefusedError):
+        return NET_REFUSED
+    if isinstance(r, (ConnectionResetError, ConnectionAbortedError, BrokenPipeError)):
+        return NET_RESET
+    if isinstance(r, (socket.timeout, TimeoutError)):
+        return NET_TIMEOUT % timeout
+    if ssl is not None and isinstance(r, ssl.SSLError):
+        return NET_TLS
+    text = str(getattr(e, "reason", e))
+    if "timed out" in text:
+        return NET_TIMEOUT % timeout
+    return "no answer (%s: %s)" % (type(r).__name__, text)
 
 
 class FetchError(Exception):
@@ -117,9 +157,9 @@ def http_get(url: str, timeout: float = TIMEOUT_S, cap: int = CAP_BYTES) -> Tupl
     except urllib.error.HTTPError as e:
         ra = _retry_after(e.headers.get("Retry-After") if e.headers is not None else None)
         raise FetchError(url, "http", "HTTP %d" % e.code, e.code, ra) from None
-    except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, OSError, ValueError) as e:
-        reason = getattr(e, "reason", e)
-        raise FetchError(url, "network", "%s: %s" % (type(e).__name__, reason)) from None
+    except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, OSError, ValueError,
+            http.client.HTTPException) as e:
+        raise FetchError(url, "network", network_reason(e, timeout)) from None
 
 
 def _sha(b: bytes) -> str:
@@ -337,6 +377,8 @@ def _judge_proof(rep: Dict[str, Any], ex: Optional[_Explorers], stated_block: Op
                         % ("none" if stated_block is None else stated_block))
     unanswered = [h for h in heights if ex is not None and ex.verdict(h) == "unanswered"]
     if st == "unverified":
+        if heights and len(unanswered) == len(heights):   # one reason for every such proof, so the report collapses them
+            return "unchecked", EXPLORERS_SILENT
         return "unchecked", "no block header for any of the proof's blocks (%s)" % ", ".join(map(str, heights))
     lo = rep["lowest"]
     if index_status == "pending":
@@ -356,6 +398,19 @@ def _judge_proof(rep: Dict[str, Any], ex: Optional[_Explorers], stated_block: Op
         note += "; not every explorer answered for block%s %s" % ("s" if len(unanswered) > 1 else "",
                                                                   ", ".join(map(str, unanswered)))
     return "pass", note
+
+
+def _ledger_missing(rec: Dict[str, Any]) -> str:
+    """why the ledger did not arrive, with the url fetched and what to check. a typo in the url is not evidence
+    against the publisher, so the check is unchecked (exit 2), never failed (improvements 2026-11-09 rank 45)."""
+    if rec["error_kind"] == "http" and rec["status"] == 404:
+        return ("%s answered HTTP 404: there is no ledger.jsonl at that url; check that the url names the exhibit's "
+                "folder, the one that holds ledger.jsonl (e.g. %s)" % (rec["url"], EXHIBIT_URL_EXAMPLE))
+    if rec["error_kind"] == "http":
+        return "%s answered %s" % (rec["url"], rec["error"])
+    if rec["error_kind"] == "network":
+        return "%s did not answer: %s; check the url and this machine's network" % (rec["url"], rec["error"])
+    return "%s: %s" % (rec["url"], rec["error"])
 
 
 def _ranges(seqs: List[int]) -> str:
@@ -414,6 +469,8 @@ def run_exhibit(base_url: str, explorers: Optional[List[str]] = None, sample: in
         rep["explorer_calls"] = f.explorer_calls
         rep["explorer_answers"] = ([ex.heights[h] for h in sorted(ex.heights)] if ex is not None else [])
         rep["explorers_rate_limited"] = ({b: n for b, n in ex.limited.items()} if ex is not None else {})
+        # an explorer that gave no answer at all (dns, refused, timeout, ...): asked once, then left out for the run
+        rep["explorers_unanswered"] = ({b: ex.dead[b] for b in exps if b in ex.dead} if ex is not None else {})
         rep["retry_wait_s"] = round(f.waited_s, 1)
         rep["finished_at"] = _now()
         rep["wall_clock_s"] = round(time.monotonic() - t0, 3)
@@ -421,8 +478,8 @@ def run_exhibit(base_url: str, explorers: Optional[List[str]] = None, sample: in
 
     # ---- the ledger and its withheld list
     raw, rec = f.file(base, "ledger.jsonl")
-    if raw is None:
-        check("ledger.jsonl fetched", "fail" if rec["error_kind"] == "http" else "unchecked", rec["error"])
+    if raw is None:   # nothing can be verified, so nothing failed: exit 2, never the exit of a failed check
+        check("ledger.jsonl fetched", "unchecked", _ledger_missing(rec))
         rep["chain"] = None
         return finish()
     wraw, wrec = f.file(base, "withheld.json")
@@ -698,11 +755,17 @@ def render_text(rep: Dict[str, Any]) -> str:
         % (len(rep["fetched"]), rep["fetched_bytes"], rep["explorer_calls"], nexp, "" if nexp == 1 else "s"))
     if not rep.get("ripemd160_available", True):
         say("note: this python's hashlib has no ripemd160; a proof that needs it is refused (ripemd160_unavailable)")
+    silent = rep.get("explorers_unanswered") or {}
+    for b in rep.get("explorers") or []:   # the reason, once, before the lines it explains (rank 44)
+        if b in silent:
+            say("explorer %s did not answer: %s; check the network, or pass --explorer <url> to ask another esplora api"
+                % (b, silent[b]))
     say("")
     c = rep.get("chain")
     if c is None:
         bad = [x for x in rep["checks"] if x["verdict"] != "pass"]
         say("ledger.jsonl: %s" % (bad[0]["detail"] if bad else "not fetched"))
+        say("nothing was verified: every other check needs the ledger")
     else:
         say("chain (protocol %s): %s %d lines = %d published + %d withheld, head %s (seq %d), %d problem record%s"
             % (c["protocol"], "re-derives:" if c["rederives"] else "DOES NOT re-derive:", c["lines"], c["published"],
@@ -727,10 +790,12 @@ def render_text(rep: Dict[str, Any]) -> str:
             for a in pv:
                 lows[a["proof"]["lowest"]["height"]] = lows.get(a["proof"]["lowest"]["height"], 0) + 1
             npend = sum(1 for a in an if (a.get("proof") or {}).get("verdict") == "pending")
+            nunch = sum(1 for a in an if (a.get("proof") or {}).get("verdict") == "unchecked")
             say("anchor proofs: %d of %d verify natively against bitcoin block headers, each to the block the index "
-                "names (lowest blocks: %s)%s" % (len(pv), len(an), ", ".join(("%d x%d" % (h, n)) if n > 1 else str(h)
-                                                                            for h, n in sorted(lows.items())) or "none",
-                                                 ("; %d of %d pending" % (npend, len(an))) if npend else ""))
+                "names (lowest blocks: %s)%s%s" % (len(pv), len(an), ", ".join(("%d x%d" % (h, n)) if n > 1 else str(h)
+                                                                              for h, n in sorted(lows.items())) or "none",
+                                                   ("; %d of %d pending" % (npend, len(an))) if npend else "",
+                                                   ("; %d of %d not checked" % (nunch, len(an))) if nunch else ""))
             late = [a for a in pv if a["proof"].get("late")]
             say("  lag from an anchor's date to its lowest block: %s; %d of %d over %d days (the proof pins such a text "
                 "from its block, not from its date)" % (_lag_summary(pv), len(late), len(pv), LATE_DAYS))
@@ -750,9 +815,10 @@ def render_text(rep: Dict[str, Any]) -> str:
                     parts.append("proof %s: %s" % ("FAILS" if pf["verdict"] == "fail" else pf["verdict"], pf["why"]))
             vs = [x.get("verdict") for x in (tc, cc, pf or {"verdict": "pass"}) if x]
             label = "ok  " if all(v == "pass" for v in vs) else (
-                "PEND" if all(v in ("pass", "pending") for v in vs) else "FAIL")
+                "PEND" if all(v in ("pass", "pending") for v in vs) else (
+                    "FAIL" if "fail" in vs else "----"))   # ----: nothing failed, something could not be checked
             say("  %s seq %-4s %s %s" % (a["date"], a.get("seq", "?"), label, "; ".join(parts)))
-    else:
+    elif c is not None:
         say("anchors: none read")
     cov = rep.get("coverage")
     if c is not None and cov is not None:
@@ -783,17 +849,31 @@ def render_text(rep: Dict[str, Any]) -> str:
                 "stated block (%s)" % (len(sm), w["attested"], seeded, _short(w["seed"]),
                                        " and ".join(map(str, ends)) or "-", len(ok), len(sm),
                                        ", ".join(map(str, blocks)) or "none"))
+            unch: Dict[str, List[int]] = {}   # unchecked proofs that share a reason: said once, with their seqs (rank 44)
             for x in sm:
-                if x.get("verdict") != "pass":
-                    say("  seq %d %s: %s: %s" % (x["seq"], _short(x["entry_id"]),
-                                                 "FAILS" if x.get("verdict") == "fail" else x.get("verdict"), x.get("why")))
+                if x.get("verdict") == "unchecked":
+                    unch.setdefault(x.get("why"), []).append(x["seq"])
+            said = set()
+            for x in sm:
+                v, why = x.get("verdict"), x.get("why")
+                if v == "pass":
+                    continue
+                if v == "unchecked" and len(unch[why]) > 1:
+                    if why not in said:
+                        said.add(why)
+                        say("  %d of %d sampled, seq %s: unchecked: %s" % (len(unch[why]), len(sm),
+                                                                           ",".join(map(str, unch[why])), why))
+                    continue
+                say("  seq %d %s: %s: %s" % (x["seq"], _short(x["entry_id"]), "FAILS" if v == "fail" else v, why))
         elif not rep["ots"]:
             say("witness proofs: not checked (--no-ots)")
         else:
             say("witness proofs: not sampled (--sample 0)")
     elif w.get("note"):
         say("witness: " + w["note"])
-    if rep["ots"]:
+    if c is None:
+        pass   # no ledger: nothing was asked of an explorer, and the lines below would only count zeros
+    elif rep["ots"]:
         ea = rep["explorer_answers"]
         agree = sum(1 for h in ea if h["verdict"] == "agree")
         dis = [str(h["height"]) for h in ea if h["verdict"] == "disagree"]
@@ -821,9 +901,20 @@ def render_text(rep: Dict[str, Any]) -> str:
         say("result: %d of %d checks passed; %d failed; %d could not be made%s (exit %d)"
             % (n["pass"], n["total"], n["fail"], n["unchecked"],
                ("; %d pending" % n["pending"]) if n["pending"] else "", rep["exit_code"]))
+        same: Dict[str, List[str]] = {}   # checks not made for one reason: one line (rank 44); each failure keeps its own
         for x in rep["checks"]:
-            if x["verdict"] in ("fail", "unchecked"):
-                say("  %s: %s: %s" % ("FAILED" if x["verdict"] == "fail" else "not made", x["name"], x["detail"]))
+            if x["verdict"] == "unchecked":
+                same.setdefault(x["detail"], []).append(x["name"])
+        said = set()
+        for x in rep["checks"]:
+            if x["verdict"] == "fail":
+                say("  FAILED: %s: %s" % (x["name"], x["detail"]))
+            elif x["verdict"] == "unchecked" and len(same[x["detail"]]) == 1:
+                say("  not made: %s: %s" % (x["name"], x["detail"]))
+            elif x["verdict"] == "unchecked" and x["detail"] not in said:
+                said.add(x["detail"])
+                names = same[x["detail"]]
+                say("  not made: %d checks, %s to %s: %s" % (len(names), names[0], names[-1], x["detail"]))
     for x in rep.get("off_host") or []:
         say("  served from another host: %s -> %s" % (x["path"], x["final_url"]))
     say("wall clock %.1f s" % rep["wall_clock_s"])

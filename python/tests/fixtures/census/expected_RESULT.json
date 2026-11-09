@@ -389,6 +389,7 @@
   "unreachable": 0,
   "verifier_problems": 0
  },
+ "fetch_failures": [],
  "gates": {
   "block_sha256": "bb0cad611122af85acb15c4db3e9b120c6dc78c98c3bc03aca8393d25315d4af",
   "gates_sha256_registered": "bb0cad611122af85acb15c4db3e9b120c6dc78c98c3bc03aca8393d25315d4af",
@@ -542,6 +543,27 @@
   },
   "counts": "entries; the header line is not counted"
  },
+ "locks": {
+  "kit": {
+   "reads": "not compared: the registration names no sha256 of vectors_v1.json",
+   "registered": "styxx-ledger 1.0.0a1",
+   "vectors_sha256_registered": null
+  },
+  "scorer": {
+   "reads": "not built at the freeze: the registration names no scorer hash, so none is compared",
+   "registered": "not built at the freeze"
+  },
+  "writer": {
+   "reads": "same",
+   "registered": "styxx-ledger 1.0.0a1 python",
+   "started": [
+    {
+     "seq": 1,
+     "writer": "styxx-ledger 1.0.0a1 python"
+    }
+   ]
+  }
+ },
  "now_utc": "2026-11-01T00:00:00Z",
  "numerals": {
   "Nb": 2,
@@ -583,11 +605,13 @@
   "unledgered_deliveries": null,
   "window_opened": 1
  },
+ "runner": "not stated",
  "schema": "styxx.ledger/census_result/v1",
  "scorer": {
-  "kit_version": "1.0.0a2",
+  "kit_version": "1.0.0a3",
   "module": "styxx_ledger.census",
-  "sha256": "8077a7669e42a193ca4d4914aedcb3fafb9c6642a5cfdea7568f7b077d740894"
+  "sha256": "49b07c6e69b3a0ec73cc02e3c121f99a07b52930d797f60ccb8841642e8ebe46",
+  "vectors_sha256": "8aceba1da5c0f3d6425ae0bcf450704c77e9eaca21f240348d602ba1dda91949"
  },
  "sends": {
   "by_destination": {

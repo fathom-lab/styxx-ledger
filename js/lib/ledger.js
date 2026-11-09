@@ -64,6 +64,25 @@ function writeAll(fd, buf) {
   while (off < buf.length) off += fs.writeSync(fd, buf, off, buf.length - off);
 }
 
+/* The anchor text of `date` as a writer may compose it at `now` (section 5), over a re-derived log's header and
+   entries ([{line, entry}]): pure, nothing is read or written. Refuses, in this order, a date not YYYY-MM-DD
+   (LedgerValueError anchor_form), a day that has not closed in anchor_tz at `now` (LedgerError day_open), a day the
+   ledger already holds an anchor entry for (already_anchored), and a day no entry has (nothing_to_anchor); the
+   python writer's compose_anchor refuses the same, with the same codes (the write-side vectors pin both). Returns
+   {agent, date, head, seq, text}: head and seq are those of the last entry whose day is `date`. */
+function composeAnchor(header, entries, date, now) {
+  if (typeof date !== "string" || !chain.DATE_RX.test(date)) throw new LedgerValueError("anchor_form", "date is not YYYY-MM-DD");
+  const tz = header.anchor_tz;
+  const today = dayOf(now, tz);
+  if (today <= date) throw new LedgerError("day_open", date + " has not closed in " + tz + " (it is " + today + " there)");
+  if (entries.some(it => it.entry.kind === "anchor" && it.entry.anchor_date === date)) {
+    throw new LedgerError("already_anchored", "the ledger already holds an anchor entry for " + date);
+  }
+  const c = Ledger.closingHead(entries, date);
+  if (c === null) throw new LedgerError("nothing_to_anchor", "no entry has day " + date + "; there is nothing to anchor");
+  return { agent: header.agent, date, head: c.head, seq: c.seq, text: chain.anchorText(header.agent, date, c.head, c.seq) };
+}
+
 class Ledger {
   /* path: the log file. opts: lockTimeoutMs (10000), staleMs (30000), writer ({name, version, ...} for start()). */
   constructor(file, opts) {
@@ -83,8 +102,10 @@ class Ledger {
   static init(file, h, opts) {
     const L = new Ledger(file, opts);
     h = h || {};
+    // an empty anchorTz is the caller's value and is refused (anchor_tz), never read as the UTC default
+    const tz = h.anchorTz != null ? h.anchorTz : (h.anchor_tz != null ? h.anchor_tz : "UTC");
     const header = h.schema !== undefined ? h : chain.makeHeader(
-      h.created || nowUtc(), h.anchorTz || h.anchor_tz || "UTC", h.agent, h.certifies,
+      h.created || nowUtc(), tz, h.agent, h.certifies,
       ["anchor", "started"].concat(h.kinds || ["note"]));   // the short form always gains anchor and started
     chain.checkHeader(header);
     const line = Buffer.from(dump(header) + "\n", "utf8");
@@ -276,16 +297,9 @@ class Ledger {
   }
 
   _composeAnchor(r, date, ts) {
-    if (typeof date !== "string" || !chain.DATE_RX.test(date)) throw new LedgerValueError("anchor_form", "date is not YYYY-MM-DD");
     const tz = r.header.anchor_tz;
-    const today = dayOf(ts, tz);
-    if (today <= date) throw new LedgerError("day_open", date + " has not closed in " + tz + " (it is " + today + " there)");
-    if (r.entries.some(it => it.entry.kind === "anchor" && it.entry.anchor_date === date)) {
-      throw new LedgerError("already_anchored", "the ledger already holds an anchor entry for " + date);
-    }
-    const c = Ledger.closingHead(r.entries, date);
-    if (c === null) throw new LedgerError("nothing_to_anchor", "no entry has day " + date + "; there is nothing to anchor");
-    const text = chain.anchorText(r.header.agent, date, c.head, c.seq);
+    const c = composeAnchor(r.header, r.entries, date, ts);
+    const text = c.text;
     // the text must check against the file as it stands (the anchor entry itself lands on a later day)
     const check = checkAnchor(r.entries, chain.parseAnchorText(text), [], r.header);
     if (!check.ok) throw new LedgerError("anchor_check", "the composed anchor does not check: " + JSON.stringify(check));
@@ -318,4 +332,4 @@ class Ledger {
   }
 }
 
-module.exports = { Ledger, LedgerError, LedgerLocked, LedgerTamper, pidAlive, LOCK_TIMEOUT_MS, LOCK_STALE_MS, VERSION };
+module.exports = { Ledger, LedgerError, LedgerLocked, LedgerTamper, composeAnchor, pidAlive, LOCK_TIMEOUT_MS, LOCK_STALE_MS, VERSION };

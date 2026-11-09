@@ -12,8 +12,8 @@
    - every problem record carries `seq` and a `code` / `codes` (PROTOCOL 4).
    - node only (node:crypto). The v1 verifier does not read a v0 file: it reports no_header and says why.
 
-   Added for v1: dayOf, entryId (sync), headerDigestSync, verifyBytesSync, buildEntry, checkHeader, makeHeader.
-   Nothing here writes or touches the network. */
+   Added for v1: dayOf, entryId (sync), headerDigestSync, verifyBytesSync, buildEntry, checkHeader, makeHeader,
+   composeAnchor. Nothing here writes or touches the network. */
 const jcsm = require("./jcs");
 const day = require("./day");
 const chain = require("./chain");
@@ -115,5 +115,8 @@ module.exports = {
   // anchors
   anchorText: chain.anchorText, parseAnchorText: chain.parseAnchorText, checkAnchor,
   // writing side (pure)
-  buildEntry: chain.buildEntry, checkHeader: chain.checkHeader, makeHeader: chain.makeHeader
+  buildEntry: chain.buildEntry, checkHeader: chain.checkHeader, makeHeader: chain.makeHeader,
+  // the anchor composition (section 5; the write-side vectors' compose_anchor): pure, defined in ledger.js beside the
+  // writer's other refusals and required when called, since ledger.js requires this module
+  composeAnchor: (header, entries, date, now) => require("./ledger").composeAnchor(header, entries, date, now)
 };

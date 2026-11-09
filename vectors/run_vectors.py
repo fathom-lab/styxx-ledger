@@ -147,8 +147,10 @@ def answer_read(S, text: bytes, case: dict) -> dict:
     return out
 
 
-def call_write(S, c: dict):
-    """(value, error_code). value is a string for every function (a line for build_entry)."""
+def call_write(S, c: dict, base: bytes = None):
+    """(value, error_code). value is a string for every function (a line for build_entry; the header's digest for
+    check_header, when the header is one a writer may write; the anchor text for compose_anchor, which composes over
+    the base's header and entries: `base` is base_v1.jsonl's bytes, read beside this file when not given)."""
     fn = c["fn"]
     try:
         if fn == "jcs":
@@ -165,15 +167,23 @@ def call_write(S, c: dict):
             v = S.late_of(c["anchor_date"], c["timestamp"], c["tz"])
         elif fn == "build_entry":
             v = S.dump(S.build_entry(c["header"], c["seq"], c["prev"], c["kind"], c["timestamp"], c["fields"]))
+        elif fn == "check_header":
+            S.check_header(c["header"])
+            v = S.header_digest(c["header"])
+        elif fn == "compose_anchor":
+            r = S.verify_bytes(base if base is not None else (HERE / "base_v1.jsonl").read_bytes())
+            v = S.compose_anchor(r["header"], r["entries"], c["date"], c["now"])["text"]
         else:
             raise KeyError("unknown write fn %r" % fn)
     except S.LedgerValueError as e:
         return None, e.code
+    except S.LedgerStateError as e:      # compose_anchor's day_open, already_anchored, nothing_to_anchor
+        return None, e.code
     return v, None
 
 
-def check_write(S, c: dict):
-    v, err = call_write(S, c)
+def check_write(S, c: dict, base: bytes = None):
+    v, err = call_write(S, c, base)
     if "expect_error" in c:
         return err == c["expect_error"], {"value": v, "error": err}
     ok = err is None and v == c["expect"]
@@ -353,7 +363,7 @@ def _main(S, a) -> int:
             print("   got      %s" % json.dumps(got, sort_keys=True))
     for c in doc["write"]:
         try:
-            ok, got = check_write(S, c)
+            ok, got = check_write(S, c, base)
         except S.ZoneDatabaseMissing:
             raise
         except Exception as e:  # noqa: BLE001 - an uncoded exception is a miss, not a refusal

@@ -11,12 +11,15 @@ numerals over the population Nn 3, Nb 2, Nu 1, carried on 3 of 4 lines. the held
 the seams (make_census_fixture.install_seams): example.invalid urls answer from the fixture files, the shelf row is
 switched on, and the js leg is answered by the python verifier, except where a test says otherwise.
 """
+import hashlib
 import json
+import re
 import shutil
+from pathlib import Path
 
 import pytest
 
-from conftest import TESTS
+from conftest import TESTS, VECTORS
 import make_census_fixture as M
 from styxx_ledger import census
 from styxx_ledger.census import score
@@ -42,6 +45,7 @@ def _run(tmp_path, name, **kw):
     ledger = kw.pop("ledger", M.LEDGER_URL)
     now = kw.pop("now", NOW)
     kw.setdefault("js", True)
+    kw.setdefault("sleep", lambda s: None)   # no test waits an hour: a guard that regresses into a fetch fails fast
     res = score(prereg, ledger, out, now, **kw)
     return res, out
 
@@ -59,6 +63,7 @@ def _reseal(text):
 def _strip(d):
     d = json.loads(json.dumps(d))
     d["scorer"].pop("sha256", None)
+    d["scorer"].pop("vectors_sha256", None)  # the kit's vectors file moves with the kit, as census.py does
     d["scorer"].pop("kit_version", None)  # the version is recorded, not tested: a pin is not a test
     return d
 
@@ -453,11 +458,15 @@ def test_js_leg_agrees_when_node_is_here(tmp_path, monkeypatch):
 
 
 def test_cli_census(cli, tmp_path):
-    """the cli in a subprocess (no seams): example.invalid does not answer, so the window cannot open; exit 0."""
+    """the cli in a subprocess (no seams): example.invalid does not answer, so the window cannot open. since rank 31
+    (2026-11-09) that is exit 2 with the url named on the summary line, not exit 0; RESULT.json is still written."""
     out = tmp_path / "c"
     r = cli("census", "--prereg", PREREG, "--ledger", LEDGER, "--out", out, "--now", NOW, "--no-js", "--tries", "1")
-    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.returncode == 2, r.stdout + r.stderr
+    assert "did not answer: ledger_url after 1 try: %s" % M.LEDGER_URL in r.stdout, r.stdout
+    assert "verdict NOT_RUN__window_did_not_open" in r.stdout
     doc = json.loads((out / "RESULT.json").read_text(encoding="utf-8"))
+    assert doc["fetch_failures"][0]["what"] == "ledger_url" and doc["fetch_failures"][0]["source"] == M.LEDGER_URL
     assert doc["verdict"] == "NOT_RUN__window_did_not_open"
     assert doc["chain_problem_components"]["unreachable"] == 1
     c = doc["window"]["opening_condition"]["c"]
@@ -468,3 +477,354 @@ def test_cli_census(cli, tmp_path):
     bad.write_text("{{d0}}\n", encoding="utf-8")
     r = cli("census", "--prereg", bad, "--ledger", LEDGER, "--out", tmp_path / "c2", "--now", NOW, "--no-js")
     assert r.returncode == 1
+
+
+# ---- improvements 2026-11-09, the census group (ranks 31, 48, 49, 50, 51, 69, 70)
+
+def _row(text, name, value):
+    """the table row of `name` set to `value` (the left cell only; the right cell is kept)."""
+    out, n = re.subn(r"^\| %s = `[^`]*` \|" % re.escape(name), lambda m: "| %s = `%s` |" % (name, value), text,
+                     count=1, flags=re.M)
+    assert n == 1, name
+    return out
+
+
+def _down(src):
+    raise census.Refused("unreachable", "%s did not answer within 30 s: URLError" % src)
+
+
+# rank 31: each failed try and each wait is announced; the url that did not answer is named; RESULT.md says so
+
+def test_rank31_each_try_and_wait_is_announced(seams, tmp_path, monkeypatch):
+    monkeypatch.setattr(census, "_fetch_once", _down)
+    said, slept = [], []
+    res, out = _run(tmp_path, "r31", ledger=None, tries=3, interval_s=3600, sleep=slept.append, say=said.append)
+    assert slept == [3600] * 4   # two waits for ledger_url, two for the shelf report (nothing answers here)
+    tries = [s for s in said if s.startswith("census: ledger_url, try ")]
+    assert len(tries) == 2 and "try 1 of 3" in tries[0] and "try 2 of 3" in tries[1]
+    assert all(M.LEDGER_URL in s and "the next try is in 3600 s" in s for s in tries)
+    assert any(s.startswith("census: ledger_url did not answer after 3 tries: " + M.LEDGER_URL) for s in said)
+    assert len(said) == 6
+    f = res["fetch_failures"]
+    assert [(x["what"], x["source"], x["tries_used"]) for x in f] == [("ledger_url", M.LEDGER_URL, 3),
+                                                                      ("the shelf report", M.SHELF_URL, 3)]
+    assert res["ledger"]["bound"].startswith("ledger_url did not answer in this run (after 3 tries)")
+    md = (out / "RESULT.md").read_text(encoding="utf-8")
+    assert "did not answer: ledger_url, after 3 tries: %s did not answer" % M.LEDGER_URL in md
+    assert "fetched in this run" not in md
+
+
+def test_rank31_a_run_that_answers_announces_nothing(seams, tmp_path):
+    said = []
+    res, _ = _run(tmp_path, "r31ok", say=said.append)
+    assert said == [] and res["fetch_failures"] == []
+
+
+def test_rank31_cli_names_the_url_and_exits_2(cli, tmp_path):
+    r = cli("census", "--prereg", PREREG, "--out", tmp_path / "c31", "--now", NOW, "--no-js", "--tries", "2",
+            "--interval", "0")
+    assert r.returncode == 2, r.stdout + r.stderr
+    assert "census: ledger_url, try 1 of 2: %s did not answer" % M.LEDGER_URL in r.stderr, r.stderr
+    assert "did not answer: ledger_url after 2 tries: %s" % M.LEDGER_URL in r.stdout, r.stdout
+    assert (tmp_path / "c31" / "RESULT.json").exists()
+
+
+# rank 48: "counted by" names the run's own runner, never the lab by default
+
+def test_rank48_counted_by_names_the_runner(seams, tmp_path):
+    for runner, words in (("operator", "counted by its operator"), ("lab", "counted by the lab"),
+                          ("other", "counted by a runner other than the lab and the operator"),
+                          (None, "counted by a runner this run does not name")):
+        res, out = _run(tmp_path, "r48%s" % runner, export=HELD, anchors=ANCHORS, runner=runner)
+        assert res["verdict"] == "HELD__every_exported_delivery_has_a_line"
+        assert res["runner"] == (runner or "not stated")
+        assert words in res["sentences"][0], res["sentences"][0][-200:]
+        assert ("counted by: %s" % (runner or "not stated")) in (out / "RESULT.md").read_text(encoding="utf-8")
+        if runner != "lab":
+            assert "counted by the lab" not in res["sentences"][0]
+    res, _ = _run(tmp_path, "r48bad", runner="me")
+    assert res["status"] == "refused" and res["refusal"]["code"] == "runner"
+
+
+def test_rank48_cli_takes_runner(cli, tmp_path):
+    r = cli("census", "--prereg", PREREG, "--ledger", LEDGER, "--out", tmp_path / "c48", "--now", NOW, "--no-js",
+            "--tries", "1", "--runner", "operator")
+    doc = json.loads((tmp_path / "c48" / "RESULT.json").read_text(encoding="utf-8"))
+    assert doc["runner"] == "operator", r.stdout + r.stderr
+    assert cli("census", "--prereg", PREREG, "--out", tmp_path / "c48b", "--runner", "lab-ish").returncode == 2
+
+
+# rank 49: the registered scorer, kit and writer are compared with the running ones; both are printed
+
+def _running_census_sha():
+    return hashlib.sha256(Path(census.__file__).read_bytes()).hexdigest()
+
+
+def test_rank49_scorer_hash_is_compared(seams, tmp_path):
+    t = PREREG.read_text(encoding="utf-8")
+    res, out = _run(tmp_path, "z", prereg=_write(tmp_path, "z.md", _reseal(_row(t, "scorer_sha256", "0" * 64))),
+                    export=HELD, anchors=ANCHORS)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "scorer_sha256"
+    assert res["locks"]["scorer"] == {"registered": "0" * 64, "reads": "differs"}
+    assert res["scorer"]["sha256"] == _running_census_sha() and res["scorer"]["sha256"] in res["refusal"]["reason"]
+    md = (out / "RESULT.md").read_text(encoding="utf-8")
+    assert "registered %s; running census.py sha256 %s" % ("0" * 64, _running_census_sha()) in md
+    same = _reseal(_row(t, "scorer_sha256", _running_census_sha()))
+    res, _ = _run(tmp_path, "s", prereg=_write(tmp_path, "s.md", same), export=HELD, anchors=ANCHORS)
+    assert res["locks"]["scorer"]["reads"] == "same" and res["verdict"] == "HELD__every_exported_delivery_has_a_line"
+    res, _ = _run(tmp_path, "w", prereg=_write(tmp_path, "w.md", _reseal(_row(t, "scorer_sha256", "census.py"))))
+    assert res["status"] == "refused" and res["refusal"]["code"] == "scorer_sha256"
+    res, _ = _run(tmp_path, "n", export=HELD, anchors=ANCHORS)   # the fixture: not built at the freeze, printed
+    assert res["locks"]["scorer"]["reads"].startswith("not built at the freeze") and res["status"] == "scored"
+
+
+def test_rank49_kit_vectors_hash_is_compared(seams, tmp_path, monkeypatch):
+    t = PREREG.read_text(encoding="utf-8")
+    vec = hashlib.sha256((TESTS.parent.parent / "vectors" / "vectors_v1.json").read_bytes()).hexdigest()
+    assert census.kit_values()["kit_version"] == "styxx-ledger %s vectors_v1.json sha256 %s" % (census.__version__, vec)
+    good = _reseal(_row(t, "kit_version", "styxx-ledger %s vectors_v1.json sha256 %s" % (census.__version__, vec)))
+    res, _ = _run(tmp_path, "k1", prereg=_write(tmp_path, "k1.md", good), export=HELD, anchors=ANCHORS)
+    assert res["locks"]["kit"]["reads"] == "same" and res["scorer"]["vectors_sha256"] == vec
+    assert res["verdict"] == "HELD__every_exported_delivery_has_a_line"
+    bad = _reseal(_row(t, "kit_version", "styxx-ledger 1.0.0a2 vectors_v1.json sha256 " + "ab" * 32))
+    res, _ = _run(tmp_path, "k2", prereg=_write(tmp_path, "k2.md", bad))
+    assert res["status"] == "refused" and res["refusal"]["code"] == "kit_version"
+    assert res["locks"]["kit"]["vectors_sha256_registered"] == "ab" * 32
+    monkeypatch.setattr(census, "_running_vectors", lambda: (None, "not beside this package (test)"))
+    res, _ = _run(tmp_path, "k3", prereg=_write(tmp_path, "k3.md", bad), export=HELD, anchors=ANCHORS)
+    assert res["locks"]["kit"]["reads"].startswith("unmeasured") and res["status"] == "scored"
+
+
+def test_rank49_writer_is_compared(seams, tmp_path):
+    t = PREREG.read_text(encoding="utf-8")
+    bad = _reseal(_row(t, "writer", "styxx-ledger 9.9.9 python"))
+    res, _ = _run(tmp_path, "wr1", prereg=_write(tmp_path, "wr1.md", bad))
+    assert res["status"] == "refused" and res["refusal"]["code"] == "writer"
+    assert "seq 1 styxx-ledger 1.0.0a1 python" in res["refusal"]["reason"]
+    obj = _reseal(_row(t, "writer", '{"name":"styxx-ledger","version":"1.0.0a1"}'))
+    res, _ = _run(tmp_path, "wr2", prereg=_write(tmp_path, "wr2.md", obj), export=HELD, anchors=ANCHORS)
+    assert res["locks"]["writer"]["reads"] == "same" and res["verdict"] == "HELD__every_exported_delivery_has_a_line"
+
+
+def test_rank49_open_d0_prints_and_does_not_refuse(seams, tmp_path):
+    t = PREREG.read_text(encoding="utf-8")
+    t = _row(_row(t, "d0", "[builder-set: open]"), "close", "[builder-set: open]")
+    t = _row(_row(t, "scorer_sha256", "0" * 64), "writer", "someone else 1")
+    res, _ = _run(tmp_path, "od", prereg=_write(tmp_path, "od.md", t))
+    assert res["status"] == "nothing_counted"
+    assert res["locks"]["scorer"]["reads"] == "differs" and res["locks"]["writer"]["reads"] == "differs"
+
+
+# rank 50: --rehearse scores a local copy offline and never prints a verdict
+
+def test_rank50_rehearsal_is_offline_and_never_a_verdict(seams, tmp_path, monkeypatch):
+    fetched = []
+    inner = census._fetch_once
+    monkeypatch.setattr(census, "_fetch_once", lambda src: (fetched.append(src), inner(src))[1])
+    res, out = _run(tmp_path, "rh", ledger=str(LEDGER), export=HELD, anchors=ANCHORS, rehearse=True)
+    assert [s for s in fetched if census._is_url(s)] == []
+    assert res["status"] == "rehearsal" and res["verdict"] is None
+    rh = res["rehearsal"]
+    assert (rh["status_if_report_holds"], rh["row_if_report_holds"]) == ("scored",
+                                                                         "HELD__every_exported_delivery_has_a_line")
+    c = res["window"]["opening_condition"]["c"]
+    assert c["held"] is False and c["offline_held"] is True and "not fetched in a rehearsal" in c["evidence"]
+    assert res["result"]["window_opened"] == 0 and res["ledger"]["bound"].startswith("rehearsal: a local copy")
+    assert res["sentences"][0].startswith("rehearsal, not a result") and "no verdict is printed" in res["sentences"][0]
+    md = (out / "RESULT.md").read_text(encoding="utf-8")
+    assert "status: rehearsal" in md and "verdict: none" in md
+
+
+def test_rank50_rehearsal_needs_a_local_copy_and_names_what_it_skipped(seams, tmp_path):
+    res, _ = _run(tmp_path, "rh2", rehearse=True)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "rehearse"
+    url = "https://example.invalid/censusbot/anchors.json"
+    res, _ = _run(tmp_path, "rh3", ledger=str(LEDGER), anchors=url, rehearse=True, now="2026-10-05T12:00:00Z")
+    assert res["rehearsal"]["not_fetched"] == [{"what": "the posted anchor texts", "url": url}]
+    assert res["rehearsal"]["status_if_report_holds"] == "in_progress" and res["fetch_failures"] == []
+    t = PREREG.read_text(encoding="utf-8")
+    zeros = _reseal(_row(t, "scorer_sha256", "0" * 64))
+    res, _ = _run(tmp_path, "rh4", prereg=_write(tmp_path, "rh4.md", zeros), ledger=str(LEDGER), rehearse=True)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "scorer_sha256"   # a fill mistake, caught offline
+
+
+def test_rank50_cli_rehearsal(cli, tmp_path):
+    r = cli("census", "--prereg", PREREG, "--rehearse", "--ledger", LEDGER, "--anchors", ANCHORS, "--export", HELD,
+            "--now", NOW, "--out", tmp_path / "rh", "--no-js")
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.startswith("rehearsal: no verdict") and "did not answer" not in r.stdout + r.stderr
+    doc = json.loads((tmp_path / "rh" / "RESULT.json").read_text(encoding="utf-8"))
+    assert doc["status"] == "rehearsal" and doc["verdict"] is None and doc["fetch_failures"] == []
+
+
+# rank 51: census-digests prints the values a fill copies, from the ledger and from the kit
+
+def test_rank51_digests_print_the_values_a_fill_copies(cli):
+    r = cli("census-digests", "--ledger", LEDGER)
+    assert r.returncode == 0, r.stdout + r.stderr
+    d = json.loads(r.stdout)
+    fl, t = d["from_the_ledger"], PREREG.read_text(encoding="utf-8")
+    for name in ("header_digest", "writer", "earliest_anchor", "kinds", "certifies", "anchor_tz", "agent"):
+        assert "| %s = `%s` |" % (name, fl[name]) in t, (name, fl[name])
+    assert d["from_this_kit"]["scorer_sha256"] == _running_census_sha()
+    assert d["from_this_kit"]["kit_version"] == census.kit_values()["kit_version"]
+    r = cli("census-digests", "--prereg", PREREG, "--ledger", LEDGER)
+    d = json.loads(r.stdout)
+    assert r.returncode == 0 and "registration_sha256" in d and "from_the_ledger" in d
+    assert cli("census-digests").returncode == 2
+    ex = VECTORS / "exhibit"   # a v0 chain with withheld lines: the earliest anchor is the one the exhibit posted
+    r = cli("census-digests", "--ledger", ex / "ledger.jsonl", "--withheld", ex / "withheld.json")
+    fl = json.loads(r.stdout)["from_the_ledger"]
+    posted = json.loads((ex / "anchors" / "index.json").read_text(encoding="utf-8"))["anchors"][0]["text"]
+    assert r.returncode == 0 and fl["rederives"] is True and fl["earliest_anchor"] == posted
+    assert cli("census-digests", "--ledger", ex / "ledger.jsonl").returncode == 1   # without the list it does not re-derive
+
+
+# rank 69: the verbatim rows keep a trailing parenthesis
+
+def test_rank69_certifies_keeps_its_parenthesis():
+    t = _row(PREREG.read_text(encoding="utf-8"), "certifies", "one line per message (hashes only)")
+    t = _row(t, "delivery_kinds", "send (the only delivery kind)")
+    cut = census.parse_prereg(t)["cut"]
+    assert cut["certifies"] == "one line per message (hashes only)"
+    assert cut["delivery_kinds"] == "send"
+
+
+def test_rank69_a_header_ending_in_a_parenthesis_matches(tmp_path, monkeypatch):
+    cert = "one line per message censusbot delivered (hashes only)"
+    assert census._cut_comment(cert) != cert   # the rule that used to cut it
+    monkeypatch.setattr(M, "CERTIFIES", cert)
+    led = tmp_path / "ledger69.jsonl"
+    meta = M.build_ledger(led)
+    shelf = tmp_path / "shelf69.json"
+    shelf.write_bytes(M.shelf_report(meta))
+    mp = M.fetch_map()
+    mp[M.LEDGER_URL], mp[M.SHELF_URL] = led, shelf
+    monkeypatch.setattr(M, "fetch_map", lambda: mp)
+    M.install_seams(census, monkeypatch.setattr)
+    t = _row(PREREG.read_text(encoding="utf-8"), "certifies", cert)
+    t = _row(_row(t, "header_digest", meta["header_digest"]), "earliest_anchor", meta["anchors"][0])
+    p = _write(tmp_path, "p69.md", M.seal(M.regate(t), hashlib.sha256(shelf.read_bytes()).hexdigest()))
+    res, _ = _run(tmp_path, "r69", prereg=p)
+    assert res["status"] == "scored", res.get("refusal")
+    assert res["header"]["certifies"] == cert and res["header"]["mismatch_with_registration"] == []
+    assert res["window"]["opening_condition"]["c"]["held"] is True
+
+
+# rank 70: every url the scorer fetches is https; an http url is refused before any fetch
+
+def test_rank70_http_is_refused(seams, tmp_path, monkeypatch):
+    fetched = []
+    inner = census._fetch_once
+    monkeypatch.setattr(census, "_fetch_once", lambda src: (fetched.append(src), inner(src))[1])
+    t = PREREG.read_text(encoding="utf-8")
+    http_ledger = M.LEDGER_URL.replace("https://", "http://")
+    h1 = _reseal(_row(t, "ledger_url", http_ledger))
+    res, _ = _run(tmp_path, "h1", prereg=_write(tmp_path, "h1.md", h1), ledger=None)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "ledger_url"
+    h2 = _reseal(_row(t, "anchors_url", "http://example.invalid/a.json"))
+    res, _ = _run(tmp_path, "h2", prereg=_write(tmp_path, "h2.md", h2))
+    assert res["status"] == "refused" and res["refusal"]["code"] == "anchors_url"
+    res, _ = _run(tmp_path, "h3", anchors="http://example.invalid/a.json")
+    assert res["status"] == "refused" and res["refusal"]["code"] == "http"
+    res, _ = _run(tmp_path, "h4", export="http://example.invalid/export.json", anchors=ANCHORS)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "http"
+    o = _row(_row(t, "d0", "[builder-set: open]"), "close", "[builder-set: open]")
+    res, _ = _run(tmp_path, "h5", prereg=_write(tmp_path, "h5.md", _row(o, "ledger_url", http_ledger)), ledger=None)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "http"
+    assert [s for s in fetched if s.startswith("http://")] == []
+
+
+# ---- the review of 2026-11-09 (census group): the export goes through the one fetch helper; a refusal keeps what did
+# not answer and the locks; a rehearsal prints its own sentence and nothing after it
+
+EXPORT_URL = "https://example.invalid/censusbot/export.json"   # not in the seams' fetch map: it does not answer
+COVERAGE_LINE = re.compile(r"^(> )?(G-1|G-2|the anchor check|the instrument check)", re.M)
+
+
+def test_review_export_url_that_does_not_answer_is_a_fetch_failure(seams, tmp_path):
+    """an https export that does not answer is tried and waited for as any url, named in fetch_failures, and leaves
+    census_run 0: the row is UNFALSIFIED, and its sentence says the export did not answer. it is never a refusal."""
+    said, slept = [], []
+    res, out = _run(tmp_path, "ex", export=EXPORT_URL, anchors=ANCHORS, tries=2, interval_s=60, sleep=slept.append,
+                    say=said.append)
+    assert res["status"] == "scored", res.get("refusal")
+    assert res["verdict"] == "UNFALSIFIED__no_census_of_the_destinations"
+    assert [(f["what"], f["source"], f["tries_used"]) for f in res["fetch_failures"]] == [("the export", EXPORT_URL, 2)]
+    assert slept == [60]
+    assert any(s.startswith("census: the export, try 1 of 2: %s did not answer" % EXPORT_URL) for s in said), said
+    assert any(s.startswith("census: the export did not answer after 2 tries: " + EXPORT_URL) for s in said), said
+    c = res["census"]
+    why = "the export did not answer in this run, after 2 tries; no message was read"
+    assert res["result"]["census_run"] == 0 and c["why_not_run"] == why
+    assert c["export"] == {"source": EXPORT_URL, "tries_used": 2,
+                           "failure": {"code": "unreachable", "reason": "%s did not answer within 30 s: URLError"
+                                                                        % EXPORT_URL}}
+    s0 = res["sentences"][0]
+    assert "but the export of chan-1 https://example.invalid/chan-1 for the window named for this run did not " \
+           "answer;" in s0 and "was committed" not in s0, s0
+    assert "G-1: unmeasured (%s)." % why in res["sentences"]
+    md = (out / "RESULT.md").read_text(encoding="utf-8")
+    assert "did not answer: the export, after 2 tries: %s did not answer" % EXPORT_URL in md
+    assert "census: not run (%s)" % why in md
+
+
+def test_review_export_file_that_cannot_be_read_is_a_fetch_failure(seams, tmp_path):
+    res, _ = _run(tmp_path, "exf", export=str(tmp_path / "no_such_export.json"), anchors=ANCHORS)
+    assert res["status"] == "scored" and res["verdict"] == "UNFALSIFIED__no_census_of_the_destinations"
+    assert [(f["what"], f["source"], f["tries_used"], f["failure"]["code"]) for f in res["fetch_failures"]] == [
+        ("the export", "no_such_export.json", 1, "unreadable")]
+    assert res["census"]["why_not_run"] == "the export did not answer in this run, after 1 try; no message was read"
+
+
+def test_review_export_that_is_not_json_is_refused_and_keeps_what_did_not_answer(seams, tmp_path):
+    """bytes that arrive and are not the export's json are still a refusal; the refused RESULT.json keeps every source
+    that did not answer before it, and the locks."""
+    bad = _write(tmp_path, "export_bad.json", "not json")
+    gone = "https://example.invalid/censusbot/anchors_gone.json"
+    res, out = _run(tmp_path, "exj", export=str(bad), anchors=gone, tries=1)
+    assert res["status"] == "refused" and res["refusal"]["code"] == "export"
+    assert [(f["what"], f["source"]) for f in res["fetch_failures"]] == [("the posted anchor texts", gone)]
+    assert sorted(res["locks"]) == ["kit", "scorer", "writer"]
+    md = (out / "RESULT.md").read_text(encoding="utf-8")
+    assert "did not answer: the posted anchor texts, after 1 try: %s did not answer" % gone in md
+    assert "lock scorer_sha256: registered" in md and "refused (export): the export is not json" in md
+    res, _ = _run(tmp_path, "exr", runner="me")   # refused before anything is read: an empty list, no locks
+    assert res["status"] == "refused" and res["fetch_failures"] == [] and "locks" not in res
+
+
+def test_review_cli_export_url_that_does_not_answer_exits_2(cli, tmp_path):
+    """the review's run, in a subprocess (no seams): the ledger url and the export url do not answer; exit 2, both
+    named, and RESULT.json is not a refusal. an export that is not json is refused (exit 1) and still names them."""
+    out = tmp_path / "cx"
+    r = cli("census", "--prereg", PREREG, "--ledger", LEDGER, "--export", EXPORT_URL, "--out", out, "--now", NOW,
+            "--no-js", "--tries", "1")
+    assert r.returncode == 2, r.stdout + r.stderr
+    assert "; the export after 1 try: %s did not answer" % EXPORT_URL in r.stdout, r.stdout
+    doc = json.loads((out / "RESULT.json").read_text(encoding="utf-8"))
+    assert doc["status"] != "refused" and doc["verdict"] == "NOT_RUN__window_did_not_open"
+    assert [(f["what"], f["source"]) for f in doc["fetch_failures"]] == [("ledger_url", M.LEDGER_URL),
+                                                                         ("the export", EXPORT_URL)]
+    bad = _write(tmp_path, "export_bad.json", "not json")
+    r = cli("census", "--prereg", PREREG, "--ledger", LEDGER, "--export", bad, "--out", tmp_path / "cx2", "--now", NOW,
+            "--no-js", "--tries", "1")
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert r.stdout.startswith("refused (export): the export is not json; did not answer: ledger_url after 1 try: "
+                               + M.LEDGER_URL), r.stdout
+    doc = json.loads((tmp_path / "cx2" / "RESULT.json").read_text(encoding="utf-8"))
+    assert [f["what"] for f in doc["fetch_failures"]] == ["ledger_url"] and "scorer" in doc["locks"]
+
+
+def test_review_rehearsal_prints_one_sentence(tmp_path, monkeypatch):
+    """a rehearsal's sentences are its own sentence only: no G-1, G-2, anchor or instrument line, neither when the
+    fill would not open (the kit's own shelf prefix: the README's command) nor when it would be scored (the seams)."""
+    res, out = _run(tmp_path, "rn", ledger=str(LEDGER), export=HELD, anchors=ANCHORS, rehearse=True, js=False)
+    assert res["status"] == "rehearsal" and res["rehearsal"]["status_if_report_holds"] == "nothing_counted"
+    M.install_seams(census, monkeypatch.setattr)
+    held, out2 = _run(tmp_path, "rs", ledger=str(LEDGER), export=HELD, anchors=ANCHORS, rehearse=True)
+    assert held["rehearsal"]["row_if_report_holds"] == "HELD__every_exported_delivery_has_a_line"
+    for r, o in ((res, out), (held, out2)):
+        assert len(r["sentences"]) == 1 and r["sentences"][0].startswith("rehearsal, not a result"), r["sentences"]
+        md = (o / "RESULT.md").read_text(encoding="utf-8")
+        assert not COVERAGE_LINE.search(md), md
+        assert [x for x in md.splitlines() if x.startswith("> ")] == ["> " + r["sentences"][0]]

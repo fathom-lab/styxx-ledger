@@ -1,3 +1,22 @@
+> **the operator's checklist** (template only: a filled copy drops it, the change logs under it, and the paragraphs
+> "a template, not a registration" and "the warning this template carries". the files the text cites that this
+> repository does not carry are named in the receipt key; none of them is needed to fill this file.)
+> 1. keep a protocol v1 ledger (`PROTOCOL_v1.md`) at an https url, and ask the lab for a shelf read of it (the lab's
+>    act): no window opens before its report exists under `https://fathom-lab.github.io/styxx-shelf/reports/reads/`.
+> 2. fill the 32 rows of "the placeholders" in the form of "how to fill" (a), after the examples in the rows, and put
+>    each value wherever its double-brace name stands in the text. from a kit checkout or an editable install,
+>    `styxx-ledger census-digests --ledger <ledger>` (`--withheld <file>` too, when lines are withheld) prints
+>    header_digest, writer, earliest_anchor, kinds, certifies, scorer_sha256 and kit_version; `--prereg <file>` prints
+>    gates_sha256 and the walk (256 assignments, 0 unreached).
+> 3. save with lf line ends; publish it as a pull request or branch path (registration_url), merged before a
+>    scheduled ci run relies on it.
+> 4. under §15, in this order: the registration entry, the shelf read entry, and your signature line before 00:00 d0.
+> 5. rehearse offline: `styxx-ledger census --prereg <file> --rehearse --ledger <a local copy> --now <scoring date>
+>    --out <dir>` (nothing fetched, no verdict; a fill mistake is refused here as it would be at scoring; §12).
+> 6. from d0, post each day's anchor at anchor_place (§9); at close, commit the export ("how to fill" (b)). the lab
+>    scores at the scoring date with `--runner lab`; your ci is a re-run (PREREG_CI_SNIPPET.md): add
+>    `--runner operator` to its census step once its `KIT_COMMIT` carries it (`styxx-ledger census --help` lists it).
+
 > change log — 2026-11-09 06:30Z (the lead): the shelf has the v1 row shape since styxx-shelf aabe6bf (`shelf_read.cjs`,
 > `docs/outside_ledgers.json`, `docs/reports/`), and `census.SHELF_HAS_V1_ROW` is set True in the kit. the register holds
 > v1 rows 0 of 2 (both rows are the lab's own). sentences below that said "the shelf has no v1 row" now read "no
@@ -6,11 +25,27 @@
 > line ends is refused with code `crlf` (the digests are over lf bytes); (i) and §3 (c) name the shelf's kept reads,
 > `https://fathom-lab.github.io/styxx-shelf/reports/reads/`, as the only host a shelf report is fetched from (the
 > kit's `census.SHELF_REPORT_PREFIX`); a report on any other host fails (c) unfetched.
+> change log — 2026-11-09 (the lab's improvement sweep, census group, ranks 31, 32, 48-52 and 69-71): the operator's
+> checklist above; a literal example in each row that needed a guess (kinds, writer, kit_version, anchor_place,
+> census_source, census_tool_sha256, scorer_sha256, header_digest), and `census-digests --ledger` prints the values a
+> fill copies; `certifies` is read whole, never cut by the comment rule ((a)); every url is https and an http url is
+> refused (the rows, §5); the registered scorer, kit and writer are compared with the running ones and a mismatch is
+> refused (§5, §11); RESULT.json names who ran it, and the held sentence says "counted by" that runner (§8, §10, §13);
+> `--rehearse` scores a local copy offline and prints no verdict (§5, §12); a url that does not answer is named and
+> the cli exits 2, with RESULT.json still written (§5). the cited files the repository does not carry are marked in
+> the receipt key, and the paragraphs a filled copy drops are marked where they stand.
+> change log — 2026-11-09 (the lab's improvement sweep, census group, the review's findings): checklist step 6 says
+> to add `--runner operator` once the ci snippet's `KIT_COMMIT` carries it; the `kit_version` example is the form
+> only (the sha256 of no bytes), since a kit that compares the locks refuses any vectors sha256 but its own; an
+> export that does not answer is a fetch failure like any url, never a refusal: `census_run` 0, named in
+> `fetch_failures`, exit 2, and the UNFALSIFIED sentence says it did not answer (§5, §10); a refused RESULT.json still
+> names every source that did not answer (§5); a rehearsal prints its own sentence only (§12).
 
 # PREREG_census — {{agent}} under the styxx ledger: a census of one outside agent's deliveries against its published ledger, counted for 28 days under a rule frozen before the window opens — {{registration_date}}
 
-**a template, not a registration.** this file becomes a registration only when every double-brace placeholder is filled
-in the form "how to fill" gives, the filled bytes are published at `{{registration_url}}` by a forge whose server sets
+**a template, not a registration.** (template only: a filled copy drops this paragraph.) this file becomes a
+registration only when every double-brace placeholder is filled in the form "how to fill" gives, the filled bytes
+are published at `{{registration_url}}` by a forge whose server sets
 the time, and the dated entries under §15 name the registration digest (the sha256 of the filled file's bytes before
 the line that starts `## 15.`), the shelf's read and the operator's signature line. a placeholder left anywhere in a
 filled file is a refusal of the registration, not a gap to read around. written 2026-11-09 by fathom lab (THE_PLAN
@@ -20,13 +55,13 @@ carry) from
 (`PROTOCOL_v1.md`, here: `P1`), a public url, anchors per day in the operator's `anchor_tz`, numerals counted only
 where the operator's own lines carry them, kinds and `certifies` read from the ledger's header.
 
-**the warning this template carries.** the lab's own record says the biggest unproven thing about the ledger is a
-second hand: "reproducible, not independent" (`WHAT_IT_AMOUNTS_TO.md` §6.2 item 3, quoting the styxx shelf's
-readme), and outside ledgers the shelf reads today: 0 (§7 item 7 there, which counts "ledgers the shelf reads that
-the lab does not write"). a filled copy of this file run to close is how that count leaves 0. it is still one
-operator's count (§14). **no outside window can open today**: condition (c) of §3 needs a shelf report of the outside
-ledger, and no outside ledger has been published (the shelf's register holds v1 rows 0 of 2, 2026-11-09); the scorer
-verifies (c) against the shelf's report once one exists.
+**the warning this template carries.** (template only: a filled copy drops this paragraph.) the lab's own record says
+the biggest unproven thing about the ledger is a second hand: "reproducible, not independent" (`WHAT_IT_AMOUNTS_TO.md`
+§6.2 item 3, quoting the styxx shelf's readme), and outside ledgers the shelf reads today: 0 (§7 item 7 there, which
+counts "ledgers the shelf reads that the lab does not write"). a filled copy of this file run to close is how that
+count leaves 0. it is still one operator's count (§14). **no outside window can open today**: condition (c) of §3
+needs a shelf report of the outside ledger, and no outside ledger has been published (the shelf's register holds v1
+rows 0 of 2, 2026-11-09); the scorer verifies (c) against the shelf's report once one exists.
 
 **how every bar is marked.** each bar, threshold, window length, population rule and floor below carries one of:
 
@@ -56,19 +91,19 @@ the forms §15 gives, because a byte above §15 cannot name a digest of itself.
 | `{{agent}}` | the ledger header's `agent`, verbatim (`P1` §1: 1-32 characters of `[a-z0-9_-]`); for a v0 chain, the v0 anchor word `gate` (§3, §9) |
 | `{{agent_description}}` | one line: what the agent is and where it posts (e.g. "a discord bot answering in one public channel") |
 | `{{agent_account}}` | the platform account the agent delivers as, in the form the census export prints it (a bot user id, a handle); it selects which exported messages are the agent's |
-| `{{ledger_url}}` | an https url serving `ledger.jsonl` byte for byte (`P1` §6), readable without a login; the scorer scores only the bytes at this url |
-| `{{withheld_url}}` | the https url of `withheld.json` (`P1` §6), or `none` |
-| `{{anchors_url}}` | an https url listing the posted anchor texts in a form of "how to fill" (e), or `none` when the anchor place itself is the list (the lab then collects the texts at scoring) |
-| `{{anchor_place}}` | where each day's anchor text is posted: a public place readable without a login (`P1` §5) where the operator cannot edit or delete a post (§9, new) |
+| `{{ledger_url}}` | an https url serving `ledger.jsonl` byte for byte (`P1` §6), readable without a login; the scorer scores only the bytes at this url, and refuses an http url |
+| `{{withheld_url}}` | the https url of `withheld.json` (`P1` §6), or `none`; an http url is refused |
+| `{{anchors_url}}` | an https url listing the posted anchor texts in a form of "how to fill" (e), or `none` when the anchor place itself is the list (the lab then collects the texts at scoring); an http url is refused |
+| `{{anchor_place}}` | where each day's anchor text is posted: a public place readable without a login (`P1` §5) where the operator cannot edit or delete a post (§9, new); written as the url a reader opens, e.g. `https://example.org/kestrel/anchors/` (the form only: whether a place holds is the lab's judgement at scoring, §9) |
 | `{{anchor_tz}}` | the ledger header's `anchor_tz`, verbatim |
-| `{{certifies}}` | the ledger header's `certifies`, verbatim |
-| `{{kinds}}` | the ledger header's `kinds`, verbatim (a v1 header must list `anchor` and `started`) |
+| `{{certifies}}` | the ledger header's `certifies`, verbatim; this row is read whole, never cut by the comment rule of "how to fill" (a), so it carries no comment |
+| `{{kinds}}` | the ledger header's `kinds`, verbatim (a v1 header must list `anchor` and `started`), as a comma list, e.g. `anchor,note,send,started` (`census-digests --ledger` prints it; the header's own json text reads the same) |
 | `{{delivery_kinds}}` | the subset of `{{kinds}}` whose lines record a delivery (e.g. `send`); never `anchor` or `started` |
 | `{{sent_hash_field}}` | the field on a delivery line that holds the sha256 of the delivered text (e.g. `sent_sha256`), or `none` |
 | `{{destination_field}}` | the field on a delivery line that names its destination (a plain id or a keyed hash), or `none` |
 | `{{public_destinations}}` | the destinations in the population, in the form of "how to fill" (g) |
-| `{{census_source}}` | how the destinations' messages are exported at close (the tool, its version, the command), and who can repeat it |
-| `{{census_tool_sha256}}` | sha256 of the export tool's bytes as run, or `none` when the export is a platform's own download |
+| `{{census_source}}` | how the destinations' messages are exported at close (the tool, its version, the command), and who can repeat it, e.g. `kestrel-export 0.3.1, python export.py --channel 123456 --out export.json, repeatable by anyone who can read channel 123456` |
+| `{{census_tool_sha256}}` | sha256 of the one file, as run, that writes the export in the form of "how to fill" (b): your exporter, or the converter that turns a platform's download into that form; `none` when the platform's own download is already that form. e.g. `9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08` (the form only) |
 | `{{normalisation_rule}}` | one of the six rules of "how to fill" (c), spelled exactly |
 | `{{native_strings}}` | the fixed strings the platform posts as the agent without the agent's writer seeing them (join notices, pins), as a json list of strings, or `none` ("how to fill" (d)) |
 | `{{numerals_field}}` | the field on a delivery line holding integer `total`, `bound` and `unbound` numeral counts, or `none` |
@@ -79,11 +114,11 @@ the forms §15 gives, because a byte above §15 cannot name a digest of itself.
 | `{{registration_url}}` | the public url of the filled file as a pull request or a branch path on a forge whose server sets the time; never a commit's own url (a commit cannot carry its own digest) |
 | `{{registration_date}}` | the date the filled file is published, `YYYY-MM-DD` |
 | `{{gates_sha256}}` | derived: sha256 of the gates block's bytes between its fences ("how to fill" (h)) |
-| `{{header_digest}}` | derived: the ledger header's digest (`P1` §3) as read at registration |
-| `{{writer}}` | the `started` entry's `writer` `{name, version}` as the ledger carries it at registration |
-| `{{earliest_anchor}}` | the earliest anchor text of `{{agent}}`'s ledger that holds (`P1` §5), verbatim; it names the head the shelf must read |
-| `{{scorer_sha256}}` | sha256 of the census scorer's bytes (THE_PLAN 3d, the second half), or `not built at the freeze` |
-| `{{kit_version}}` | the styxx-ledger version the scorer verifies with, and the sha256 of its `vectors/vectors_v1.json` |
+| `{{header_digest}}` | derived: the ledger header's digest (`P1` §3) as read at registration, which is seq 1's `prev`; `census-digests --ledger` prints it, e.g. `702c8ef801ec75ed03b516a947cef7a8683882a3d53ecaf6a3933d17a116a453` (the kit's census fixture) |
+| `{{writer}}` | the `started` entry's `writer` `{name, version}` as the ledger carries it at registration: the name, the version and, when the entry names one, the language, e.g. `styxx-ledger 1.0.0a3 python` (`census-digests --ledger` prints it; a part holding a space is written as the entry's json object, e.g. `{"name":"my writer","version":"2"}`). the scorer compares it with the started entries before `{{d0}}` and refuses one none of them carries |
+| `{{earliest_anchor}}` | the earliest anchor text of `{{agent}}`'s ledger that holds (`P1` §5), verbatim; it names the head the shelf must read (`census-digests --ledger` prints the earliest one the ledger's own anchor lines record that holds) |
+| `{{scorer_sha256}}` | sha256 of the census scorer's bytes (THE_PLAN 3d, the second half): the one file `python/src/styxx_ledger/census.py` of the kit that will score the window, as `census-digests` prints it, e.g. `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` (the form only: the sha256 of no bytes), or `not built at the freeze`. the scorer compares it with its own bytes and refuses another (§11) |
+| `{{kit_version}}` | the styxx-ledger version the scorer verifies with, and the sha256 of its `vectors/vectors_v1.json`, as `census-digests` prints them from a kit checkout or an editable install, e.g. `styxx-ledger 1.0.0a3 vectors_v1.json sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` (the form only: the sha256 of no bytes; copy the value `census-digests` prints from the kit you register). the scorer compares the sha256 with the vectors file beside it and refuses another (§11) |
 
 ---
 
@@ -99,8 +134,10 @@ between backticks in the left cell; the right cell is kept:
     | normalisation_rule = `strip` | one of the six rules ... |
 
 a value that ends in a parenthesis opened by a space and `(` carries a comment, which the scorer cuts:
-`send (105 of 106 entries)` reads `send`. everywhere else in the file each double-brace placeholder is replaced by its
-value with the comment cut. every one of the 32 names appears once in the table. `[builder-set: open]` marks a value
+`send (105 of 106 entries)` reads `send`. the one row read whole is `certifies`: a header's sentence may itself end
+in a parenthesis, so that row takes no comment and is compared with the header as written. everywhere else in the
+file each double-brace placeholder is replaced by its value with the comment cut (`certifies` whole). every one of
+the 32 names appears once in the table. `[builder-set: open]` marks a value
 open in an illustration only (the red example); with `{{d0}}` filled, an open value is a refusal.
 
 **(b) the export.** one json file, committed with the result at or after close:
@@ -160,12 +197,16 @@ unfetched.
 
 ## receipt key
 
-- `DPR` = `PREREG_darkflobi_gate_2026_10_23.md` (`papers/darkflobi-gate/`, sealed as its §15 records); `DPR §n` cites
-  its section. quotes from it are 25 words or fewer.
+- `DPR` = `PREREG_darkflobi_gate_2026_10_23.md` (`papers/darkflobi-gate/` in the public repository
+  github.com/fathom-lab/styxx, where it answered 200 on 2026-11-09; sealed as its §15 records); `DPR §n` cites its
+  section. quotes from it are 25 words or fewer.
 - `P1` = `PROTOCOL_v1.md` of the styxx-ledger kit; `P1 §n` its section. `KIT` = the kit's `README.md` and
   `vectors/README.md`.
 - `SHELF` = the styxx shelf, the nightly re-derivation the lab runs outside the box (its readme: "reproducible, not
   independent").
+- lab-internal, not published, and not needed to fill this file: THE_PLAN (the lab's plan of record; "THE_PLAN 3d"
+  is the item this template and its scorer belong to), `WHAT_IT_AMOUNTS_TO.md`, `FRONTIER_2026_11_09.md` and the
+  lab's adversarial review of this template.
 - `here:` = checked by the operator when filling this file, each with the command and its output in the registration's
   commit message or beside it. a filled copy carries at least: here:1, the ledger at `{{ledger_url}}` re-derives under
   both reference implementations with one head; here:2, `{{earliest_anchor}}` holds; here:3, `{{header_digest}}`
@@ -335,7 +376,16 @@ the scoring date it writes status `in_progress`, counts so far and no verdict; f
 it refuses (status `refused`, exit 1, RESULT.json still written) only on a defect of the file or of what it was
 handed: a placeholder left, a value open with `{{d0}}` filled, bytes above §15 that do not hash to the registration
 entry, a gates block that moves a lab-set bar or does not hash to `{{gates_sha256}}`, a normalisation rule or native
-list outside "how to fill", a `--ledger` that is not `{{ledger_url}}` or a local copy whose sha256 is not the url's.
+list outside "how to fill", a `--ledger` that is not `{{ledger_url}}` or a local copy whose sha256 is not the url's,
+an http url (every url it fetches is https), and, with `{{d0}}` filled, a `{{scorer_sha256}}`, a vectors sha256 in
+`{{kit_version}}` or a `{{writer}}` that is not the running scorer's, the running kit's or one of the ledger's
+started entries before `{{d0}}` (§11; `not built at the freeze` is printed, never refused). a url that does not
+answer is never a refusal (an export that does not answer leaves `census_run` 0): each failed try and each wait is
+announced, `fetch_failures` in RESULT.json names every source that did not answer, and the cli exits 2 with
+RESULT.json written (1 when the run is refused for another reason; that RESULT.json still names them). a run with
+`--rehearse` scores a local copy offline and writes status `rehearsal`: no verdict, only the row the fill reaches if
+the checks of (c) that need the shelf's report hold (§12). every RESULT.json names its runner (`--runner`; "not
+stated" without it).
 
 **reported beside them, no bar**: lines by kind in each cell; exact, normalised and native matches;
 `missing_from_export` (delivery lines with no exported message: a deleted message, or an export gap; listed by seq);
@@ -429,7 +479,9 @@ lab's, printed with the result: whether `{{anchor_place}}` meets §9 (`--anchor-
 **who counts.** the scorer (`{{scorer_sha256}}`), run by anyone who holds `{{ledger_url}}`, the posted anchors and
 the committed export. the operator exports and signs; the lab reads and runs the scorer at the scoring date and
 publishes its output whatever the row. the operator does not run the scorer that reports on their window, and if
-they do, the lab's run is the one cited. **open outside run**: the scorer, this file and the export are public from
+they do, the lab's run is the one cited. each run names its runner in RESULT.json (`--runner lab`, `operator` or
+`other`; "not stated" without it), and the held sentence of §10 says "counted by" that runner, so an operator's
+own run never prints the lab as its counter. **open outside run**: the scorer, this file and the export are public from
 close; j outside re-runs reporting the same receipt sha256 are printed, including j = 0 (`DPR` §8's open outside
 seat, adapted).
 
@@ -495,8 +547,11 @@ denominators in every case.
 > line, under a rule frozen at {{registration_url}} on {{registration_date}}; the census read [k] of [k] planted
 > misses. [m] lines had no exported message ([m] of [D], listed by seq); [w] seqs in the window were withheld by the
 > publisher. [where numerals are carried: of [Nn] numerals the operator's writer counted, [Nb] were marked bound and
-> [Nu] unbound, the writer's own counts.] this is one operator's ledger counted by the lab under a frozen rule: custody
-> of what was delivered, not that any message is true, and nothing in it is signed.
+> [Nu] unbound, the writer's own counts.] this is one operator's ledger counted by [runner] under a frozen rule:
+> custody of what was delivered, not that any message is true, and nothing in it is signed.
+
+[runner] is the run's own `--runner`, in words: "the lab", "its operator", "a runner other than the lab and the
+operator", or "a runner this run does not name" when none was given; the run that is cited is the lab's (§8).
 
 **if it fails**, under the verdict's own title, counts in every case:
 
@@ -512,8 +567,8 @@ denominators in every case.
   show is not shown, and no sentence of coverage is licensed."
 - `UNFALSIFIED__no_census_of_the_destinations`: "the ledger re-derives ([L_all] lines, head [h]) and was anchored on
   [d] of [dl] days with lines, but no export of {{public_destinations}} for the window was committed [or: the lines
-  carry no hash of the delivered text]; the ledger has no evidence it is complete, and the census sentence reads
-  unfalsified, not held."
+  carry no hash of the delivered text; or: the export of {{public_destinations}} for the window named for this run
+  did not answer]; the ledger has no evidence it is complete, and the census sentence reads unfalsified, not held."
 - `UNCALIBRATED__the_census_missed_a_planted_miss`: "the census instrument read [r] of [k] planted misses (missed:
   [listed]); the row is the instrument's failure, not the subject's, and no count of coverage is printed."
 - `OPEN__deliveries_without_a_line`: "[u] of [E] messages {{agent_account}} delivered in the window match no published
@@ -551,9 +606,9 @@ DPR §11, cut to what exists off the box]`.
 | this file above §15 | `{{registration_url}}` | the registration entry under §15 | the bytes before the line that starts `## 15.`, lf, as the registration commit stores them; the scorer recomputes it and refuses on a mismatch |
 | the gates block | `#gates` of the filled file | `{{gates_sha256}}` | the bytes between the fences, lf, `{{min_deliveries}}` filled ("how to fill" (h)); the scorer refuses on a mismatch |
 | the ledger's header | `{{ledger_url}}` line 1 | `{{header_digest}}` | `P1` §3's header digest; `certifies`, `kinds`, `anchor_tz` verbatim below |
-| the writer | `started` entry | `{{writer}}` | the writer's own statement (`P1` §1), not a hash of its code |
-| the scorer | THE_PLAN 3d second half | `{{scorer_sha256}}` | moves only by AMENDMENT |
-| the reference implementations | styxx-ledger | `{{kit_version}}` | the vectors file's sha256 beside the version |
+| the writer | `started` entry | `{{writer}}` | the writer's own statement (`P1` §1), not a hash of its code; the scorer compares it with the ledger's started entries before `{{d0}}` and refuses one none of them carries |
+| the scorer | THE_PLAN 3d second half: `python/src/styxx_ledger/census.py` | `{{scorer_sha256}}` | moves only by AMENDMENT; the scorer compares it with its own bytes and refuses another; `not built at the freeze` is printed beside the running hash |
+| the reference implementations | styxx-ledger | `{{kit_version}}` | the vectors file's sha256 beside the version; the scorer compares it with the vectors file beside it and refuses another (a value naming no sha256 is printed "not compared") |
 | the export tool | `{{census_source}}` | `{{census_tool_sha256}}` | `none` when the export is a platform's own download |
 
 the header, verbatim: `certifies` = `{{certifies}}`; `kinds` = `{{kinds}}`; `anchor_tz` = `{{anchor_tz}}`.
@@ -585,6 +640,14 @@ the anchor posts, the export (committed with the result, after close), the withh
 7. **scoring date** (§3): the lab runs the scorer, publishes `RESULT.json` and the sentence of §10 for the row it
    reaches, whatever the row.
 
+**a rehearsal**, any time after the §15 entries exist and before `{{d0}}`: `styxx-ledger census --prereg <file>
+--rehearse --ledger <a local copy of the ledger> --now <the scoring date> --out <dir>`, with `--anchors` and
+`--export` as local files when there are any. nothing is fetched; the checks of (c) that need the shelf's report
+read "not fetched"; RESULT.json says status `rehearsal` and names, under `rehearsal.row_if_report_holds`, the row
+the fill would reach if those checks hold. it prints no verdict and one sentence, its own (no G-1, G-2, anchor or
+instrument line: those would be counts of a copy bound to nothing), the readme check refuses it, and a fill mistake
+(a digest, a lock, a form) is refused in a rehearsal as it would be at scoring.
+
 nothing is scored before the scoring date. an amendment before `{{d0}}` is a dated entry under §15 and never an edit
 of the text above it (an edit above §15 breaks the registration digest, and the scorer refuses the file); after
 `{{d0}}` a change to any rule, bar or lock is a new AMENDMENT file beside this one, with lines under the old rule
@@ -604,7 +667,7 @@ counted under the old rule (`DPR` §12).
 | v0 chain | read under the kit's v0 read mode, `{{kinds}}` applied by the scorer | v1 only: a v0 chain cannot register |
 | numerals | counted only where `{{numerals_field}}` carries them; no bar | a bar on the share: not offered; a bar needs a population a panel labels (§5) |
 | operator's commitment | printed, no gate | none |
-| the scorer's runner | the lab | the operator: allowed as a re-run; the lab's run is the one cited (§8) |
+| the scorer's runner | the lab, named in RESULT.json and in the held sentence (`--runner lab`) | the operator: allowed as a re-run, named `--runner operator`, so its "counted by" says the operator; the lab's run is the one cited (§8) |
 
 ---
 
