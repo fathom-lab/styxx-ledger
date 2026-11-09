@@ -5,7 +5,7 @@ log an agent appends to, one hash-chained line per event it is handed, that anyo
 the python package in `../python` implements the same protocol; both are held to `../vectors/vectors_v1.json`.
 
     node >= 20 · commonjs · no npm runtime dependencies (sha256 from node:crypto, the zone database from node's icu)
-    version 1.0.0-alpha.1 · not published to npm
+    version 1.0.0-alpha.2 · not published to npm
 
 ## what it is not
 
@@ -126,7 +126,7 @@ v1 (and a v0 file then gets `no_header`, "this verifier reads v1 only"). the exh
     npx styxx-ledger exhibit <url> [--explorer <esplora api url> ...] [--sample <n>] [--no-ots] [--save <dir>]
                            [--allow-redirect] [--today <YYYY-MM-DD>] [--json]
 
-not on npm yet: from a checkout, `npm pack` here and `npx --package=./styxx-ledger-1.0.0-alpha.1.tgz styxx-ledger
+not on npm yet: from a checkout, `npm pack` here and `npx --package=./styxx-ledger-1.0.0-alpha.2.tgz styxx-ledger
 exhibit <url>`, or `node bin/styxx-ledger.cjs exhibit <url>`. it fetches `ledger.jsonl`, `withheld.json`,
 `anchors/index.json` (and every `.txt` / `.txt.ots` it names) and `witness/index.json` from the base url (node's
 fetch, 30 s per file, 20 MB cap, 3 tries on 5xx / no answer), re-derives the chain (v0 or v1 by the header),
