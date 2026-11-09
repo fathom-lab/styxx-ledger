@@ -70,9 +70,11 @@ NUMERAL_SHARE_FLOOR = 40    # lab-set, template section 5
 OPEN_MARK = "[builder-set: open]"
 TRIES = 3                   # lab-set, template section 5: three tries an hour apart
 INTERVAL_S = 3600
-# opening condition (c) needs a shelf report of the outside ledger. the shelf has no v1 row (TEMPLATE_NOTES question
-# 1); until a kit commit sets this to True, (c) prints "stated, unverified" and no window opens.
-SHELF_HAS_V1_ROW = False
+# opening condition (c) needs a shelf report of the outside ledger. the shelf has a v1 row shape since styxx-shelf
+# aabe6bf (2026-11-09): shelf_read.cjs reads protocol v1 ledgers from the register docs/outside_ledgers.json and writes
+# the report this scorer fetches (docs/reports/<name>.json, kept reads under docs/reports/reads/). the register holds
+# v1 rows 0 of 2 until an outside operator publishes one; the shape exists, the row does not.
+SHELF_HAS_V1_ROW = True
 NORMALISATION_RULES = ("none", "strip", "nfc", "nfc+strip", "crlf-to-lf", "crlf-to-lf+strip")
 
 PLACEHOLDERS = (
