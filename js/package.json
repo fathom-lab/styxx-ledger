@@ -1,6 +1,6 @@
 {
   "name": "styxx-ledger",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "reference writer and verifier for the styxx ledger protocol v1: a hash-chained json-lines log an agent appends to and anyone can re-derive",
   "type": "commonjs",
   "main": "lib/index.js",
@@ -8,6 +8,9 @@
     ".": "./lib/index.js",
     "./verify": "./lib/verify.js",
     "./ledger": "./lib/ledger.js",
+    "./v0": "./lib/v0.js",
+    "./ots": "./lib/ots.js",
+    "./exhibit": "./lib/exhibit.js",
     "./package.json": "./package.json"
   },
   "bin": {

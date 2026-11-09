@@ -8,7 +8,12 @@
    match), verify with the withheld list and anchor texts given, compare with `expect` (only the keys in `compare`
    when a case names them). Write-side cases: call the named function, compare the value or the thrown error's
    `.code`. Prints "k of n vectors answered as the file says"; exit 0 only when k == n. run_vectors.py does the same
-   with the python package. */
+   with the python package.
+
+   Protocol v0 (vectors/v0/, the exhibit's 10 cases over its base.jsonl, byte for byte): answered with js/lib/v0.js
+   (the module next to --verify, or --v0-verify) and the exhibit runner's transforms, printed first as "k of n v0
+   vectors answered as the file says". --only v1 | v0 runs one set; the default runs both, the v1 tally stays the
+   last line, and the exit is 0 only when both sets are answered in full. */
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -20,12 +25,19 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 let vectorsPath = path.join(HERE, "vectors_v1.json");
 let verifyPath = path.join(HERE, "..", "js", "lib", "verify.js");
+let v0VectorsPath = path.join(HERE, "v0", "vectors.json");
+let v0VerifyPath = null;
+let only = "both";
 let verbose = false;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--vectors") vectorsPath = args[++i];
   else if (args[i] === "--verify") verifyPath = args[++i];
+  else if (args[i] === "--v0-vectors") v0VectorsPath = args[++i];
+  else if (args[i] === "--v0-verify") v0VerifyPath = args[++i];
+  else if (args[i] === "--only") only = args[++i];
   else if (args[i] === "-v" || args[i] === "--verbose") verbose = true;
 }
+if (!["v1", "v0", "both"].includes(only)) { console.log("--only takes v1, v0 or both"); process.exit(2); }
 
 let V;
 try { V = require(path.resolve(verifyPath)); }
@@ -156,7 +168,90 @@ async function callWrite(c) {           // -> {value, error}
   }
 }
 
+// ------------------------------------------------------------------------------------------- protocol v0
+async function applyV0(V0, baseBuf, t) {      // the exhibit's run_vectors.cjs transforms, byte for byte
+  const op = t.op;
+  if (op === "identity") return baseBuf;
+  if (op === "crlf_first_line") { const i = baseBuf.indexOf(0x0a); return Buffer.concat([baseBuf.subarray(0, i), Buffer.from("\r\n"), baseBuf.subarray(i + 1)]); }
+  if (op === "truncate_last") {
+    let s = baseBuf; while (s.length && s[s.length - 1] === 0x0a) s = s.subarray(0, s.length - 1);
+    const parts = splitLines(s); parts.pop();
+    return Buffer.concat([joinLF(parts), Buffer.from("\n")]);
+  }
+  let out = [];
+  for (const ln of splitLines(baseBuf)) {
+    if (isBlank(ln)) { out.push(ln); continue; }
+    const o = JSON.parse(ln.toString("utf8"));
+    const s = o.seq;
+    if (op === "set_field" && s === t.seq) { o[t.field] = t.value; out.push(await canon(o)); }
+    else if (op === "drop_seq" && s === t.seq) continue;
+    else if (op === "dup_key" && s === t.seq) out.push(Buffer.concat([ln.subarray(0, ln.length - 1), Buffer.from(',"' + t.key + '":' + JSON.stringify(t.value) + "}", "utf8")]));
+    else out.push(ln);
+  }
+  if (op === "set_field_rechain") {
+    let prev = null; const res = [];
+    for (const ln of out) {
+      if (isBlank(ln)) { res.push(ln); continue; }
+      const o = JSON.parse(ln.toString("utf8"));
+      if (o.schema === V0.V0_LOG_SCHEMA) { prev = await V0.headerDigestV0(o); res.push(ln); continue; }
+      if (o.seq === t.seq) o[t.field] = t.value;
+      if (o.seq >= t.seq) { o.prev = prev; delete o.entry_id; o.entry_id = await V.entryId(o); res.push(await canon(o)); }
+      else res.push(ln);
+      prev = o.entry_id;
+    }
+    out = res;
+  } else if (!["set_field", "drop_seq", "dup_key"].includes(op)) throw new Error("unknown v0 transform op " + op);
+  return joinLF(out);
+}
+
+async function runV0() {                       // -> [answered, total] | null
+  const p = v0VerifyPath || path.join(path.dirname(path.resolve(verifyPath)), "v0.js");
+  let V0;
+  try { V0 = require(path.resolve(p)); }
+  catch (e) { console.log("cannot load the v0 module " + p + ": " + (e && e.message ? e.message : e)); return null; }
+  const d = JSON.parse(fs.readFileSync(v0VectorsPath, "utf8"));
+  const b = fs.readFileSync(path.join(path.dirname(v0VectorsPath), d.base));
+  if (sha(b) !== d.base_sha256) { console.log("the v0 base file is not the one the v0 vectors were made over"); return null; }
+  let good = 0;
+  for (const c of d.cases) {
+    let ok, got;
+    try {
+      const input = await applyV0(V0, b, c.transform);
+      if (sha(input) !== c.input_sha256) { ok = false; got = { input_sha256: sha(input) }; }
+      else {
+        const w = c.withheld || [];
+        const r = await V0.verifyBytesV0(new Uint8Array(input), { withheld: w });
+        got = {
+          ok: r.ok,
+          problem_seqs: [...new Set(r.problems.filter(q => !noSeq(q)).map(q => q.seq))].sort((x, y) => x - y),
+          problems_without_seq: r.problems.filter(noSeq).length,
+          head: r.head, bridged: r.bridged
+        };
+        if (c.anchors) {
+          got.anchors_ok = [];
+          for (const t of c.anchors) { const a = await V0.parseAnchorTextV0(t); got.anchors_ok.push(a ? !!(await V0.checkAnchorV0(r.entries, a, w)).ok : false); }
+        }
+        ok = c.transform.op === "dup_key" ? got.ok === c.expect.ok        // the exhibit runner compares ok only here
+          : Object.keys(c.expect).every(k => stable(got[k]) === stable(c.expect[k]));
+      }
+    } catch (e) { ok = false; got = { thrown: e && e.message ? e.message : String(e) }; }
+    if (ok) good++;
+    if (verbose || !ok) console.log((ok ? "ok   " : "FAIL ") + "v0    " + c.name);
+    if (!ok) { console.log("   expected " + stable(c.expect)); console.log("   got      " + stable(got)); }
+  }
+  console.log("  " + "v0:read".padEnd(22) + " " + good + " of " + d.cases.length);
+  console.log(`${good} of ${d.cases.length} v0 vectors answered as the file says`);
+  return [good, d.cases.length];
+}
+
 (async () => {
+  let v0Failed = false;
+  if (only !== "v1") {
+    const r0 = await runV0();
+    if (r0 === null) process.exit(2);
+    v0Failed = r0[0] !== r0[1];
+    if (only === "v0") process.exit(v0Failed ? 1 : 0);
+  }
   if (sha(base) !== doc.base_sha256) { console.log("the base file is not the one the vectors were made over (a checkout that converted LF to CRLF does this)"); process.exit(2); }
   const total = doc.read.length + doc.write.length;
   let failed = 0; const groups = {};
@@ -191,5 +286,5 @@ async function callWrite(c) {           // -> {value, error}
   for (const g of Object.keys(groups).sort()) console.log("  " + g.padEnd(22) + " " + groups[g][0] + " of " + groups[g][1]);
   console.log("implementation: " + path.relative(process.cwd(), path.resolve(verifyPath)) + " (node " + process.versions.node + ", " + process.platform + ")");
   console.log(`${total - failed} of ${total} vectors answered as the file says`);
-  process.exit(failed ? 1 : 0);
+  process.exit(failed || v0Failed ? 1 : 0);
 })().catch(e => { console.error("error: " + (e && e.message ? e.message : e)); process.exit(2); });

@@ -1,0 +1,51 @@
+{
+ "destinations": [
+  "chan-1"
+ ],
+ "made_at": "2026-10-29T12:00:00Z",
+ "messages": [
+  {
+   "account": "censusbot#0001",
+   "destination": "chan-1",
+   "text": "census fixture message one: 2 numerals, 1 bound",
+   "timestamp": "2026-10-01T14:00:02Z"
+  },
+  {
+   "account": "censusbot#0001",
+   "destination": "chan-1",
+   "text": "  census fixture message two ",
+   "timestamp": "2026-10-01T15:00:02Z"
+  },
+  {
+   "account": "censusbot#0001",
+   "destination": "chan-1",
+   "text": "census fixture message four",
+   "timestamp": "2026-10-02T14:00:02Z"
+  },
+  {
+   "account": "censusbot#0001",
+   "destination": "chan-1",
+   "text": "census fixture message five, after the last anchor",
+   "timestamp": "2026-10-03T14:00:02Z"
+  },
+  {
+   "account": "censusbot#0001",
+   "destination": "chan-1",
+   "text": "censusbot pinned a message",
+   "timestamp": "2026-10-03T20:00:00Z"
+  },
+  {
+   "account": "censusbot#0001",
+   "destination": "dm-9",
+   "text": "census fixture message three, sent to a private place",
+   "timestamp": "2026-10-01T16:00:02Z"
+  },
+  {
+   "account": "someone-else",
+   "destination": "chan-1",
+   "text": "a reader's reply",
+   "timestamp": "2026-10-01T14:30:00Z"
+  }
+ ],
+ "tool": "tests/make_census_fixture.py (synthetic; no platform)"
+}

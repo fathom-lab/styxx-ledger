@@ -103,8 +103,10 @@ def test_verify_names_a_v0_log(cli, tmp_path):
     p = tmp_path / "v0.jsonl"
     p.write_bytes(b'{"anchor_tz":"America/New_York","certifies":"x","created":"2026-10-24T00:00:00Z","schema":"darkflobi.gate/log/v0"}\n'
                   b'{"schema":"darkflobi.gate/entry/v0","seq":1}\n')
-    cp = cli("verify", p)
+    cp = cli("verify", p, "--protocol", "v1")
     assert cp.returncode == 1 and "reads v1 only" in cp.stdout
+    cp = cli("verify", p)   # auto: read under v0's rules, and this line has no entry_id
+    assert cp.returncode == 1 and "protocol v0" in cp.stdout and "reads v1 only" not in cp.stdout
 
 
 def test_bad_anchor_text_fails(cli, tmp_path):

@@ -1,0 +1,647 @@
+{
+ "anchors": {
+  "anchor_place": "https://example.invalid/censusbot/anchors",
+  "by_date_all": {},
+  "coverage": {
+   "after_last_anchor": 10,
+   "last_anchor_seq": 0,
+   "pinned": 0,
+   "unpinned_by_withholding": 0,
+   "unpinned_ranges": [],
+   "withheld": 0
+  },
+  "holding": 0,
+  "ledger_own_anchor_lines": 3,
+  "lines_after_last_anchor": 10,
+  "mismatched": 0,
+  "place_judged": "not judged in this run",
+  "source": "no posted texts read (anchors_url none and none given); the ledger's own 3 anchor line(s) are the writer's statement and anchor no day",
+  "texts": 0,
+  "unparsed": 0,
+  "window": {
+   "anchored_days_with_lines": 0,
+   "conflict_days": 0,
+   "days": [
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-01",
+     "delivery_lines": 2,
+     "duplicate": 0,
+     "late": false,
+     "lines": 3,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-02",
+     "delivery_lines": 1,
+     "duplicate": 0,
+     "late": false,
+     "lines": 3,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-03",
+     "delivery_lines": 1,
+     "duplicate": 0,
+     "late": false,
+     "lines": 2,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-04",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-05",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-06",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-07",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-08",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-09",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-10",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-11",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-12",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-13",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-14",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-15",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-16",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-17",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-18",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-19",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-20",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-21",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-22",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-23",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-24",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-25",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-26",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-27",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    },
+    {
+     "anchored": false,
+     "conflict": 0,
+     "day": "2026-10-28",
+     "delivery_lines": 0,
+     "duplicate": 0,
+     "late": false,
+     "lines": 0,
+     "lines_after_anchor": 0,
+     "mismatched": 0
+    }
+   ],
+   "days_with_lines": 3,
+   "days_with_lines_after_anchor": [],
+   "days_with_unanchored_deliveries": [
+    "2026-10-01",
+    "2026-10-02",
+    "2026-10-03"
+   ],
+   "days_without_lines": [
+    "2026-10-04",
+    "2026-10-05",
+    "2026-10-06",
+    "2026-10-07",
+    "2026-10-08",
+    "2026-10-09",
+    "2026-10-10",
+    "2026-10-11",
+    "2026-10-12",
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15",
+    "2026-10-16",
+    "2026-10-17",
+    "2026-10-18",
+    "2026-10-19",
+    "2026-10-20",
+    "2026-10-21",
+    "2026-10-22",
+    "2026-10-23",
+    "2026-10-24",
+    "2026-10-25",
+    "2026-10-26",
+    "2026-10-27",
+    "2026-10-28"
+   ],
+   "duplicate": 0,
+   "late": 0,
+   "mismatched": 0,
+   "missing_days": [
+    "2026-10-01",
+    "2026-10-02",
+    "2026-10-03"
+   ]
+  }
+ },
+ "census": {
+  "export": null,
+  "instrument": null,
+  "matching": "one published line per exported message at most (multiset)",
+  "why_not_run": "no export committed with the result",
+  "withheld_seqs_in_window": []
+ },
+ "chain_problem_components": {
+  "header_changed": 0,
+  "implementations_disagree": 0,
+  "kinds_outside_registration": 0,
+  "unreachable": 0,
+  "verifier_problems": 0
+ },
+ "gates": {
+  "block_sha256": "bb0cad611122af85acb15c4db3e9b120c6dc78c98c3bc03aca8393d25315d4af",
+  "gates_sha256_registered": "bb0cad611122af85acb15c4db3e9b120c6dc78c98c3bc03aca8393d25315d4af",
+  "rows": [
+   {
+    "bar": "== 1",
+    "count": 1,
+    "denominator": 4,
+    "gate": "G_W_opened",
+    "metric": "result.window_opened",
+    "reads": "conditions held of (a)-(d)",
+    "status": "met"
+   },
+   {
+    "bar": "== 0",
+    "count": 0,
+    "denominator": 10,
+    "gate": "G_C_chain",
+    "metric": "result.chain_problems",
+    "reads": "problem records over lines",
+    "status": "met"
+   },
+   {
+    "bar": "== 0",
+    "count": 0,
+    "denominator": 8,
+    "gate": "G_O_order",
+    "metric": "result.lines_after_day_anchor",
+    "reads": "window lines after their day's anchor, over window lines",
+    "status": "met"
+   },
+   {
+    "bar": "== 0",
+    "count": 4,
+    "denominator": 4,
+    "gate": "G_A_anchored",
+    "metric": "result.unanchored_deliveries",
+    "reads": "population delivery lines on days with no holding posted anchor, over population delivery lines",
+    "status": "not met"
+   },
+   {
+    "bar": "== 1",
+    "count": 0,
+    "denominator": 1,
+    "gate": "G_E_census",
+    "metric": "result.census_run",
+    "reads": "census run",
+    "status": "not met"
+   },
+   {
+    "bar": "== 0",
+    "count": null,
+    "denominator": null,
+    "gate": "G_I_instrument",
+    "metric": "result.instrument_plants_missed",
+    "reads": "planted misses the census did not read, over plants built",
+    "status": "unmeasured"
+   },
+   {
+    "bar": "== 0",
+    "count": null,
+    "denominator": null,
+    "gate": "G_X_census",
+    "metric": "result.unledgered_deliveries",
+    "reads": "unledgered of exported messages in scope",
+    "status": "unmeasured"
+   },
+   {
+    "bar": ">= 3",
+    "count": 4,
+    "denominator": 8,
+    "gate": "G_N_deliveries",
+    "metric": "result.n_deliveries",
+    "reads": "deliveries in the population, over window lines",
+    "status": "met"
+   }
+  ],
+  "source": "the prereg's ```gates block"
+ },
+ "header": {
+  "agent": "censusbot",
+  "anchor_tz": "America/New_York",
+  "certifies": "one line per message censusbot delivered, chained; the sha256 of the delivered text, never the text",
+  "digest": "702c8ef801ec75ed03b516a947cef7a8683882a3d53ecaf6a3933d17a116a453",
+  "digest_registered": "702c8ef801ec75ed03b516a947cef7a8683882a3d53ecaf6a3933d17a116a453",
+  "kinds": [
+   "anchor",
+   "note",
+   "send",
+   "started"
+  ],
+  "kinds_from": "header",
+  "mismatch_with_registration": []
+ },
+ "js_leg": {
+  "entries": 10,
+  "head": "59f6529dc47be3ce8679be66deff6f42438d627e29bd7e3be6357ba26ac84eaf",
+  "ok": true,
+  "protocol": "v1",
+  "status": "measured"
+ },
+ "ledger": {
+  "bound": "the bytes at ledger_url, fetched in this run",
+  "bridged": [],
+  "bytes": 4385,
+  "entries": 10,
+  "head": "59f6529dc47be3ce8679be66deff6f42438d627e29bd7e3be6357ba26ac84eaf",
+  "http_status": 200,
+  "protocol": "v1",
+  "rederives": true,
+  "registered_url": "https://example.invalid/censusbot/ledger.jsonl",
+  "sha256": "8d55b7f0313512d1d7be92ce684ce000847d52a63318d2d96e9fe4f6a705961c",
+  "source": "https://example.invalid/censusbot/ledger.jsonl",
+  "tries": {
+   "allowed": 3,
+   "interval_s": 3600,
+   "used": 1
+  }
+ },
+ "lines": {
+  "all": 10,
+  "by_kind": {
+   "anchor": 3,
+   "note": 1,
+   "send": 5,
+   "started": 1
+  },
+  "cells": {
+   "after": {
+    "by_kind": {},
+    "delivery_lines": 0,
+    "lines": 0
+   },
+   "pre_window": {
+    "by_kind": {
+     "anchor": 1,
+     "started": 1
+    },
+    "delivery_lines": 0,
+    "lines": 2
+   },
+   "window": {
+    "by_kind": {
+     "anchor": 2,
+     "note": 1,
+     "send": 5
+    },
+    "delivery_lines": 5,
+    "lines": 8
+   }
+  },
+  "counts": "entries; the header line is not counted"
+ },
+ "now_utc": "2026-11-01T00:00:00Z",
+ "numerals": {
+  "Nb": 2,
+  "Nn": 3,
+  "Nu": 1,
+  "bound_share": null,
+  "field": "numerals",
+  "lines_carrying": 3,
+  "of_population": 4,
+  "share_floor": 40
+ },
+ "own_commitment": "none",
+ "prereg": {
+  "bytes": 58411,
+  "file": "PREREG_filled.md",
+  "sha256": "9b349551914540933609dfa2cef29f9d5d2b750efbeb75d91bab60c37da98652"
+ },
+ "problem_codes": {},
+ "problem_seqs": [],
+ "registration": {
+  "bytes_before_section_15": 57146,
+  "digest_read": "2fe1cdef7e1b30545ead42be09d47b8c5eea2213eb8eaca7e2ca837e5909db25",
+  "entry": {
+   "commit": "105cc2b232b8bd3b268128587a792ad416704821",
+   "registration_sha256": "2fe1cdef7e1b30545ead42be09d47b8c5eea2213eb8eaca7e2ca837e5909db25",
+   "url": "https://example.invalid/opfixture/census/pull/1"
+  },
+  "rule": "sha256 of the file's bytes before the line that starts '## 15.'"
+ },
+ "result": {
+  "census_run": 0,
+  "chain_problems": 0,
+  "chain_problems_unmeasured": [],
+  "instrument_plants_missed": null,
+  "lines_after_day_anchor": 0,
+  "n_deliveries": 4,
+  "nonfinite_metrics": [],
+  "unanchored_deliveries": 4,
+  "unledgered_deliveries": null,
+  "window_opened": 1
+ },
+ "schema": "styxx.ledger/census_result/v1",
+ "scorer": {
+  "kit_version": "1.0.0a1",
+  "module": "styxx_ledger.census",
+  "sha256": "8077a7669e42a193ca4d4914aedcb3fafb9c6642a5cfdea7568f7b077d740894"
+ },
+ "sends": {
+  "by_destination": {
+   "chan-1": 4
+  },
+  "delivery_kinds": [
+   "send"
+  ],
+  "delivery_lines_in_window": 5,
+  "destination_field": "dest",
+  "in_population": 4,
+  "outside_by_destination": {
+   "dm-9": 1
+  },
+  "outside_destination": 1,
+  "public_destinations": [
+   "chan-1"
+  ]
+ },
+ "sentences": [
+  "4 of 4 delivery lines in the population sit on days with no holding posted anchor (3 days: 2026-10-01, 2026-10-02, 2026-10-03; anchor source: no posted texts read (anchors_url none and none given); the ledger's own 3 anchor line(s) are the writer's statement and anchor no day; the place not judged in this run); the order those lines were to show is not shown, and no sentence of coverage is licensed.",
+  "G-1: unmeasured (no export committed with the result).",
+  "G-2: 0 problem records over 10 lines (no codes); the javascript leg agrees.",
+  "the anchor check: 0 lines sit after the anchor of their day, 4 population delivery lines sit on days with no holding posted anchor, and 3 of 3 days with lines read unanchored (0 duplicate, 0 mismatched, 3 missing, 0 late) and 0 days stand on the earlier of two conflicting anchors; anchor source: no posted texts read (anchors_url none and none given); the ledger's own 3 anchor line(s) are the writer's statement and anchor no day; the place not judged in this run."
+ ],
+ "status": "scored",
+ "verdict": "UNANCHORED__deliveries_on_days_without_a_posted_anchor",
+ "window": {
+  "anchor_tz": "America/New_York",
+  "close": "2026-10-29",
+  "closes_at_utc": "2026-10-29T04:00:00Z",
+  "d0": "2026-10-01",
+  "length_days": 28,
+  "opening_condition": {
+   "a": {
+    "evidence": "registration entry: url https://example.invalid/opfixture/census/pull/1 (equals registration_url), commit 105cc2b232b8bd3b268128587a792ad416704821, registration_sha256 2fe1cdef7e1b30545ead42be09d47b8c5eea2213eb8eaca7e2ca837e5909db25 = the digest of the 57146 bytes before section 15; registration_date 2026-09-30 before d0; the forge's server timestamp is not fetched by this scorer",
+    "held": true
+   },
+   "b": {
+    "evidence": "signature line found; operator ok, agent ok, registration_sha256 ok, d0 ok, anchor_tz ok, signed_before_d0 ok",
+    "held": true
+   },
+   "c": {
+    "evidence": "shelf read entry: https://example.invalid/shelf/censusbot.json sha256 8b5d341a7ce0fb052cf6fca4abec903c4f1368ab831ae5e3bc079e3457ba4a88 at 2026-09-30T12:00:00Z; report_answers ok, report_sha256 ok, names_ledger_url ok, names_earliest_anchor_and_its_head ok, earliest_anchor_holds ok, read_after_the_anchors_day_ended ok, read_before_d0 ok",
+    "held": true,
+    "verified": true
+   },
+   "d": {
+    "evidence": "registered 702c8ef801ec75ed03b516a947cef7a8683882a3d53ecaf6a3933d17a116a453; read at close 702c8ef801ec75ed03b516a947cef7a8683882a3d53ecaf6a3933d17a116a453; a difference counts in chain_problems (header_changed), not here, since one read at close cannot date a change",
+    "held": true
+   },
+   "window_started_by_now": true
+  },
+  "opens_at_utc": "2026-10-01T04:00:00Z",
+  "scoring_date_utc": "2026-10-30T04:00:00Z"
+ }
+}

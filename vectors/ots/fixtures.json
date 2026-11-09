@@ -1,0 +1,274 @@
+{
+ "exhibit_ledger_sha256": "b9cdb57dc29e7c0f8fe0c5bbf4dbaf58383d819a85f00e01c4e814502857f533",
+ "exhibit_ledger_bytes": 1251502,
+ "witness_rule": "attested entry_ids (witness/index.json status bitcoin) ranked by sha256(bytes(seed) + bytes(entry_id)), seed = the ledger file's sha256; first 20. pending-only: the same rank over status pending, first 2",
+ "witness_sample": [
+  {
+   "entry_id": "c11ce39b2dc8786f3cb7237c1eb2477a30b8e1827c1c78c68984438cfb277580",
+   "seq": 137,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "bf5880b869ce87e60893bc367329c29c82d53ed25727d30bcb01f0491e1edc41",
+   "seq": 564,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "6efc799cb798e688168235e70ebb049c5af7cca312110ba8976e4eb915564946",
+   "seq": 608,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "df0fe1da2c376762a51f9e7e149e41632e1a9376d35175b494ce7c86087302d2",
+   "seq": 601,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "b853efac28c5b7a3e3eabad5df7a9e9d4be75216887a8ad2b62813ac77774675",
+   "seq": 21,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "388cc5466cd356bc5ac89dd8f7ec5fa389e796b192917feb39f37439e2ade7e5",
+   "seq": 47,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "bd9ef216d0127a8694f330d105cedcaaf8e871a33bebdf839f275210fc7bf6d5",
+   "seq": 446,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "058ec607b294744ce132a034ba5d1bb9fbb289cc788a4ea1241340bd0d20b443",
+   "seq": 419,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "51df25587dba2f038042d6653abfaf37e1c8f305974238802c3a942ea5fd390f",
+   "seq": 543,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "b59bdbafb8269428fafa078d6c15de0fac6cd1ea3d72e2da0a2608b52a27250b",
+   "seq": 614,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "5fa5aba7e12f8d69a728a529fd667379268dd4c3b962dfb4e1e4320652a0f1b0",
+   "seq": 32,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "a1dda800598a70ef507589f35d4dc161dbaeaa82d655530425791a8ce5eaa681",
+   "seq": 622,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "c67977beebcebddd586bafc086eb54087b1b74c5e455d3c9e351e80e1f5e3516",
+   "seq": 149,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "be175a36ce7ee1e07ec86c099139b31f23c0ff801fca5984e2bb1a56043503a1",
+   "seq": 386,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "f21b47f4f81c2af2b718d80b0a9feb9f28e1ed3070f2cf92d4eafb6c6e8cfcd9",
+   "seq": 632,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "14eca990297c6530a65e031098080715ab52ce4e46fcacaae2d0fc51e1d4bea9",
+   "seq": 122,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "42c10faf5e1f608769e34dfcf01b526bdd768d36981a48dad8605a7fd73f99c9",
+   "seq": 361,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "eb3dad2f12cb40ff6561b23ddf8564e8081f108266cdefb204f0b3fa861c8f73",
+   "seq": 346,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "8860b2f0bd2c1f8f744e7d9367cc01c29a26c6ffcf9bfe17dd973ab614d1e260",
+   "seq": 701,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  },
+  {
+   "entry_id": "cdebbb5a452c9d73134d973d5bd0de97717a714069c411d5acb57b9475af25a1",
+   "seq": 612,
+   "status": "bitcoin",
+   "block": 975101,
+   "block_time": 1794174086
+  }
+ ],
+ "witness_pending": [
+  {
+   "entry_id": "9fdfeda17e741672c1e06d2d0b9ebe1ad53818d20b8e44a93c40c55207931a79",
+   "seq": 741,
+   "status": "pending"
+  },
+  {
+   "entry_id": "9a080f22717c5561a6b384eb3484f7951c5ae7cca660402dc56afb2686b4ab5c",
+   "seq": 740,
+   "status": "pending"
+  }
+ ],
+ "anchors": [
+  {
+   "date": "2026-10-24",
+   "text": "anchors/2026-10-24.txt",
+   "ots": "anchors/2026-10-24.txt.ots",
+   "text_sha256": "1d187807253d257f672908f7565e89db406dc56575d9482bfe35090086b8e0e7",
+   "ots_sha256": "51c56be2582c6f4d4afb01642b8244be1b90b3708b12a133d36304a87a64c512",
+   "block": 974530
+  },
+  {
+   "date": "2026-10-25",
+   "text": "anchors/2026-10-25.txt",
+   "ots": "anchors/2026-10-25.txt.ots",
+   "text_sha256": "b3749f8326c18041a8838ef2ca811c1cbf14885fccaf9b9f43d0f3eb4dd876e5",
+   "ots_sha256": "d0c879a3be1e4d005f6d83f44c381b1b8f9636a2685c95f2b533c5376362701b",
+   "block": 974530
+  },
+  {
+   "date": "2026-10-26",
+   "text": "anchors/2026-10-26.txt",
+   "ots": "anchors/2026-10-26.txt.ots",
+   "text_sha256": "d6ee10daaafd3ddd79c980e1ef089d6fd76d0ab1f88b34b5c2fc55cc04d87cdb",
+   "ots_sha256": "fd9a0358352b74f172fe1aafde74f8c9dc01c8708b57c2dc46bdf2cf0fde0239",
+   "block": 974530
+  },
+  {
+   "date": "2026-10-27",
+   "text": "anchors/2026-10-27.txt",
+   "ots": "anchors/2026-10-27.txt.ots",
+   "text_sha256": "6003778b29823016a715138c749f9d9c9363a4d2693452e35fbf33160a15ef80",
+   "ots_sha256": "7adad32ca9b4500c76ec893651f9f63e0e87102f77a04aa309bb3a55ddaa3e47",
+   "block": 974530
+  },
+  {
+   "date": "2026-10-28",
+   "text": "anchors/2026-10-28.txt",
+   "ots": "anchors/2026-10-28.txt.ots",
+   "text_sha256": "272e778398bf037c8106cee3cfbd42589f6123c232641dd51d35f42375fd96ac",
+   "ots_sha256": "4ec38c0432a61c764bb158903e2eee9b488e2cae688595485ca2b50c17d0b4e2",
+   "block": 974530
+  },
+  {
+   "date": "2026-10-29",
+   "text": "anchors/2026-10-29.txt",
+   "ots": "anchors/2026-10-29.txt.ots",
+   "text_sha256": "59a6a787ee53fd9c8bc53338ca338603e4b05d03311e063187800fd0886bdf77",
+   "ots_sha256": "a02040496e887ae06388b1d05b919736e4fc6740bf367b89e584cc5d9a5aa7b8",
+   "block": 974530
+  },
+  {
+   "date": "2026-10-30",
+   "text": "anchors/2026-10-30.txt",
+   "ots": "anchors/2026-10-30.txt.ots",
+   "text_sha256": "6ba360e0d3c5fd0ebb40c7bbe9cc0dc87afc0ff330588b785afe0cc752af5de1",
+   "ots_sha256": "03c78096f37941367bcfb93920541546dab7600d711a3899c61f474d86a626cf",
+   "block": 974530
+  },
+  {
+   "date": "2026-10-31",
+   "text": "anchors/2026-10-31.txt",
+   "ots": "anchors/2026-10-31.txt.ots",
+   "text_sha256": "5794384dad38129b3a28adc29c737aa03a9bbc08a6f0ab420118d4bacb26ff5a",
+   "ots_sha256": "1d2c9e2a19fc84fa9bd0a381deda6cf769789e26a316678d38bf961ad3287480",
+   "block": 974530
+  },
+  {
+   "date": "2026-11-01",
+   "text": "anchors/2026-11-01.txt",
+   "ots": "anchors/2026-11-01.txt.ots",
+   "text_sha256": "5478a3c73436110aea2b7a2410839113745f68d8d4e3679445ff518dc3a01836",
+   "ots_sha256": "92507db1582b63154ff3ecb564cdf672318297f50837296d10f316e385fc4e2a",
+   "block": 974530
+  },
+  {
+   "date": "2026-11-02",
+   "text": "anchors/2026-11-02.txt",
+   "ots": "anchors/2026-11-02.txt.ots",
+   "text_sha256": "2f6459498d6b1f3713711d9c57c58e2bb64018545c511bfebb813ea7fdbd771f",
+   "ots_sha256": "55614a3fba2914b729a1beb40a8bc7b4e90b15f5ad700e19302c797672275ce1",
+   "block": 974530
+  },
+  {
+   "date": "2026-11-03",
+   "text": "anchors/2026-11-03.txt",
+   "ots": "anchors/2026-11-03.txt.ots",
+   "text_sha256": "cc2b8175f7a4536494fc5f1cb30d7f2bab9da0b1e43e0b7b9c53f4d4a7321aab",
+   "ots_sha256": "cd036ea2a08150259c1c5f783ed90fed730ffbc9424bdf40dc3b26ea364407d8",
+   "block": 974530
+  },
+  {
+   "date": "2026-11-04",
+   "text": "anchors/2026-11-04.txt",
+   "ots": "anchors/2026-11-04.txt.ots",
+   "text_sha256": "0d8b9f84af4a1fc2319ed1da2d9fca3e3ea2b656ab1f4d3e6e1394157b8db91f",
+   "ots_sha256": "b06612332d4598481609b61a7303af3079612692d738df1809e4b49d57da95f9",
+   "block": 974635
+  },
+  {
+   "date": "2026-11-05",
+   "text": "anchors/2026-11-05.txt",
+   "ots": "anchors/2026-11-05.txt.ots",
+   "text_sha256": "ba6169a6c1368e4c28e3ca657c7be23653b7846dd7adc4b45280772810551610",
+   "ots_sha256": "9f0796c82bfb44ebfbc3a4e4df8f9d61f28d1d7960489e632a5fe9c7a9a5085a",
+   "block": 974768
+  },
+  {
+   "date": "2026-11-07",
+   "text": "anchors/2026-11-07.txt",
+   "ots": "anchors/2026-11-07.txt.ots",
+   "text_sha256": "b9032fc6152f042e4a67198d729fc9f5762ec3cbe53ac62c84484ee445a90dce",
+   "ots_sha256": "28cfb2cd340a3fcdbcdf65638deab831e26d844c3a90094a14a08cd305038ad2",
+   "block": 975028
+  }
+ ],
+ "copied_from": "C:/Users/heyzo/clawd/wt/exhibit/ledger (byte-identical local copy of https://fathom-lab.github.io/styxx/ledger/; anchors/index.json written_at 2026-11-08T23:50:49Z, witness/index.json written_at 2026-11-08T23:38:26.100Z)"
+}

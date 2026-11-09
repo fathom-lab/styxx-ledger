@@ -1,0 +1,123 @@
+{
+ "arg_len_2p60": {
+  "expect": {
+   "code": "varuint",
+   "status": "refused"
+  },
+  "file": "arg_len_2p60.ots",
+  "sha256": "c1bda5797808aadf9efd268e2a692f8c6db3df4968f9228b8bc14dabc62b5498",
+  "why": "an append whose argument length is the varuint 2^60"
+ },
+ "btc_trailing": {
+  "expect": {
+   "code": "attestation_payload",
+   "status": "refused"
+  },
+  "file": "btc_trailing.ots",
+  "sha256": "ced9384c7d56acc7225c3851b1c78cd1dbcc670cb107b57f39053f4c0c3ac78c",
+  "why": "a bitcoin payload with a byte after the height (the library accepts it)"
+ },
+ "fork_attestations_first": {
+  "expect": {
+   "attestations": [
+    [
+     "bitcoin",
+     974530
+    ],
+    [
+     "pending",
+     "https://x"
+    ],
+    [
+     "bitcoin",
+     974635
+    ]
+   ],
+   "status": "parsed"
+  },
+  "file": "fork_attestations_first.ots",
+  "sha256": "8fd115f74b45398263d0dc0a2142da19c7f7d74b97c2a6b131855592a0e323fe",
+  "why": "a three-way fork whose first two branches are attestations (the library keeps two)"
+ },
+ "height_2p32": {
+  "expect": {
+   "code": "attestation_payload",
+   "status": "refused"
+  },
+  "file": "height_2p32.ots",
+  "sha256": "b7eb1b30324fb009e2c1d42dfd8ee5b9cfa0bc692a8a1143187db692445478c5",
+  "why": "a bitcoin height of 2^32, one past the kit's bound"
+ },
+ "height_2p53": {
+  "expect": {
+   "code": "attestation_payload",
+   "status": "refused"
+  },
+  "file": "height_2p53.ots",
+  "sha256": "d6cb898797504707147395513a7e2b975edac27e671801bae04464a7e8fe2bfe",
+  "why": "a bitcoin height of 2^53 (python once read it and asked the explorers; javascript refused)"
+ },
+ "height_2p60": {
+  "expect": {
+   "code": "attestation_payload",
+   "status": "refused"
+  },
+  "file": "height_2p60.ots",
+  "sha256": "208715ae1907d82a77e51828a68656f747fc3a74d826205d219a84ca8d059eaa",
+  "why": "a bitcoin height of 2^60"
+ },
+ "height_2p63": {
+  "expect": {
+   "code": "attestation_payload",
+   "status": "refused"
+  },
+  "file": "height_2p63.ots",
+  "sha256": "9a33dd15d520e331d47ad1a3fb0d45d16afe0bbdf07b7cc68160d45c79370f0f",
+  "why": "a bitcoin height of 2^63 in a 10-byte varuint"
+ },
+ "height_max": {
+  "expect": {
+   "attestations": [
+    [
+     "bitcoin",
+     4294967295
+    ]
+   ],
+   "status": "parsed"
+  },
+  "file": "height_max.ots",
+  "sha256": "3d34c04e88d2052e8db8e222c10109d0138d5f925e74f55423844f04ac2876a7",
+  "why": "a bitcoin height of 2^32 - 1, the kit's bound: read"
+ },
+ "nested_forks": {
+  "expect": {
+   "attestations": [
+    [
+     "pending",
+     "https://alice.btc.calendar.opentimestamps.org"
+    ],
+    [
+     "bitcoin",
+     974530
+    ],
+    [
+     "bitcoin",
+     974635
+    ]
+   ],
+   "status": "parsed"
+  },
+  "file": "nested_forks.ots",
+  "sha256": "539b613a0333b66ccc688fbccc6105765c660d7fdc29272726371d1b3f912157",
+  "why": "root -> [append 'a' -> [sha256 -> btc 974530 | pending alice]] | [sha256 -> btc 974635]"
+ },
+ "pending_bad_uri": {
+  "expect": {
+   "code": "pending_uri",
+   "status": "refused"
+  },
+  "file": "pending_bad_uri.ots",
+  "sha256": "c9c30ee4edd10721cf2236db21231956598a68e0e16564be7bde56678c323e17",
+  "why": "a pending uri with the bytes ff fe"
+ }
+}

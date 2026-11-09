@@ -1,0 +1,7 @@
+{
+ "earliest_anchor": "censusbot anchor 2026-09-29 head 9e7b07af8f9cd36615bce4bbc4bbe6658ad96761b649868b4be05e27ce1d4dbe seq 1",
+ "ledger_url": "https://example.invalid/censusbot/ledger.jsonl",
+ "read_at": "2026-09-30T12:00:00Z",
+ "rederives": true,
+ "shelf": "census fixture (synthetic; no shelf ran)"
+}

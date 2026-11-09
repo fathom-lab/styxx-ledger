@@ -1,20 +1,27 @@
-"""cli.py: styxx-ledger init | append | verify | anchor-text | head.
+"""cli.py: styxx-ledger init | append | verify | anchor-text | head | exhibit.
 
 exit codes: 0 done / re-derives; 1 refused, or the log does not re-derive, or an anchor does not hold;
 2 usage or i/o error. machine output with --json; the anchor text alone on stdout for anchor-text.
+
+verify reads the header's schema: a v1 log is read as v1, a v0 log (darkflobi.gate/log/v0) under v0's rules (v0.py);
+--protocol v1|v0 forces one. head is v1 only, as before.
+
+exhibit <url> re-derives a published exhibit over the network (exhibit.py): exit 0 every check passed, 1 any
+failed, 2 usage, or a file / an explorer did not answer.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, List, Optional
 
 from ._version import __version__
-from .chain import parse_anchor_text
 from .jcs import LedgerValueError
-from .verify import check_anchor, coverage, verify_bytes
+from .v0 import check_anchor_auto, parse_anchor_auto, verify_auto
+from .verify import coverage
 from .writer import Ledger, LedgerBroken, LedgerError
 
 
@@ -114,14 +121,15 @@ def cmd_verify(a) -> int:
     texts = list(a.anchor or [])
     if a.anchors_file:
         texts += [ln for ln in _read_text(a.anchors_file, "anchors file").split("\n") if ln.strip()]
-    r = verify_bytes(raw, withheld=withheld)
+    r = verify_auto(raw, withheld=withheld, protocol=a.protocol)
+    proto = r["protocol"]
     anchors = []
     for t in texts:
-        p = parse_anchor_text(t)
+        p = parse_anchor_auto(t, proto)
         if p is None:
             anchors.append({"text": t, "ok": False, "parsed": False})
         else:
-            c = check_anchor(r["entries"], p, withheld, r["header"])
+            c = check_anchor_auto(r, p, withheld)
             c["text"], c["parsed"] = t, True
             anchors.append(c)
     cov = None
@@ -130,11 +138,13 @@ def cmd_verify(a) -> int:
         cov = coverage(r["entries"], withheld, seqs)
     ok = r["ok"] and all(x["ok"] for x in anchors)
     if a.json:
-        print(json.dumps({"ok": ok, "rederives": r["ok"], "entries": len(r["entries"]), "head": r["head"],
+        print(json.dumps({"ok": ok, "protocol": proto, "rederives": r["ok"], "entries": len(r["entries"]), "head": r["head"],
                           "file_sha256": r["file_sha256"], "bridged": r["bridged"], "problems": r["problems"],
                           "anchors": anchors, "coverage": cov}, ensure_ascii=True, sort_keys=True))
         return 0 if ok else 1
     n = len(r["entries"])
+    if proto == "v0":
+        _say("protocol v0 (darkflobi.gate/log/v0): read under v0's rules")
     if r["ok"]:
         _say("re-derives: %d entr%s, head %s" % (n, "y" if n == 1 else "ies", r["head"]))
         if r["bridged"]:
@@ -148,7 +158,9 @@ def cmd_verify(a) -> int:
             _say("  ... %d more (--max-problems, or --json)" % (len(r["problems"]) - a.max_problems))
     for x in anchors:
         if not x.get("parsed"):
-            _say("anchor not in the form '<agent> anchor <YYYY-MM-DD> head <64 hex> seq <n>': %r" % x["text"][:120])
+            form = "gate anchor <YYYY-MM-DD> head <64 hex> seq <n>" if proto == "v0" else \
+                "<agent> anchor <YYYY-MM-DD> head <64 hex> seq <n>"
+            _say("anchor not in the form '%s': %r" % (form, x["text"][:120]))
             continue
         why = []
         if not x["agent_matches"]:
@@ -187,7 +199,7 @@ def cmd_anchor_text(a) -> int:
 
 def cmd_head(a) -> int:
     try:
-        r = verify_bytes(Path(a.log).read_bytes())
+        r = verify_auto(Path(a.log).read_bytes(), protocol="v1")
     except OSError as e:
         raise _Usage("cannot read %s: %s" % (a.log, e)) from None
     last = r["entries"][-1]["entry"].get("seq") if r["entries"] else 0
@@ -200,10 +212,58 @@ def cmd_head(a) -> int:
     return 0 if r["ok"] else 1
 
 
+def cmd_exhibit(a) -> int:
+    from .exhibit import DEFAULT_EXPLORERS, render_text, run_exhibit
+    u = a.url
+    if not (u.startswith("https://") or u.startswith("http://")):
+        raise _Usage("exhibit wants an http(s) url, e.g. https://fathom-lab.github.io/styxx/ledger/")
+    exps = a.explorer or list(DEFAULT_EXPLORERS)
+    for e in exps:
+        if not (e.startswith("https://") or e.startswith("http://")):
+            raise _Usage("--explorer wants an http(s) url (an esplora api base such as https://blockstream.info/api)")
+    if a.sample < 0:
+        raise _Usage("--sample wants a count of 0 or more")
+    if a.today is not None and not re.match(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$", a.today):
+        raise _Usage("--today wants a date YYYY-MM-DD")
+    rep = run_exhibit(u, explorers=exps, sample=a.sample, no_ots=a.no_ots, save_dir=a.save,
+                      allow_redirect=a.allow_redirect, today=a.today)
+    if a.json:
+        print(json.dumps(rep, ensure_ascii=True, sort_keys=True, indent=1))
+    else:
+        sys.stdout.write(render_text(rep))
+    return rep["exit_code"]
+
+
+def cmd_census(a) -> int:
+    from .census import score
+    from .day import now_utc
+    if a.anchor_place_holds and a.anchor_place_fails:
+        _say("census: --anchor-place-holds and --anchor-place-fails exclude each other")
+        return 2
+    place = "holds" if a.anchor_place_holds else ("fails: " + a.anchor_place_fails if a.anchor_place_fails else None)
+    res = score(a.prereg, a.ledger, a.out, a.now or now_utc(), export=a.export, anchors=a.anchors,
+                withheld=a.withheld, js=not a.no_js, anchor_place=place, tries=a.tries, interval_s=a.interval)
+    _say("%s: verdict %s; wrote %s" % (res["status"], res.get("verdict") or "none", Path(a.out) / "RESULT.json"))
+    return 1 if res["status"] == "refused" else 0
+
+
+def cmd_census_digests(a) -> int:
+    from .census import digests
+    try:
+        d = digests(a.prereg)
+    except (OSError, UnicodeDecodeError) as e:
+        _say("census-digests: cannot read %s: %s" % (a.prereg, type(e).__name__))
+        return 2
+    _say(json.dumps(d, indent=1, sort_keys=True))
+    g = d.get("gates")
+    bad = g is None or "error" in g or g["unreached"] or g["vacuous_gates"] or g["without_power_basis"]
+    return 1 if bad else 0
+
+
 # -------------------------------------------------------------------------------------------------- parser
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="styxx-ledger", description="a writer and verifier for styxx ledger protocol v1")
+    ap = argparse.ArgumentParser(prog="styxx-ledger", description="a writer and verifier for styxx ledger protocol v1 (and a reader of v0)")
     ap.add_argument("--version", action="version", version="styxx-ledger %s (python)" % __version__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -234,6 +294,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--anchors-file", help="a file of posted anchor texts, one per line")
     p.add_argument("--json", action="store_true")
     p.add_argument("--max-problems", type=int, default=20)
+    p.add_argument("--protocol", choices=("auto", "v1", "v0"), default="auto",
+                   help="auto (default): by the header's schema; v1 or v0 forces one")
     p.set_defaults(fn=cmd_verify)
 
     p = sub.add_parser("anchor-text", help="compose a day's anchor text (prints it); --record writes the anchor entry")
@@ -247,6 +309,43 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("log")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_head)
+
+    p = sub.add_parser("exhibit", help="fetch a published exhibit by url and re-derive it: chain, anchors, proofs, witness")
+    p.add_argument("url", help="the exhibit's base url, e.g. https://fathom-lab.github.io/styxx/ledger/")
+    p.add_argument("--explorer", action="append",
+                   help="an esplora api base asked for block headers (repeatable; default blockstream.info and mempool.space)")
+    p.add_argument("--sample", type=int, default=20, help="witness proofs picked by the seeded rule (default 20; 0: none)")
+    p.add_argument("--no-ots", action="store_true", help="skip every proof and explorer call")
+    p.add_argument("--save", help="keep the fetched bytes (and the explorers' answers) under this directory")
+    p.add_argument("--allow-redirect", action="store_true",
+                   help="accept exhibit files served from another host (a redirect off the base url's host or off https)")
+    p.add_argument("--today", help="the day (YYYY-MM-DD) the ages are counted against (default: today in utc)")
+    p.add_argument("--json", action="store_true", help="the full record: every fetched file's sha256 and length, every answer")
+    p.set_defaults(fn=cmd_exhibit)
+
+    p = sub.add_parser("census", help="score a filled PREREG_census against a published ledger; writes RESULT.json / RESULT.md")
+    p.add_argument("--prereg", required=True, help="the filled PREREG_census markdown file")
+    p.add_argument("--ledger", help="the ledger: default the prereg's ledger_url; a url must be ledger_url, and a local "
+                   "copy must hash to the bytes at ledger_url fetched in the same run")
+    p.add_argument("--out", required=True, help="the directory RESULT.json and RESULT.md are written to")
+    p.add_argument("--now", help="utc YYYY-MM-DDTHH:MM:SSZ the census is scored at (default: now)")
+    p.add_argument("--export", help="the census export (json {destinations, made_at, messages}), a path or url")
+    p.add_argument("--anchors", help="posted anchor texts (an index json or one text per line), overriding anchors_url")
+    p.add_argument("--withheld", help="withheld.json, overriding withheld_url")
+    p.add_argument("--no-js", action="store_true", help="skip the javascript reference implementation's re-derivation "
+                   "(G_C then reads unmeasured)")
+    p.add_argument("--tries", type=int, default=3, help="fetch tries for each url (default 3, the template's rule)")
+    p.add_argument("--interval", type=float, default=3600, help="seconds between tries (default 3600)")
+    p.add_argument("--anchor-place-holds", action="store_true", help="the lab's judgement: the anchor place is one where "
+                   "the operator cannot edit or delete a post")
+    p.add_argument("--anchor-place-fails", metavar="WHY", help="the lab's judgement that the place fails, and why; "
+                   "every day prints unanchored")
+    p.set_defaults(fn=cmd_census)
+
+    p = sub.add_parser("census-digests", help="print a prereg's registration digest (bytes before '## 15.') and gates "
+                       "digest, and walk the gates block's assignments")
+    p.add_argument("--prereg", required=True)
+    p.set_defaults(fn=cmd_census_digests)
     return ap
 
 

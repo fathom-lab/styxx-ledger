@@ -1,0 +1,21 @@
+{
+ "anchors": [
+  {
+   "late": false,
+   "text": "censusbot anchor 2026-09-29 head 9e7b07af8f9cd36615bce4bbc4bbe6658ad96761b649868b4be05e27ce1d4dbe seq 1"
+  },
+  {
+   "late": false,
+   "text": "censusbot anchor 2026-10-01 head 60fabd0277a12b7fc79985bdc4c367a223ee2e4a65e3c56e7b8e984e4a9efabe seq 5"
+  },
+  {
+   "late": true,
+   "text": "censusbot anchor 2026-10-02 head 8776bd7ec2ac7e448bb273d37a4354de17f040a7c499b2f94e1f36b6bf6d16fa seq 8"
+  },
+  {
+   "late": false,
+   "text": "censusbot anchor 2026-10-03 head 59f6529dc47be3ce8679be66deff6f42438d627e29bd7e3be6357ba26ac84eaf seq 10"
+  }
+ ],
+ "note": "synthetic posted texts for the census fixture; no place posted them"
+}

@@ -1,0 +1,1695 @@
+{
+ "what": "what javascript-opentimestamps says of each fixture proof: its file digest, every attestation (kind, the digest it attests, a bitcoin attestation's height and the attested time the library read from its own explorer), and the lowest verified bitcoin attestation. both packages' native readers must agree exactly, offline, against block_headers.json.",
+ "computed_by": "javascript-opentimestamps 0.4.9",
+ "explorer": "https://blockstream.info/api (the library's default esplora)",
+ "ran_at": "2026-11-09T03:37:03.061Z",
+ "explorer_calls": 96,
+ "files": {
+  "anchors/2026-10-24.txt.ots": {
+   "file_digest": "1d187807253d257f672908f7565e89db406dc56575d9482bfe35090086b8e0e7",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24ae9b2bb055f5128fdf8bb90ccc75085b43e9f1f8a13ce9bb121d543eeadc21ad8f48ed6e24ed7e5db9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24aeaa109fdeab4d8a8f4d8a0ee1d286b935e949a80835499f0dcba9c9d158fb9227b8c097781b1db5af",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24adb3da6fe805a5fb06fc2edd473c1fd4c00901a591adcbb3b9116878dac32dd5c03bc73e26b8be59a1",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24adb63a4a4bd1eafff4edb3a28884d04ee78af9bd7c907130a5227447540d295b4e2d007a64ac5567ed",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-24.txt"
+  },
+  "anchors/2026-10-25.txt.ots": {
+   "file_digest": "b3749f8326c18041a8838ef2ca811c1cbf14885fccaf9b9f43d0f3eb4dd876e5",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24aff5a161f58102ea6f553def1ebe42c820691ce50b8858add8a8b70bfb7946d9cf3e538e9d51c6c062",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24afd4713c41c19148abb22f613bb20f6077d91ac901dcb7f3fcdff4a39dbcee87c026dc9e4b93332d84",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24afc3e886767d31aaf765b9d593bb3119360acc8045d61ebccf45ab539b91b39266fd75720be870ae76",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24af2a5a7ab79be9cddd15827424d68c5f13f8ed3108ba2543e90406745d63e4ae442d88a18e3e36c8c0",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-25.txt"
+  },
+  "anchors/2026-10-26.txt.ots": {
+   "file_digest": "d6ee10daaafd3ddd79c980e1ef089d6fd76d0ab1f88b34b5c2fc55cc04d87cdb",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24b2f97870f637d1564d38f649edcaa26c8d24e5f7e9c61118c5d08f2177e05a92b74260100b1a064a75",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b2a871564039b49482952f5e9ca7bda42773d0bb4a11d92298e51dd443b19660b9d00da4d890791810",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b1968243fd45d85d3b38b1e7779bb6a02bf8f1b0de7a899f5f696ce9aedfe0d452af7195ca4c0c66c5",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b19c407f20360389d4a9f1270f718aab5a71ce423f8e555c2e0dd161a4fec7b38f93501738393e430b",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-26.txt"
+  },
+  "anchors/2026-10-27.txt.ots": {
+   "file_digest": "6003778b29823016a715138c749f9d9c9363a4d2693452e35fbf33160a15ef80",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24b33a37a092da5603d18d7b74dccee8b02224bc110a0dc5262391f261b04bc439b915bd791f10222f57",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b395649e164a8b52404ae4d72f958ee8f0b03c23a321a154ad5296c282f50298bceb42110f979740ab",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b3461190bf99f5c0ff433bed5d5087dcc2b7d106b1fa1146e7f33f6663e8b18913ab3922c0caea56b4",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b35438cbe827db29adb640146c8f6dc41589d2615d705c43279a042c0e41d783783dc33f103197bb44",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-27.txt"
+  },
+  "anchors/2026-10-28.txt.ots": {
+   "file_digest": "272e778398bf037c8106cee3cfbd42589f6123c232641dd51d35f42375fd96ac",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24b5cabcde1ab6828b98e73913901ebf066143c989ee6fca708dc18ffaae0b00d80e33b85482f822f713",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b542c4dbfa9c29996864475ebd57a3b2b7d3be6f847475be0c5a567365aca059ac788da206e3bea474",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b49f03d035e57c1a143c5d13de463ba4903ec819d424bb05cb2dd447e9fbc009a3e6ebe22a36337c81",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b445e53926b28762ce36d516131678393383f0305ab2dcb29e723517fee71c8eba7e2a7a2956e2800f",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-28.txt"
+  },
+  "anchors/2026-10-29.txt.ots": {
+   "file_digest": "59a6a787ee53fd9c8bc53338ca338603e4b05d03311e063187800fd0886bdf77",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24b638e49d14951d310363739cfb4fb34f9f88df098a93d928547ba8fc6350fc0be6936ace0f2535c388",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b66cb2b35127c01a4db6e7784c339c9808fc7f0d11cdae3b6138915f85e4a6bb62fc8e9c9f8e435fbe",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b64fb868e5b55f1ead4e4536d5758d82eb90f155174ee0f5daf77cfe5ac3bb34a9526cb0911fe0df7e",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b65a7b745654565cf426315195d29b2a8f7cad72811a9f45a770daa39d7e94db08010167b19cda4203",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-29.txt"
+  },
+  "anchors/2026-10-30.txt.ots": {
+   "file_digest": "6ba360e0d3c5fd0ebb40c7bbe9cc0dc87afc0ff330588b785afe0cc752af5de1",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24b8d1f39c8b42d0f50f27c0053f60d5a46f5fb5fb23ea2e567ad19c13d4404855362b8b36e8ce72c00f",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b873505e08ec0ffa1ee1ee9c2c66e197b919a6bf4ccf39c82b5be2c81a4451f2d9b993b9800297eb80",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b7e962a0f77b261acb4c21b51e4f10b82a7fbfd1403d80060ee5679984f0e5f3cc825f2d983ad579d2",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b733ee3012f11e443e5732addc0cd7e9130f716ae5465e604600e48e3c1e25c468054a8fbf7b8e3698",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-30.txt"
+  },
+  "anchors/2026-10-31.txt.ots": {
+   "file_digest": "5794384dad38129b3a28adc29c737aa03a9bbc08a6f0ab420118d4bacb26ff5a",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24b9217ffa43cd9525d555373c392b0120b933efab1cde3a5c0db0984501a56305ee7c9842704c93c5f2",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b965e3fc22953d3273e1dee66d2f441af2b2cb0ce815590c3d786cbf81b1904524e08d52fc101c0939",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b9dcb7b5698ff60353e7812f25d6af65f1c3571a715c970df141c463658d8ad169bd2ccc17e7fffbfc",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24b90324b55b3fbe2b868a56a2367b9555bb9f8dd35785e46cc5e4612739e698a1208c592945a082a4ac",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-10-31.txt"
+  },
+  "anchors/2026-11-01.txt.ots": {
+   "file_digest": "5478a3c73436110aea2b7a2410839113745f68d8d4e3679445ff518dc3a01836",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24bb04c833cb081d41a528aa0c5a61d61dc658a3ea2f966f7f97b8eedde74cd626d62664b88f63222040",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24bbc713cb949f6b44c629952f8b2eb87bb83cda8dae62e6c2f01a3bdd8003580d4359d9babeb8e8225e",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24bab041611b5580a19bd07c0f396857c8e8686355c86d4f21394291e7c782839034339b434c2d83ad41",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24ba1b09bca158db8c949b647d097f59f691cd2148b087f46729591d59b5431c2756678d01acc2429132",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-11-01.txt"
+  },
+  "anchors/2026-11-02.txt.ots": {
+   "file_digest": "2f6459498d6b1f3713711d9c57c58e2bb64018545c511bfebb813ea7fdbd771f",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24bc329d0207cb024774ab3f1edc86041c4a80f9feefe7107229cf5fe95f2048c7000bf8be4f0e3247f6",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24bc745c55902901f7503f48b71bc6ea24a3a51968858d1f2a0a4a6320536cc80d1df6a533e3f421f60b",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24bc32598baf3a618c5aa0ceebdab9e0262262b2805304051e351546c57f55c0744b09df18383b8f6c15",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24bb114249bf9a510522901b34f814573e38321f0e594447a4e7bcb8731840f202e4f8413110fb4351b2",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-11-02.txt"
+  },
+  "anchors/2026-11-03.txt.ots": {
+   "file_digest": "cc2b8175f7a4536494fc5f1cb30d7f2bab9da0b1e43e0b7b9c53f4d4a7321aab",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aeb24bed2eefcc7b8c1e4fe00cf04d21beb53e0cc9a1513b424b64006dd3427a78986c624236b85e6e61ea4",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24be07ff49c5c0832ecf8ff72d6fe8ac442195dd9e3a9b80576e05cc5162b83297e95c11b91476150bfe",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24bdcca72b429d0baf8bb47478643bba300db9f14471cbd6da5d171f6affebd669d3d2d31f90dbc92306",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    },
+    {
+     "kind": "pending",
+     "digest": "6aeb24be29e89d9545e394dc5e870d867f7a1aba30ae2ca28c27aa9b974c8865cee21703d7d49876b103143d",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "2bb4bd44b4fbc41b1103fa5fe97473a4f7df881e98b6f820984b5a7307cb60e6",
+     "height": 974530,
+     "time": 1793798695
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974530,
+    "time": 1793798695
+   },
+   "target": "anchors/2026-11-03.txt"
+  },
+  "anchors/2026-11-04.txt.ots": {
+   "file_digest": "0d8b9f84af4a1fc2319ed1da2d9fca3e3ea2b656ab1f4d3e6e1394157b8db91f",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aec1472dc42451329c2da21a55c8245814ac1629d6dbe4e3bff141c98487b958ee37ae4eda5175c9f1aeedc",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "c0369cbacd0351981352739dd8ed32290a45d7c81f23754af38c983566feab73",
+     "height": 974635,
+     "time": 1793863154
+    },
+    {
+     "kind": "pending",
+     "digest": "6aec147232b2d123d4fe883f3bd1030763cb770209ae47cb00ca4e51dc05741cc837b731bd73cb2b8fd6094a",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "c0369cbacd0351981352739dd8ed32290a45d7c81f23754af38c983566feab73",
+     "height": 974635,
+     "time": 1793863154
+    },
+    {
+     "kind": "pending",
+     "digest": "6aec14737e47d04261e18082cd30e608ae9e93c8de3295731290b85eed687cfd49c89d1ac76dbb3c0277b52a",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "60fa73d5cad3bba7158482198d586b579cfca701458c71f8759aa084642d9ae0",
+     "height": 974654,
+     "time": 1793871022
+    },
+    {
+     "kind": "pending",
+     "digest": "6aec1472da3db9a39f24c70ff4d5ac5538de8604f4f81ef43e7cab80143ecb020c4efc3725cabdbb2402de54",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "bccc772318f07673266b7c87ff5792cc15ce317628da4ac245f0bed3772a5ba9",
+     "height": 974643,
+     "time": 1793866369
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974635,
+    "time": 1793863154
+   },
+   "target": "anchors/2026-11-04.txt"
+  },
+  "anchors/2026-11-05.txt.ots": {
+   "file_digest": "ba6169a6c1368e4c28e3ca657c7be23653b7846dd7adc4b45280772810551610",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6aed65e57808612c9460865a1bafbd4b8b34f3057b4e7d8253718c6131ad66f79a8b60e7240d42be69c3b059",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "263ca1d04e4f6f8d1d6b02aa42b8698b2096f061d7369245c1e4698a2f93ae02",
+     "height": 974768,
+     "time": 1793945540
+    },
+    {
+     "kind": "pending",
+     "digest": "6aed65e5f91a449555b92243e9eb3182a4893815eea0fbc50ab424ab1e57aafa8f4256814801ba2d120e9534",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "ea0430687d3c4498476a2ac8d09a36c5733439b7cce838b360a8faa405bb99cf",
+     "height": 974770,
+     "time": 1793946945
+    },
+    {
+     "kind": "pending",
+     "digest": "6aed65e5edc84d176bdb486d2a7e8f2ebb604946021f7cd19d6985cb7aa51b64f012aa395b9d06bb205d8915",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "5a8d4e0f3dd42c480f5ffd960a1064a6488c365d67fbbc58223e4702b3e95b7a",
+     "height": 974799,
+     "time": 1793960542
+    },
+    {
+     "kind": "pending",
+     "digest": "6aed65e5c0fbf675a24528391fc7e005112d57b67f6707d88c17b373bb8791b7dc36f69cca5935a60b5210d1",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "e5f383d8007f0017d02bb75a18b69746654f106c4d419b4bba47f333917c2463",
+     "height": 974808,
+     "time": 1793967145
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 974768,
+    "time": 1793945540
+   },
+   "target": "anchors/2026-11-05.txt"
+  },
+  "anchors/2026-11-07.txt.ots": {
+   "file_digest": "b9032fc6152f042e4a67198d729fc9f5762ec3cbe53ac62c84484ee445a90dce",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af008e8a45fb3dd530934c7a1c4745ad21e916482386a277fd87a8c09d26b15c18a4cbdd78f03cdb1998889",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "e7dc0136b151e75b228d51286571c68beda245e6d91964ca473c40b1b7ace642",
+     "height": 975028,
+     "time": 1794116700
+    },
+    {
+     "kind": "pending",
+     "digest": "6af008e8898331be98021517660392c14094c8bbf9c2f41aa2b8e9c42be6d8d299eff8baebef5fda6d2a4147",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "22324e8247f1b012810dd148ce517d5ed3f720e8da5e81b31d6c720e2ad21463",
+     "height": 975030,
+     "time": 1794118475
+    },
+    {
+     "kind": "pending",
+     "digest": "6af008e834f607e597f8bb11bcef64b06d34c0b2e86e8e8b25dccd4b0b2a16d75c731f494e65fe2ce76da7e3",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "47f578712c34581e526ed2ad4cfc7383aa539e9780a54b9b6e2d5aeaeb9809db",
+     "height": 975060,
+     "time": 1794140561
+    },
+    {
+     "kind": "pending",
+     "digest": "6af008e8bfd69b4e0ad98c1852f19227518bc006f7f0985d22c1cd061c607056cfd4c9a6088b8ed83fce7e1b",
+     "uri": "https://btc.calendar.catallaxy.com"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "51c1ac19a1bd25c46e785a6d8d0664a725f9dff1fadf0f59f9e4dab84ebe03b5",
+     "height": 975074,
+     "time": 1794153025
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975028,
+    "time": 1794116700
+   },
+   "target": "anchors/2026-11-07.txt"
+  },
+  "witness/058ec607b294744ce132a034ba5d1bb9fbb289cc788a4ea1241340bd0d20b443.ots": {
+   "file_digest": "058ec607b294744ce132a034ba5d1bb9fbb289cc788a4ea1241340bd0d20b443",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "058ec607b294744ce132a034ba5d1bb9fbb289cc788a4ea1241340bd0d20b443"
+  },
+  "witness/14eca990297c6530a65e031098080715ab52ce4e46fcacaae2d0fc51e1d4bea9.ots": {
+   "file_digest": "14eca990297c6530a65e031098080715ab52ce4e46fcacaae2d0fc51e1d4bea9",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "14eca990297c6530a65e031098080715ab52ce4e46fcacaae2d0fc51e1d4bea9"
+  },
+  "witness/388cc5466cd356bc5ac89dd8f7ec5fa389e796b192917feb39f37439e2ade7e5.ots": {
+   "file_digest": "388cc5466cd356bc5ac89dd8f7ec5fa389e796b192917feb39f37439e2ade7e5",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "388cc5466cd356bc5ac89dd8f7ec5fa389e796b192917feb39f37439e2ade7e5"
+  },
+  "witness/42c10faf5e1f608769e34dfcf01b526bdd768d36981a48dad8605a7fd73f99c9.ots": {
+   "file_digest": "42c10faf5e1f608769e34dfcf01b526bdd768d36981a48dad8605a7fd73f99c9",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "42c10faf5e1f608769e34dfcf01b526bdd768d36981a48dad8605a7fd73f99c9"
+  },
+  "witness/51df25587dba2f038042d6653abfaf37e1c8f305974238802c3a942ea5fd390f.ots": {
+   "file_digest": "51df25587dba2f038042d6653abfaf37e1c8f305974238802c3a942ea5fd390f",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "51df25587dba2f038042d6653abfaf37e1c8f305974238802c3a942ea5fd390f"
+  },
+  "witness/5fa5aba7e12f8d69a728a529fd667379268dd4c3b962dfb4e1e4320652a0f1b0.ots": {
+   "file_digest": "5fa5aba7e12f8d69a728a529fd667379268dd4c3b962dfb4e1e4320652a0f1b0",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "5fa5aba7e12f8d69a728a529fd667379268dd4c3b962dfb4e1e4320652a0f1b0"
+  },
+  "witness/6efc799cb798e688168235e70ebb049c5af7cca312110ba8976e4eb915564946.ots": {
+   "file_digest": "6efc799cb798e688168235e70ebb049c5af7cca312110ba8976e4eb915564946",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "6efc799cb798e688168235e70ebb049c5af7cca312110ba8976e4eb915564946"
+  },
+  "witness/8860b2f0bd2c1f8f744e7d9367cc01c29a26c6ffcf9bfe17dd973ab614d1e260.ots": {
+   "file_digest": "8860b2f0bd2c1f8f744e7d9367cc01c29a26c6ffcf9bfe17dd973ab614d1e260",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "8860b2f0bd2c1f8f744e7d9367cc01c29a26c6ffcf9bfe17dd973ab614d1e260"
+  },
+  "witness/9a080f22717c5561a6b384eb3484f7951c5ae7cca660402dc56afb2686b4ab5c.ots": {
+   "file_digest": "9a080f22717c5561a6b384eb3484f7951c5ae7cca660402dc56afb2686b4ab5c",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af107f0be9d839d2247e5cce8213dd9006056e8183fe722968af1502384ef8f6426d97aaefc883e11250124",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af107ef8e49a2638420fccfe29455a1dea02119acbadd64c3f864ec7bc7db6ba19c8ffcc8ada657362599ed",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af107ef96473418d3a1c33b1a21af1c8ee7d6279d9ac844591d7520b2e7766ec8a7591d2297a7657768e623",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af107ef8c269ccf1f9b314381e8905e287b471147b144e57e661d7bb518af90e6b9549762e72147d7cca0ca",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "pending",
+   "lowest": null,
+   "digest": "9a080f22717c5561a6b384eb3484f7951c5ae7cca660402dc56afb2686b4ab5c"
+  },
+  "witness/9fdfeda17e741672c1e06d2d0b9ebe1ad53818d20b8e44a93c40c55207931a79.ots": {
+   "file_digest": "9fdfeda17e741672c1e06d2d0b9ebe1ad53818d20b8e44a93c40c55207931a79",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af107f0be9d839d2247e5cce8213dd9006056e8183fe722968af1502384ef8f6426d97aaefc883e11250124",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af107ef8e49a2638420fccfe29455a1dea02119acbadd64c3f864ec7bc7db6ba19c8ffcc8ada657362599ed",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af107ef96473418d3a1c33b1a21af1c8ee7d6279d9ac844591d7520b2e7766ec8a7591d2297a7657768e623",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af107ef8c269ccf1f9b314381e8905e287b471147b144e57e661d7bb518af90e6b9549762e72147d7cca0ca",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "pending",
+   "lowest": null,
+   "digest": "9fdfeda17e741672c1e06d2d0b9ebe1ad53818d20b8e44a93c40c55207931a79"
+  },
+  "witness/a1dda800598a70ef507589f35d4dc161dbaeaa82d655530425791a8ce5eaa681.ots": {
+   "file_digest": "a1dda800598a70ef507589f35d4dc161dbaeaa82d655530425791a8ce5eaa681",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "a1dda800598a70ef507589f35d4dc161dbaeaa82d655530425791a8ce5eaa681"
+  },
+  "witness/b59bdbafb8269428fafa078d6c15de0fac6cd1ea3d72e2da0a2608b52a27250b.ots": {
+   "file_digest": "b59bdbafb8269428fafa078d6c15de0fac6cd1ea3d72e2da0a2608b52a27250b",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "b59bdbafb8269428fafa078d6c15de0fac6cd1ea3d72e2da0a2608b52a27250b"
+  },
+  "witness/b853efac28c5b7a3e3eabad5df7a9e9d4be75216887a8ad2b62813ac77774675.ots": {
+   "file_digest": "b853efac28c5b7a3e3eabad5df7a9e9d4be75216887a8ad2b62813ac77774675",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "b853efac28c5b7a3e3eabad5df7a9e9d4be75216887a8ad2b62813ac77774675"
+  },
+  "witness/bd9ef216d0127a8694f330d105cedcaaf8e871a33bebdf839f275210fc7bf6d5.ots": {
+   "file_digest": "bd9ef216d0127a8694f330d105cedcaaf8e871a33bebdf839f275210fc7bf6d5",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "bd9ef216d0127a8694f330d105cedcaaf8e871a33bebdf839f275210fc7bf6d5"
+  },
+  "witness/be175a36ce7ee1e07ec86c099139b31f23c0ff801fca5984e2bb1a56043503a1.ots": {
+   "file_digest": "be175a36ce7ee1e07ec86c099139b31f23c0ff801fca5984e2bb1a56043503a1",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "be175a36ce7ee1e07ec86c099139b31f23c0ff801fca5984e2bb1a56043503a1"
+  },
+  "witness/bf5880b869ce87e60893bc367329c29c82d53ed25727d30bcb01f0491e1edc41.ots": {
+   "file_digest": "bf5880b869ce87e60893bc367329c29c82d53ed25727d30bcb01f0491e1edc41",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "bf5880b869ce87e60893bc367329c29c82d53ed25727d30bcb01f0491e1edc41"
+  },
+  "witness/c11ce39b2dc8786f3cb7237c1eb2477a30b8e1827c1c78c68984438cfb277580.ots": {
+   "file_digest": "c11ce39b2dc8786f3cb7237c1eb2477a30b8e1827c1c78c68984438cfb277580",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "c11ce39b2dc8786f3cb7237c1eb2477a30b8e1827c1c78c68984438cfb277580"
+  },
+  "witness/c67977beebcebddd586bafc086eb54087b1b74c5e455d3c9e351e80e1f5e3516.ots": {
+   "file_digest": "c67977beebcebddd586bafc086eb54087b1b74c5e455d3c9e351e80e1f5e3516",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "c67977beebcebddd586bafc086eb54087b1b74c5e455d3c9e351e80e1f5e3516"
+  },
+  "witness/cdebbb5a452c9d73134d973d5bd0de97717a714069c411d5acb57b9475af25a1.ots": {
+   "file_digest": "cdebbb5a452c9d73134d973d5bd0de97717a714069c411d5acb57b9475af25a1",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "cdebbb5a452c9d73134d973d5bd0de97717a714069c411d5acb57b9475af25a1"
+  },
+  "witness/df0fe1da2c376762a51f9e7e149e41632e1a9376d35175b494ce7c86087302d2.ots": {
+   "file_digest": "df0fe1da2c376762a51f9e7e149e41632e1a9376d35175b494ce7c86087302d2",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "df0fe1da2c376762a51f9e7e149e41632e1a9376d35175b494ce7c86087302d2"
+  },
+  "witness/eb3dad2f12cb40ff6561b23ddf8564e8081f108266cdefb204f0b3fa861c8f73.ots": {
+   "file_digest": "eb3dad2f12cb40ff6561b23ddf8564e8081f108266cdefb204f0b3fa861c8f73",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "eb3dad2f12cb40ff6561b23ddf8564e8081f108266cdefb204f0b3fa861c8f73"
+  },
+  "witness/f21b47f4f81c2af2b718d80b0a9feb9f28e1ed3070f2cf92d4eafb6c6e8cfcd9.ots": {
+   "file_digest": "f21b47f4f81c2af2b718d80b0a9feb9f28e1ed3070f2cf92d4eafb6c6e8cfcd9",
+   "attestations": [
+    {
+     "kind": "pending",
+     "digest": "6af0e32ed67c52d2d5181fb4122edf4de16783276bed3c519d3f6a34ee7dba5aac0b5c3e2f78b2c1eb8d66b9",
+     "uri": "https://alice.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "3ca71b73ef426e459fba5d0374e2462de7c29054783438d8bc2c3d32957cd4dc",
+     "height": 975101,
+     "time": 1794174086
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e46ead430c95b81516f231ccb820f5eac751a9322d47b19fa258dd8894017600ca130ebad6f9f5d47",
+     "uri": "https://bob.btc.calendar.opentimestamps.org"
+    },
+    {
+     "kind": "bitcoin",
+     "digest": "b408d3664d7439e80bd17660785ce74d39e491de116dc24a074a414185571a4d",
+     "height": 975102,
+     "time": 1794175060
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32e89eb06d30b0ff0bf89150ab0ca904d1800b60ae0da99c0b05e9c4ab2097e8f52d4dc5099b27ce6ec",
+     "uri": "https://finney.calendar.eternitywall.com"
+    },
+    {
+     "kind": "pending",
+     "digest": "6af0e32efb3cd48a38af723dd6bf4a74a9eb86ed7a90b71d11d99258045524c49733d21e009c453a0f472b14",
+     "uri": "https://btc.calendar.catallaxy.com"
+    }
+   ],
+   "status": "verified",
+   "lowest": {
+    "height": 975101,
+    "time": 1794174086
+   },
+   "digest": "f21b47f4f81c2af2b718d80b0a9feb9f28e1ed3070f2cf92d4eafb6c6e8cfcd9"
+  }
+ }
+}

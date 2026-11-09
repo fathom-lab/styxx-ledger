@@ -9,6 +9,11 @@ list and anchor texts given, and compare the answer with `expect` (only the keys
 them). Write-side cases: call the named function on the given arguments and compare the value, or the refusal's
 `.code`. Prints "k of n vectors answered as the file says"; exit 0 only when k == n. run_vectors.mjs does the same
 with the javascript package.
+
+Protocol v0 (vectors/v0/, the exhibit's 10 cases over its base.jsonl, copied byte for byte): the same, with the
+package's v0 read mode (styxx_ledger.v0) and the exhibit runner's transforms; printed first, as
+"k of n v0 vectors answered as the file says". `--only v1` or `--only v0` runs one set; the default runs both, the
+v1 tally stays the last line, and the exit is 0 only when both sets are answered in full.
 """
 from __future__ import annotations
 
@@ -174,13 +179,131 @@ def check_write(S, c: dict):
     return ok, {"value": v, "error": err}
 
 
+# ------------------------------------------------------------------------------------------- protocol v0
+
+def apply_v0(S, base: bytes, t: dict) -> bytes:
+    """The exhibit's run_vectors.cjs transforms, byte for byte; the header is the line whose schema is v0's."""
+    V0 = S.v0
+    op = t["op"]
+    if op == "identity":
+        return base
+    if op == "crlf_first_line":
+        return base.replace(b"\n", b"\r\n", 1)
+    if op == "truncate_last":
+        kept = base.rstrip(b"\n").split(b"\n")[:-1]
+        return b"\n".join(kept) + b"\n"
+    out = []
+    for ln in base.split(b"\n"):
+        if not ln.strip():
+            out.append(ln)
+            continue
+        o = json.loads(ln)
+        s = o.get("seq")
+        if op == "set_field" and s == t["seq"]:
+            o[t["field"]] = t["value"]
+            out.append(_canon(S, o))
+        elif op == "drop_seq" and s == t["seq"]:
+            continue
+        elif op == "dup_key" and s == t["seq"]:
+            out.append(ln[:-1] + b',"' + t["key"].encode("utf-8") + b'":' + json.dumps(t["value"]).encode("utf-8") + b"}")
+        else:
+            out.append(ln)
+    if op == "set_field_rechain":
+        res, prev = [], None
+        for ln in out:
+            if not ln.strip():
+                res.append(ln)
+                continue
+            o = json.loads(ln)
+            if o.get("schema") == S.chain.V0_LOG_SCHEMA:
+                prev = V0.header_digest_v0(o)
+                res.append(ln)
+                continue
+            if o["seq"] == t["seq"]:
+                o[t["field"]] = t["value"]
+            if o["seq"] >= t["seq"]:
+                o["prev"] = prev
+                o.pop("entry_id", None)
+                o["entry_id"] = S.entry_id_of(o)
+                res.append(_canon(S, o))
+            else:
+                res.append(ln)
+            prev = o["entry_id"]
+        out = res
+    elif op not in ("set_field", "drop_seq", "dup_key"):
+        raise ValueError("unknown v0 transform op %r" % op)
+    return b"\n".join(out)
+
+
+def answer_v0(S, text: bytes, case: dict) -> dict:
+    V0 = S.v0
+    w = case.get("withheld") or []
+    r = V0.verify_bytes_v0(text, withheld=w)
+    probs = r["problems"]
+    out = {"ok": r["ok"],
+           "problem_seqs": sorted({p["seq"] for p in probs if p.get("seq") is not None}),
+           "problems_without_seq": sum(1 for p in probs if p.get("seq") is None),
+           "head": r["head"], "bridged": r["bridged"]}
+    if case.get("anchors") is not None:
+        res = []
+        for t in case["anchors"]:
+            a = V0.parse_anchor_text_v0(t)
+            res.append(bool(a) and V0.check_anchor_v0(r["entries"], a, w)["ok"])
+        out["anchors_ok"] = res
+    return out
+
+
+def check_v0(S, base: bytes, c: dict):
+    text = apply_v0(S, base, c["transform"])
+    if hashlib.sha256(text).hexdigest() != c["input_sha256"]:
+        return False, {"input_sha256": hashlib.sha256(text).hexdigest()}
+    got = answer_v0(S, text, c)
+    if c["transform"]["op"] == "dup_key":   # the exhibit runner compares ok only for this case
+        return got["ok"] == c["expect"]["ok"], got
+    return all(got.get(k) == c["expect"].get(k) for k in c["expect"]), got
+
+
+def run_v0(S, vpath: Path, verbose: bool):
+    """(answered, total), or None when the base file is not the one the vectors name."""
+    doc = json.loads(vpath.read_text("utf-8"))
+    base = (vpath.parent / doc["base"]).read_bytes()
+    if hashlib.sha256(base).hexdigest() != doc["base_sha256"]:
+        print("the v0 base file is not the one the v0 vectors were made over")
+        return None
+    good = 0
+    for c in doc["cases"]:
+        try:
+            ok, got = check_v0(S, base, c)
+        except Exception as e:  # noqa: BLE001
+            ok, got = False, {"raised": "%s: %s" % (type(e).__name__, str(e)[:200])}
+        good += 1 if ok else 0
+        if verbose or not ok:
+            print("%s v0    %s" % ("ok  " if ok else "FAIL", c["name"]))
+        if not ok:
+            print("   expected %s" % json.dumps(c["expect"], sort_keys=True))
+            print("   got      %s" % json.dumps(got, sort_keys=True))
+    print("  %-22s %d of %d" % ("v0:read", good, len(doc["cases"])))
+    print("%d of %d v0 vectors answered as the file says" % (good, len(doc["cases"])))
+    return good, len(doc["cases"])
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--vectors", default=str(HERE / "vectors_v1.json"))
+    ap.add_argument("--v0-vectors", default=str(HERE / "v0" / "vectors.json"))
+    ap.add_argument("--only", choices=("v1", "v0", "both"), default="both")
     ap.add_argument("--src", default=str(HERE.parent / "python" / "src"))
     ap.add_argument("-v", "--verbose", action="store_true")
     a = ap.parse_args(argv)
     S = load_pkg(Path(a.src))
+    v0_failed = False
+    if a.only in ("v0", "both"):
+        res = run_v0(S, Path(a.v0_vectors), a.verbose)
+        if res is None:
+            return 2
+        v0_failed = res[0] != res[1]
+        if a.only == "v0":
+            return 1 if v0_failed else 0
     vpath = Path(a.vectors)
     doc = json.loads(vpath.read_text("utf-8"))
     base = (vpath.parent / doc["base"]).read_bytes()
@@ -233,7 +356,7 @@ def main(argv=None) -> int:
         print("  %-22s %d of %d" % (g, by_group[g][0], by_group[g][1]))
     print("implementation: styxx_ledger (python %s, %s)" % (sys.version.split()[0], sys.platform))
     print("%d of %d vectors answered as the file says" % (total - failed, total))
-    return 1 if failed else 0
+    return 1 if (failed or v0_failed) else 0
 
 
 if __name__ == "__main__":

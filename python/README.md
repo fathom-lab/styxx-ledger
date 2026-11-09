@@ -12,8 +12,8 @@ this is the python half. the javascript half is `../js/`; both are held to `../v
 - not a coverage claim: the writer records what it is handed. an event the caller never hands it leaves no trace.
 - not a truth claim: no field is checked for what it says. the writer does not read content.
 - not a signature: the chain and the posted heads are the whole of what fixes the bytes.
-- not a reader of protocol v0 (darkflobi's own ledger, `darkflobi.gate/log/v0`): v0 remains v0. given a v0 file the
-  verifier reports `no_header` with the words "this verifier reads v1 only".
+- not a writer of protocol v0 (darkflobi's own ledger, `darkflobi.gate/log/v0`): v0 remains v0. `verify_bytes` reads
+  v1 only (`no_header`, "this verifier reads v1 only"); the v0 read mode is separate (below).
 
 ## install
 
@@ -44,7 +44,7 @@ prints the coverage line (how many published entries the holding anchors pin, ho
 how many sit after the last anchor).
 
 exit codes: 0 done / re-derives / every anchor holds; 1 refused, does not re-derive, or an anchor does not hold;
-2 usage or i/o error.
+2 usage or i/o error. `exhibit <url>` (below) fetches a published exhibit and re-derives it.
 
 ## quickstart (python)
 
@@ -86,11 +86,71 @@ concurrent-writer test, 6 processes and 120 appends, found it: the first version
 `timestamp=` on the writing calls is for reproducible logs; without it the utc clock is used, which is the writer's
 statement, not evidence of order. `day` is read with `zoneinfo`.
 
-## opentimestamps (optional)
+## protocol v0 (read only)
 
-`styxx_ledger.ots.stamp_text(text, path)` writes the exact anchor text to a file and runs `ots stamp` on it when an
-`ots` client is on PATH (`pip install opentimestamps-client`); the client talks to the calendars, this package does
-no network. not a dependency, not required, not exercised by the suite.
+v0 read mode: `verify` reads the header's schema. a `darkflobi.gate/log/v0` file (darkflobi's own ledger) is read
+under v0's rules, the exhibit verify.js's: the domain `darkflobi.gate/log/v0`, the fixed anchor word `gate`, no kinds
+check, the day as verify.js reads it in the header's `anchor_tz`; everything else is v1's. `--protocol v1` forces
+v1 (and a v0 file then gets `no_header`, "this verifier reads v1 only"). the exhibit's 10 v0 vectors are
+`../vectors/v0/`, byte for byte, and both packages answer 10 of 10. the writer stays v1 only.
+
+```python
+from styxx_ledger import detect_protocol, verify_auto, parse_anchor_text_v0, check_anchor_v0
+r = verify_auto(raw, withheld)          # r["protocol"] is "v0" or "v1"
+check_anchor_v0(r["entries"], parse_anchor_text_v0("gate anchor 2026-11-07 head <64 hex> seq 729"), withheld)["ok"]
+```
+
+## opentimestamps proofs (native)
+
+`styxx_ledger.ots` reads `.ots` files with no opentimestamps library: `parse_ots(data)`, `attestations(proof)`,
+`verify_bitcoin(digest, {merkle_root, timestamp})`, and `verify_proof(data, target=bytes | digest=hex,
+get_header=fn)`, which returns a status (`verified`, `pending`, `unverified`, `failed`, `commitment_mismatch`,
+`refused` with a code, `no_attestation`), each bitcoin attestation with its height and attested time, and the lowest.
+it never fetches: `get_header(height)` is the caller's (an explorer, a node, a fixture). a bitcoin attestation shows
+the stamped bytes existed before that block, not that they were published anywhere. sha256, sha1 and ripemd160 come
+from hashlib (`ots.ripemd160_available()` says whether this python's OpenSSL has ripemd160; a proof that needs it is
+refused with `ripemd160_unavailable` otherwise); keccak256 is implemented in the module. on the 14 anchor proofs and
+22 witness proofs in `../vectors/ots/` it agrees, offline, with javascript-opentimestamps 0.4.9 on every height,
+attested time and digest.
+
+stamping (optional): `styxx_ledger.ots.stamp_text(text, path)` writes the exact anchor text to a file and runs
+`ots stamp` on it when an `ots` client is on PATH (`pip install opentimestamps-client`); the client talks to the
+calendars, this package does no network. not a dependency, not required, not exercised by the suite.
+
+## exhibit: re-derive a published exhibit by url
+
+    styxx-ledger exhibit https://fathom-lab.github.io/styxx/ledger/
+    styxx-ledger exhibit <url> [--explorer <esplora api url> ...] [--sample <n>] [--no-ots] [--save <dir>]
+                       [--allow-redirect] [--today <YYYY-MM-DD>] [--json]
+
+fetches `ledger.jsonl`, `withheld.json`, `anchors/index.json` (and every `.txt` / `.txt.ots` it names) and
+`witness/index.json` from the base url (urllib, 30 s per file, 20 MB cap, 3 tries on 5xx / no answer), then
+re-derives the chain (v0 or v1 by the header), checks each anchor `.txt` against the index and against the chain
+(section 5), verifies each anchor proof natively against bitcoin block headers asked of every `--explorer` (default
+`https://blockstream.info/api` and `https://mempool.space/api`; all must give the same hash, merkle root and time, or
+the block is "explorers disagree: not verified"), checks that every witness record names the chain's entry_id at its
+seq, and verifies a seeded sample of witness proofs (seed = the ledger file's sha256; `--sample` of them, default 20,
+plus the earliest and latest attested lines) to the block and block time the index states. the text report carries
+every count with its denominator; `--json` is the full record (each fetched file's url, length, sha256; each explorer
+answer; each attestation). `--save` keeps the fetched bytes and the explorers' answers. exit 0 every check passed, 1
+any failed, 2 usage, or a file or an explorer did not answer. in code: `styxx_ledger.exhibit.run_exhibit(url, ...)`
+(the fetch is injectable: `get=fn(url) -> (status, bytes[, final url])`) and `render_text(report)`.
+
+a withheld record counts only when a later published line's prev names its digest (one naming a published seq, or
+one no later line binds, fails); an index that names no block for a verified proof fails; a block every explorer
+answers 404 for fails the proof, one 404 against one header is disagreement; an explorer still answering 429 after 5
+tries (its Retry-After, capped at 60 s, else 2, 4, 8, 16 s) is named as rate-limited and left out; a file served from
+another host (a redirect off the url's host or off https) fails unless `--allow-redirect`. the report gives each
+anchor's lag from its date to its lowest block (late above 7 days), the last holding anchor's age against the run
+day (`--today` sets it), and an anchor the index marks pending reads PEND until 7 days after its date, then fails.
+the public explorers rate-limit (blockstream.info's notice: 700 requests an hour per ip, unauthenticated); one run
+asks each explorer 28 times for the exhibit's 14 blocks.
+
+a proof attests that bytes existed before a block, not that they were published at a url; the anchor texts come from
+the lab's page (the supergroup they were posted to needs an account); the headers are the explorers' word; nothing is
+signed; a copy that is older but consistent passes every check (compare the head and the last anchor date with the
+posts, and with a run of your own on another day). the javascript cli prints the same report line for line (apart
+from its name and the wall clock).
 
 ## tests and counts
 
@@ -98,11 +158,17 @@ no network. not a dependency, not required, not exercised by the suite.
     python -B -m pytest -q
     python -B ../vectors/run_vectors.py
 
-as read on this box (windows 11, python 3.12.10, tzdata 2025.3, 2026-11-08):
+as read on this box (windows 11, python 3.12.10, tzdata 2025.3, 2026-11-08 and 09):
 
     vectors (run_vectors.py)          118 of 118 vectors answered as the file says
+    v0 vectors (run_vectors.py)       10 of 10 v0 vectors answered as the file says
     vectors, python 3.14.2, no tzdata 58 of 118 (the windows zone database is the tzdata package)
-    pytest                            212 passed of 212 collected
+    pytest                            353 passed of 353 collected without tests/test_census.py (another
+                                      workstream's; tests/test_v0.py 37, tests/test_ots.py 73, tests/test_exhibit.py
+                                      31: cases a-e and the review-3e regressions against a local server)
+    exhibit, live, 2026-11-09 05:28Z  68 of 69 checks, 1 pending (the 2026-11-08 anchor, as the index says), exit
+                                      0; 14 of 15 anchor proofs, 22 of 22 witness proofs verify; 2 explorers agree
+                                      on 14 of 14 blocks (15.5 s wall clock)
     of those, cross tests             5 of 5: the python fixture re-written byte for byte; each of the 3
                                       js/tests/fixtures/*.jsonl (js_written, js_cli_written, mixed_written)
                                       re-derives here with the head and sha256 its sidecar names, and its anchors
