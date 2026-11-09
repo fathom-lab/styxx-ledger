@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      KIT_COMMIT: <40-hex commit of fathom-lab/styxx-ledger carrying the census scorer>
+      KIT_COMMIT: 94e41817cc12eb992d9725c9f075baf5dda88c46   # fathom-lab/styxx-ledger main as of 2026-11-09; pin a later commit if you verified with one
       PREREG: <path of your filled prereg in this repository, e.g. PREREG_census.md>
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
