@@ -374,7 +374,9 @@ def test_cli_census(cli, tmp_path):
     assert doc["verdict"] == "NOT_RUN__window_did_not_open"
     assert doc["chain_problem_components"]["unreachable"] == 1
     c = doc["window"]["opening_condition"]["c"]
-    assert c["held"] is False and c["verified"] is False  # no section-15 shelf entry in this prereg
+    # the scorer checks (c) itself against the shelf report the prereg names; example.invalid does not answer, so the
+    # check ran (verified) and did not hold
+    assert c["held"] is False and c["verified"] is True, c
     bad = tmp_path / "half.md"
     bad.write_text("{{d0}}\n", encoding="utf-8")
     r = cli("census", "--prereg", bad, "--ledger", LEDGER, "--out", tmp_path / "c2", "--now", NOW, "--no-js")
