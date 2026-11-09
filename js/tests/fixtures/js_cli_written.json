@@ -1,0 +1,11 @@
+{
+ "anchor_texts": [
+  "crossbot anchor 2026-11-01 head 2d0abf60d0b39e478c5feb32f77eee303a9ef5c49b02e7afa025ad765a7b60a8 seq 13"
+ ],
+ "entries": 40,
+ "file": "js_cli_written.jsonl",
+ "head": "328ab7b3545bb73ec91b669f94f0cd0bd462b6711723da2f2f3bac415e9ca1f6",
+ "last_seq": 40,
+ "sha256": "60033975bdc480f5142a55b83726a1b23ab188f28eda7037614bef68b7ecfde1",
+ "written_by": "styxx-ledger cli (javascript): the same 41 calls as python/tests/fixtures/py_cli_written.jsonl; since the fix pass of 2026-11-08 (late is section 5's rule in both writers) the two files are byte-identical; this file's bytes did not change"
+}

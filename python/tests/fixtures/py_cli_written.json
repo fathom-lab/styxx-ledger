@@ -1,0 +1,11 @@
+{
+ "anchor_texts": [
+  "crossbot anchor 2026-11-01 head 2d0abf60d0b39e478c5feb32f77eee303a9ef5c49b02e7afa025ad765a7b60a8 seq 13"
+ ],
+ "entries": 40,
+ "file": "py_cli_written.jsonl",
+ "head": "328ab7b3545bb73ec91b669f94f0cd0bd462b6711723da2f2f3bac415e9ca1f6",
+ "last_seq": 40,
+ "sha256": "60033975bdc480f5142a55b83726a1b23ab188f28eda7037614bef68b7ecfde1",
+ "written_by": "styxx-ledger cli (python): `init --no-started`, 39 `append --fields --timestamp`, 1 `anchor-text --record --timestamp`; regenerated 2026-11-08 in the fix pass once `late` became section 5's rule (the earlier bytes, sha256 236cf16f..., carried late false); now byte-identical to js/tests/fixtures/js_cli_written.jsonl"
+}

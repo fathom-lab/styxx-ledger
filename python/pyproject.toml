@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "styxx-ledger"
+dynamic = ["version"]
+description = "a reference writer and verifier for the styxx ledger protocol v1: an agent's append-only, hash-chained event log with daily posted heads"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Fathom Intelligence"}]
+keywords = ["ledger", "hash-chain", "agent", "audit-log", "jcs"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+# windows python ships no iana zone database; zoneinfo reads it from the tzdata package there.
+dependencies = ["tzdata; sys_platform == 'win32'"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+styxx-ledger = "styxx_ledger.cli:main"
+
+[project.urls]
+Repository = "https://github.com/fathom-lab/styxx-ledger"
+
+[tool.setuptools.dynamic]
+version = {attr = "styxx_ledger._version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"

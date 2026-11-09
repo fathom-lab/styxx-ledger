@@ -1,0 +1,15 @@
+{
+ "anchor_texts": [
+  "kitbot-js anchor 2026-10-31 head ea06b6eceb0e849018c45ea092134f42f869f7ee58a4612c66050b8415be7a76 seq 7",
+  "kitbot-js anchor 2026-11-01 head d1ff7498e48a9ee015f5dcca7162f5f7fd8bbad2b11bdada2ed8164774244ea6 seq 14",
+  "kitbot-js anchor 2026-11-02 head 253b5ff69fb3286d4e65fdb663c91cb016f027a3cf743918b4bbd82a951b0d22 seq 17",
+  "kitbot-js anchor 2026-12-31 head 2233a8f7afefc77b794f37818b467f71079bcf0c1d778a83433dc8c2b70460de seq 23",
+  "kitbot-js anchor 2027-01-01 head 9c1ae7d3fccf151c0479bd6553b3c5a0de807764b03b5422785674b36f32afaa seq 27"
+ ],
+ "entries": 29,
+ "file": "js_written.jsonl",
+ "head": "7589a58e025b93e4e4f3aa12ab5b4eb5e53052cea46cd7cf504641dc2746c414",
+ "last_seq": 29,
+ "sha256": "eac9663ec5171b2a9bd67ef55d69023dcebd314e3591af432b68bf839b958da1",
+ "written_by": "styxx-ledger (javascript) tests/make_fixture.js"
+}

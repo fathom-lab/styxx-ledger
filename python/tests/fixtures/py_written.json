@@ -1,0 +1,12 @@
+{
+ "anchor_texts": [
+  "pybot anchor 2026-10-24 head 8b803b1a322ed18272dd33a6f690bbc537b55c131db67d232cacc6ed996f1e8b seq 4",
+  "pybot anchor 2026-10-25 head 020fc5f0fd8557fd2df834bc80bade322590e34626bc79bafafd5cce8ff22013 seq 10"
+ ],
+ "entries": 12,
+ "file": "py_written.jsonl",
+ "head": "a093f7a4c2bab783ca935ac8c7fb45b9cc1f2c33c552f64b32a426858dd5561f",
+ "last_seq": 12,
+ "sha256": "051726859f25dbc2c53a5ba7d73812f3f4f25476dc5ab3eb3471b6eed2c1e3a0",
+ "written_by": "styxx_ledger (python) tests/make_fixture.py"
+}

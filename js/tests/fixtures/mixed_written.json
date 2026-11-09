@@ -1,0 +1,9 @@
+{
+ "anchor_texts": [],
+ "entries": 100,
+ "file": "mixed_written.jsonl",
+ "head": "0ca1c608f487bf8ce4d9e010d691302f6e57ca8970c28698dc6fd89c45730396",
+ "last_seq": 100,
+ "sha256": "e3aaa4bd699f83c28622cb0b5223685f268973f9aa8ca6323030cdd7b9916c51",
+ "written_by": "2 python + 2 node processes, 25 appends each, one lock file; adversarial-conformance pass 2026-11-08"
+}

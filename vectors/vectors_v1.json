@@ -1,0 +1,2004 @@
+{
+ "base": "base_v1.jsonl",
+ "base_anchor_texts": [
+  "kitbot anchor 2026-10-31 head e4e61d531f964e1a94b2ed260ea3ade9ed0c041801197f41cc46e19d1a4d0495 seq 9",
+  "kitbot anchor 2026-11-01 head 8d19a85bb63dbb5a5105c15d3a519921a43f491466c77b0513b075bccf8a221d seq 23",
+  "kitbot anchor 2026-11-02 head 7640180c82d1550c6fbd51f2136183b612f238218deaab215204c833d3e946e8 seq 29",
+  "kitbot anchor 2026-12-31 head c0538b01ef1b49d3a33d7658294d78594b02931f5a7c0e422f382e9cad4d094a seq 39",
+  "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57"
+ ],
+ "base_entries": 59,
+ "base_head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+ "base_lines": 60,
+ "base_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+ "made_by": "vectors/make_vectors.py with styxx_ledger (python); every expect is the python answer, re-asked by both runners",
+ "note": "read: apply `transform` to the base (the result must hash to input_sha256), verify it with `withheld` and the `anchors` texts, and answer as `expect` says (only the keys in `compare` when a case names them). problem_seqs: the seqs carrying a problem; problems_without_seq: the count of problem records naming no seq (reading and header problems); problem_codes: the sorted set of codes; anchors_ok: check_anchor(...).ok per text, with the header; coverage: coverage(entries, withheld, coverage_anchor_seqs). write: call `fn` on the given arguments and compare the string value (build_entry: the canonical line of the entry), or the refusal's code.",
+ "protocol": "PROTOCOL_v1.md",
+ "read": [
+  {
+   "anchors": [
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57",
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 50"
+   ],
+   "coverage_anchor_seqs": [
+    9,
+    23,
+    29,
+    39,
+    57
+   ],
+   "expect": {
+    "anchors_ok": [
+     true,
+     false
+    ],
+    "bridged": [],
+    "coverage": {
+     "after_last_anchor": 2,
+     "last_anchor_seq": 57,
+     "pinned": 57,
+     "unpinned_by_withholding": 0,
+     "unpinned_ranges": [],
+     "withheld": 0
+    },
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+   "name": "identity",
+   "transform": {
+    "op": "identity"
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2026-10-31 head e4e61d531f964e1a94b2ed260ea3ade9ed0c041801197f41cc46e19d1a4d0495 seq 9",
+    "kitbot anchor 2026-11-01 head 8d19a85bb63dbb5a5105c15d3a519921a43f491466c77b0513b075bccf8a221d seq 23",
+    "kitbot anchor 2026-11-02 head 7640180c82d1550c6fbd51f2136183b612f238218deaab215204c833d3e946e8 seq 29",
+    "kitbot anchor 2026-12-31 head c0538b01ef1b49d3a33d7658294d78594b02931f5a7c0e422f382e9cad4d094a seq 39",
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57"
+   ],
+   "expect": {
+    "anchors_ok": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+   "name": "anchor-present",
+   "transform": {
+    "op": "identity"
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2026-11-01 head d31fd30adb18657eb6c9e923736b5ca032a15ef2613c173ee9fd0bc97b33c244 seq 22"
+   ],
+   "expect": {
+    "anchors_ok": [
+     false
+    ],
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+   "name": "anchor-after-a-later-line",
+   "transform": {
+    "op": "identity"
+   }
+  },
+  {
+   "anchors": [
+    "gate anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57"
+   ],
+   "expect": {
+    "anchors_ok": [
+     false
+    ],
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+   "name": "anchor-v0-word-or-other-agent",
+   "transform": {
+    "op": "identity"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "entry_id"
+    ],
+    "problem_seqs": [
+     20
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "1b8e6b713246e7d2ee5953b5bc2b0ed10db03665d96f73b729ad42342a2d6f42",
+   "name": "rewrite-one-field",
+   "transform": {
+    "field": "note",
+    "op": "set_field",
+    "seq": 20,
+    "value": "rewritten"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "entry_id",
+     "prev"
+    ],
+    "problem_seqs": [
+     33
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "bf090ec3ae5bf0df6b40f5909c7097df55af4fa6eb5fade9ddf6f2343098ce6a",
+   "name": "rewrite-prev",
+   "transform": {
+    "field": "prev",
+    "op": "set_field",
+    "seq": 33,
+    "value": "0000000000000000000000000000000000000000000000000000000000000000"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "prev",
+     "seq"
+    ],
+    "problem_seqs": [
+     34
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "e914be5344690ae1f2815b0f40a7bbcab8da2e3da7ec67b978e11d498dbec748",
+   "name": "drop-a-line",
+   "transform": {
+    "op": "drop_seq",
+    "seq": 33
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57"
+   ],
+   "coverage_anchor_seqs": [
+    9,
+    23,
+    29,
+    39,
+    57
+   ],
+   "expect": {
+    "anchors_ok": [
+     true
+    ],
+    "bridged": [
+     33
+    ],
+    "coverage": {
+     "after_last_anchor": 2,
+     "last_anchor_seq": 57,
+     "pinned": 53,
+     "unpinned_by_withholding": 3,
+     "unpinned_ranges": [
+      [
+       30,
+       32
+      ]
+     ],
+     "withheld": 1
+    },
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "e914be5344690ae1f2815b0f40a7bbcab8da2e3da7ec67b978e11d498dbec748",
+   "name": "drop-a-line-withheld",
+   "transform": {
+    "op": "drop_seq",
+    "seq": 33
+   },
+   "withheld": [
+    {
+     "entry_id": "030f2805d1eb9dc33a3b856773d74466ed1c6965908ca96ef8681d89dda27321",
+     "seq": 33
+    }
+   ]
+  },
+  {
+   "expect": {
+    "bridged": [
+     33
+    ],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "prev"
+    ],
+    "problem_seqs": [
+     34
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "e914be5344690ae1f2815b0f40a7bbcab8da2e3da7ec67b978e11d498dbec748",
+   "name": "drop-a-line-withheld-wrong-digest",
+   "transform": {
+    "op": "drop_seq",
+    "seq": 33
+   },
+   "withheld": [
+    {
+     "entry_id": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+     "seq": 33
+    }
+   ]
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "cr_byte",
+     "not_canonical"
+    ],
+    "problem_seqs": [],
+    "problems_without_seq": 2
+   },
+   "input_sha256": "ce0c8a513e230a58edd0742a2ae3e42448e68dd95a8ddacf108134289e8d9cd3",
+   "name": "cr-byte",
+   "transform": {
+    "op": "crlf_first_line"
+   }
+  },
+  {
+   "compare": [
+    "ok"
+   ],
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "duplicate_key",
+     "prev",
+     "seq"
+    ],
+    "problem_seqs": [
+     11
+    ],
+    "problems_without_seq": 1
+   },
+   "input_sha256": "626929544fa4514a4d268d3b81694cbe2d2ea200036853adc5cb89e054d4db8b",
+   "name": "duplicate-key",
+   "note": "section 4's one documented difference: the python reader drops the line (the chain breaks after it), a JSON.parse reader keeps it with its bytes flagged; both answer ok=false",
+   "transform": {
+    "key": "late",
+    "op": "dup_key",
+    "seq": 10,
+    "value": true
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57"
+   ],
+   "expect": {
+    "anchors_ok": [
+     true
+    ],
+    "bridged": [],
+    "head": "4c35ce40afa1b4368067a833ed2f528f215a3ac3c599f6d38f7abfc56bef2095",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "08dbae4208ae3ca46159700885227bed0db6ed00747de23c3cb669b6b566a6f7",
+   "name": "truncate-last-line",
+   "transform": {
+    "op": "truncate_last"
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57"
+   ],
+   "expect": {
+    "anchors_ok": [
+     false
+    ],
+    "bridged": [],
+    "head": "087c5c39d45f01197af88c8bf75d59e8333f2a267f6df989c8fc7288aca1ca29",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "8e4dceef021516d918a13bfba31b0e2b0f95b7d7937d1f72bcefc13554d4c366",
+   "name": "flip-and-rechain",
+   "transform": {
+    "field": "note",
+    "op": "set_field_rechain",
+    "seq": 41,
+    "value": "flipped"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "44c7e45fcb59b863072c26fffadaeea46a0f0f7ee7bd1557f646d6fd0a3552c2",
+    "ok": false,
+    "problem_codes": [
+     "kind_not_declared"
+    ],
+    "problem_seqs": [
+     20
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "83b2f87e738e6fc12165f268244fc1e466fa2a222918af24dfa5894bfc627b48",
+   "name": "kind-not-declared",
+   "transform": {
+    "field": "kind",
+    "op": "set_field_rechain",
+    "seq": 20,
+    "value": "send"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "b00b14451c64b4b1310325612a08cceda430d617dccc76213b93920b5a2dd4fe",
+    "ok": false,
+    "problem_codes": [
+     "header_kinds",
+     "kind_not_declared"
+    ],
+    "problem_seqs": [
+     1
+    ],
+    "problems_without_seq": 1
+   },
+   "input_sha256": "f16bc5099a392f66aaa661ade59766b16869df811139ac8a18b512e230e6d67f",
+   "name": "header-kinds-missing-started",
+   "transform": {
+    "field": "kinds",
+    "op": "set_header_rechain",
+    "value": [
+     "anchor",
+     "note"
+    ]
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "no_header"
+    ],
+    "problem_seqs": [],
+    "problems_without_seq": 2
+   },
+   "input_sha256": "ffed9a761295c76816894e1bfe67e7d58ceb109d5e0a2913fb3948b258488cc1",
+   "name": "header-v0-schema",
+   "transform": {
+    "field": "schema",
+    "op": "set_header",
+    "value": "darkflobi.gate/log/v0"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "0a1896fe0de8381086e22440802f709c1e6d7c91bb295d3384d1a355113fdead",
+    "ok": false,
+    "problem_codes": [
+     "day"
+    ],
+    "problem_seqs": [
+     22
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "ac730fe0903019cab1be58fd17d34e9583403eed3b195658f60e54505285d53c",
+   "name": "day-rewritten-at-dst-edge",
+   "transform": {
+    "field": "day",
+    "op": "set_field_rechain",
+    "seq": 22,
+    "value": "2026-11-02"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "9c6974e1ec19837cd64fe3f8f74876f38b785d3aea3a045de9469b87e3c51ebf",
+    "ok": false,
+    "problem_codes": [
+     "schema"
+    ],
+    "problem_seqs": [
+     20
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "8f8761fccd5cffa04ae9282d91d73335739905dd28be6ae0a9069d889a20d98d",
+   "name": "entry-schema-v0",
+   "transform": {
+    "field": "schema",
+    "op": "set_field_rechain",
+    "seq": 20,
+    "value": "darkflobi.gate/entry/v0"
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2027-01-02 head 4c35ce40afa1b4368067a833ed2f528f215a3ac3c599f6d38f7abfc56bef2095 seq 58"
+   ],
+   "expect": {
+    "anchors_ok": [
+     false
+    ],
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+   "name": "anchor-later-line-no-own-entry",
+   "transform": {
+    "op": "identity"
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2026-11-01 head e84897e246ccd63d12c3d12002b500283c26cfdca2a142eb56594ecf69290cf8 seq 24"
+   ],
+   "expect": {
+    "anchors_ok": [
+     false
+    ],
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+   "name": "anchor-own-entry-disagrees",
+   "transform": {
+    "op": "identity"
+   }
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2026-12-31 head c0538b01ef1b49d3a33d7658294d78594b02931f5a7c0e422f382e9cad4d094a seq 39"
+   ],
+   "coverage_anchor_seqs": [
+    9,
+    23,
+    29,
+    39,
+    57
+   ],
+   "expect": {
+    "anchors_ok": [
+     true
+    ],
+    "bridged": [
+     39
+    ],
+    "coverage": {
+     "after_last_anchor": 2,
+     "last_anchor_seq": 57,
+     "pinned": 47,
+     "unpinned_by_withholding": 9,
+     "unpinned_ranges": [
+      [
+       30,
+       38
+      ]
+     ],
+     "withheld": 1
+    },
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "db40201f479520d009cd47f6c2f5aadbef31d081c1fe4d6f5d453c40f2d7472a",
+   "name": "anchor-head-withheld",
+   "transform": {
+    "op": "drop_seq",
+    "seq": 39
+   },
+   "withheld": [
+    {
+     "entry_id": "c0538b01ef1b49d3a33d7658294d78594b02931f5a7c0e422f382e9cad4d094a",
+     "seq": 39
+    }
+   ]
+  },
+  {
+   "anchors": [
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57\n",
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57 ",
+    " kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57",
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57\n\n",
+    "kitbot anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 057",
+    "kitbot  anchor 2027-01-01 head 178bd12806e9686f2fee077e21629eae299c504f35336b7bddac3fe9e4f3dad2 seq 57",
+    "KITBOT ANCHOR 2027-01-01 HEAD 178BD12806E9686F2FEE077E21629EAE299C504F35336B7BDDAC3FE9E4F3DAD2 SEQ 57"
+   ],
+   "expect": {
+    "anchors_ok": [
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "09fcf1d7f46f9c8c84beeed38e83721e56553a37dea6626143b32ac59c4fa8e4",
+   "name": "anchor-text-strict-form",
+   "transform": {
+    "op": "identity"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "1fb59b5ed8bba2d1baa17f53f501063a51330287703a4d3592c56615b4e43287",
+    "ok": false,
+    "problem_codes": [
+     "day"
+    ],
+    "problem_seqs": [
+     41
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "93a171668b0eb3a19fd25f0929fce18b852177239eb302109cb08e6f35b8026f",
+   "name": "timestamp-trailing-lf-rechained",
+   "transform": {
+    "field": "timestamp",
+    "op": "set_field_rechain",
+    "seq": 41,
+    "value": "2027-01-01T05:00:04Z\n"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "ab1765c4e8eac54d93ab75dbbe684fdfb0f8f8cda6654f79c2775fd36200e2ee",
+    "ok": false,
+    "problem_codes": [
+     "day"
+    ],
+    "problem_seqs": [
+     41
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "826a7d9304d9993d76b169dbc2ad2878eebef863b8977994784684914fab9b26",
+   "name": "timestamp-fullwidth-digits-rechained",
+   "transform": {
+    "field": "timestamp",
+    "op": "set_field_rechain",
+    "seq": 41,
+    "value": "\uff12\uff10\uff12\uff17-01-01T05:00:04Z"
+   }
+  },
+  {
+   "coverage_anchor_seqs": [
+    9,
+    23,
+    29,
+    39,
+    57
+   ],
+   "expect": {
+    "bridged": [
+     33
+    ],
+    "coverage": {
+     "after_last_anchor": 2,
+     "last_anchor_seq": 57,
+     "pinned": 53,
+     "unpinned_by_withholding": 3,
+     "unpinned_ranges": [
+      [
+       30,
+       32
+      ]
+     ],
+     "withheld": 1
+    },
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "e914be5344690ae1f2815b0f40a7bbcab8da2e3da7ec67b978e11d498dbec748",
+   "name": "drop-a-line-withheld-integral-float-seq",
+   "transform": {
+    "op": "drop_seq",
+    "seq": 33
+   },
+   "withheld": [
+    {
+     "entry_id": "030f2805d1eb9dc33a3b856773d74466ed1c6965908ca96ef8681d89dda27321",
+     "seq": 33.0
+    }
+   ]
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "unparsable"
+    ],
+    "problem_seqs": [],
+    "problems_without_seq": 1
+   },
+   "input_sha256": "0ad6b42e0c5bed31c2bcd00e0a7ca2c907cf17003af058d1549686be259cebdc",
+   "name": "line-nested-33-deep",
+   "transform": {
+    "depth": 33,
+    "op": "append_nested"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "unparsable"
+    ],
+    "problem_seqs": [],
+    "problems_without_seq": 1
+   },
+   "input_sha256": "006611c983081d60ae188a0e333cfdefeb3377a31f041210c8bd852ef643a8c9",
+   "name": "line-nested-1200-deep",
+   "transform": {
+    "depth": 1200,
+    "op": "append_nested"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": null,
+    "ok": false,
+    "problem_codes": [
+     "no_header"
+    ],
+    "problem_seqs": [],
+    "problems_without_seq": 2
+   },
+   "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "name": "empty-file",
+   "transform": {
+    "op": "replace_all",
+    "text": ""
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": null,
+    "ok": false,
+    "problem_codes": [
+     "no_header"
+    ],
+    "problem_seqs": [],
+    "problems_without_seq": 2
+   },
+   "input_sha256": "004530e402f8ad01fa656964a58bd1be47b77e50e4bfe73388ec48da476e6ed9",
+   "name": "blank-lines-only",
+   "transform": {
+    "op": "replace_all",
+    "text": "\n\n \t\n"
+   }
+  },
+  {
+   "expect": {
+    "bridged": [],
+    "head": "66424b07330c0d937faee544dbe7e572af9396fecaa90adb59efc72d91895b22",
+    "ok": true,
+    "problem_codes": [],
+    "problem_seqs": [],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "881c3cc97cf2fad87ee1d7cce0429b454979b64a5605e8bfd7bb6f67f907abd3",
+   "name": "header-extra-key-is-not-a-verifier-problem",
+   "note": "section 4: header form beyond kinds is a writer-side refusal (header_form) that the verifier does not report",
+   "transform": {
+    "field": "extra",
+    "op": "set_header_rechain",
+    "value": 1
+   }
+  },
+  {
+   "compare": [
+    "ok"
+   ],
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "core_not_canonical",
+     "seq"
+    ],
+    "problem_seqs": [
+     5.0
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "d197e93d62f16864b3aa0578106a72aeee92d5e9163989836e7dd00d4ab1e63a",
+   "name": "seq-written-as-5.0",
+   "note": "section 4: a number a javascript reader re-prints (5.0 as 5) gives different codes in the two readers; both answer ok=false",
+   "transform": {
+    "new": "\"seq\":5.0,",
+    "old": "\"seq\":5,",
+    "op": "replace_in_line",
+    "seq": 5
+   }
+  },
+  {
+   "compare": [
+    "ok"
+   ],
+   "expect": {
+    "bridged": [],
+    "head": "cb0ec566b5de51517fd647d033b23d7d32fdd216866f892c0bc67501d2fe203a",
+    "ok": false,
+    "problem_codes": [
+     "core_not_canonical"
+    ],
+    "problem_seqs": [
+     20
+    ],
+    "problems_without_seq": 0
+   },
+   "input_sha256": "bfa0bf4f5597a3fd75f9796b46aaaf9e9ca1b3ee0ffbd4074a0dac0a60e6f51c",
+   "name": "non-ascii-keys-in-code-point-order",
+   "note": "section 4: dump order is defined for admitted keys only; a python reader orders u+ff5e first, a utf-16 reader u+1f600 first; both answer ok=false",
+   "transform": {
+    "new": "\"timestamp\":\"2026-11-02T00:00:00Z\",\"\uff5e\":1,\"\ud83d\ude00\":2}",
+    "old": "\"timestamp\":\"2026-11-02T00:00:00Z\"}",
+    "op": "replace_in_line",
+    "seq": 20
+   }
+  }
+ ],
+ "schema": "styxx.ledger/vectors/v1",
+ "write": [
+  {
+   "expect": "{\"a\":[],\"z\":{\"a\":false,\"b\":[1,{\"c\":true,\"d\":null}]}}",
+   "expect_sha256": "537bbf6d42f5087ebaa64ae356e1887a3e50d8a256bf51803fc793d4e18a2357",
+   "fn": "jcs",
+   "input": {
+    "a": [],
+    "z": {
+     "a": false,
+     "b": [
+      1,
+      {
+       "c": true,
+       "d": null
+      }
+     ]
+    }
+   },
+   "name": "dump-nested"
+  },
+  {
+   "expect": "{\"s\":\"h\u00e9llo w\u00f6rld \u2014 \u65e5\u672c\u8a9e \ud83d\ude42\",\"t\":\"\u00e4\u00f6\u00fc\u00df\"}",
+   "expect_sha256": "c35b369615c0bb0774da0443f18a775aa2111923df8d1ea400a27176c5b037a1",
+   "fn": "jcs",
+   "input": {
+    "s": "h\u00e9llo w\u00f6rld \u2014 \u65e5\u672c\u8a9e \ud83d\ude42",
+    "t": "\u00e4\u00f6\u00fc\u00df"
+   },
+   "name": "dump-unicode-strings"
+  },
+  {
+   "expect": "{\"e\":\"quote\\\" backslash\\\\ slash/ \\b\\f\\n\\r\\t \\u0000 \\u001f \u007f \u0080 \u2028 \u2029 \ufeff\"}",
+   "expect_sha256": "9c68eccca6a1f74ec503fef71fb13e450ed49574226ab6fa5179e11923a357a1",
+   "fn": "jcs",
+   "input": {
+    "e": "quote\" backslash\\ slash/ \b\f\n\r\t \u0000 \u001f \u007f \u0080 \u2028 \u2029 \ufeff"
+   },
+   "name": "dump-escapes"
+  },
+  {
+   "expect": "{\"max\":9007199254740992}",
+   "expect_sha256": "4e0b17a5c1abeea791edcf4836875f815a5cb8a3984814d5de9f42ca0c5656a4",
+   "fn": "jcs",
+   "input": {
+    "max": 9007199254740992
+   },
+   "name": "dump-int-plus-2^53"
+  },
+  {
+   "expect": "{\"min\":-9007199254740992}",
+   "expect_sha256": "3bb65bcbf191d7d1b0fa46bb6ef5dc83f0888b986a035f4541ffd9d37bc8e814",
+   "fn": "jcs",
+   "input": {
+    "min": -9007199254740992
+   },
+   "name": "dump-int-minus-2^53"
+  },
+  {
+   "expect": "{}",
+   "expect_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+   "fn": "jcs",
+   "input": {},
+   "name": "dump-empty-object"
+  },
+  {
+   "expect": "{\"a\":[],\"o\":{}}",
+   "expect_sha256": "9bee7ebfc94b459dacb8cbc72cb2900e61f0aa42189df18329f84f92568f4f89",
+   "fn": "jcs",
+   "input": {
+    "a": [],
+    "o": {}
+   },
+   "name": "dump-empty-array-and-object-values"
+  },
+  {
+   "expect": "{\"\":11,\" \":10,\"0\":9,\"A\":5,\"B\":2,\"_\":3,\"a\":4,\"a \":12,\"a_\":7,\"aa\":6,\"b\":1,\"~\":8}",
+   "expect_sha256": "1b68b568961a3f872cf426fec0e1009b806db50fe104701a2897abb920c9544d",
+   "fn": "jcs",
+   "input": {
+    "": 11,
+    " ": 10,
+    "0": 9,
+    "A": 5,
+    "B": 2,
+    "_": 3,
+    "a": 4,
+    "a ": 12,
+    "a_": 7,
+    "aa": 6,
+    "b": 1,
+    "~": 8
+   },
+   "name": "dump-key-order-by-code-point"
+  },
+  {
+   "expect": "[3,\"x\",null,[],{},[[]]]",
+   "expect_sha256": "5a109b73e6a7290f4276af36eb9544295b97370dc97522271b3743197c8522e9",
+   "fn": "jcs",
+   "input": [
+    3,
+    "x",
+    null,
+    [],
+    {},
+    [
+     []
+    ]
+   ],
+   "name": "dump-top-level-array"
+  },
+  {
+   "expect": "{\"\\u0001\":1,\"\\t\":2,\"\\\\\":4,\"a\\\"b\":3,\"~\":5}",
+   "expect_sha256": "6216fb9d6f5e939b03934bef7834b46fd4f67b09c1699dd5e2b87046d647f835",
+   "fn": "jcs",
+   "input": {
+    "\u0001": 1,
+    "\t": 2,
+    "\\": 4,
+    "a\"b": 3,
+    "~": 5
+   },
+   "name": "dump-control-and-quote-keys"
+  },
+  {
+   "expect": "{\"big\":123456789012345,\"neg\":-1,\"small\":-123456789012345,\"zero\":0}",
+   "expect_sha256": "151912f9c7994ddb03a3bfec1b5440c50f86a7c3ab1c991d0dc6865fddfaec3d",
+   "fn": "jcs",
+   "input": {
+    "big": 123456789012345,
+    "neg": -1,
+    "small": -123456789012345,
+    "zero": 0
+   },
+   "name": "dump-integers"
+  },
+  {
+   "expect": "{\"meta\":{\"n\":1,\"none\":null,\"ok\":true},\"s\":\"\",\"tags\":[\"\u00e4\",\"a\",\"Z\"]}",
+   "expect_sha256": "cb4c687f03358957bd2fa7145f40b5ec952c61c489c99d2d1c5c6ad16a867265",
+   "fn": "jcs",
+   "input": {
+    "meta": {
+     "n": 1,
+     "none": null,
+     "ok": true
+    },
+    "s": "",
+    "tags": [
+     "\u00e4",
+     "a",
+     "Z"
+    ]
+   },
+   "name": "dump-mixed-entry-like"
+  },
+  {
+   "expect": "{\"d\":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}",
+   "expect_sha256": "bc3c4449574090f617a9c23471577ba73a012d7261aab64d59c8ab7595de0280",
+   "fn": "jcs",
+   "input": {
+    "d": [
+     [
+      [
+       [
+        [
+         [
+          [
+           [
+            [
+             [
+              [
+               [
+                [
+                 [
+                  [
+                   [
+                    [
+                     [
+                      [
+                       [
+                        [
+                         [
+                          [
+                           [
+                            [
+                             [
+                              [
+                               [
+                                [
+                                 [
+                                  [
+                                   1
+                                  ]
+                                 ]
+                                ]
+                               ]
+                              ]
+                             ]
+                            ]
+                           ]
+                          ]
+                         ]
+                        ]
+                       ]
+                      ]
+                     ]
+                    ]
+                   ]
+                  ]
+                 ]
+                ]
+               ]
+              ]
+             ]
+            ]
+           ]
+          ]
+         ]
+        ]
+       ]
+      ]
+     ]
+    ]
+   },
+   "name": "dump-depth-32"
+  },
+  {
+   "expect_error": "float",
+   "fn": "jcs",
+   "input": {
+    "a": [
+     1,
+     {
+      "b": 1.5
+     }
+    ]
+   },
+   "name": "refuse-float"
+  },
+  {
+   "expect_error": "non_ascii_key",
+   "fn": "jcs",
+   "input": {
+    "\u00e9": 1
+   },
+   "name": "refuse-non-ascii-key"
+  },
+  {
+   "expect_error": "non_ascii_key",
+   "fn": "jcs",
+   "input": {
+    "\u007f": 1
+   },
+   "name": "refuse-key-U+007F"
+  },
+  {
+   "expect_error": "int_range",
+   "fn": "jcs",
+   "input": {
+    "n": 9007199254740994
+   },
+   "name": "refuse-int-over-2^53"
+  },
+  {
+   "expect_error": "int_range",
+   "fn": "jcs",
+   "input": {
+    "n": [
+     -9007199254740994
+    ]
+   },
+   "name": "refuse-int-under-minus-2^53"
+  },
+  {
+   "expect_error": "lone_surrogate",
+   "fn": "jcs",
+   "input": {
+    "s": "a\ud800b"
+   },
+   "name": "refuse-lone-surrogate"
+  },
+  {
+   "expect_error": "depth",
+   "fn": "jcs",
+   "input": {
+    "d": [
+     [
+      [
+       [
+        [
+         [
+          [
+           [
+            [
+             [
+              [
+               [
+                [
+                 [
+                  [
+                   [
+                    [
+                     [
+                      [
+                       [
+                        [
+                         [
+                          [
+                           [
+                            [
+                             [
+                              [
+                               [
+                                [
+                                 [
+                                  [
+                                   [
+                                    1
+                                   ]
+                                  ]
+                                 ]
+                                ]
+                               ]
+                              ]
+                             ]
+                            ]
+                           ]
+                          ]
+                         ]
+                        ]
+                       ]
+                      ]
+                     ]
+                    ]
+                   ]
+                  ]
+                 ]
+                ]
+               ]
+              ]
+             ]
+            ]
+           ]
+          ]
+         ]
+        ]
+       ]
+      ]
+     ]
+    ]
+   },
+   "name": "refuse-depth-33"
+  },
+  {
+   "expect": "2026-10-31",
+   "fn": "day_of",
+   "name": "day 2026-11-01T03:59:59Z America/New_York",
+   "timestamp": "2026-11-01T03:59:59Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-11-01",
+   "fn": "day_of",
+   "name": "day 2026-11-01T04:00:00Z America/New_York",
+   "timestamp": "2026-11-01T04:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-11-01",
+   "fn": "day_of",
+   "name": "day 2026-11-01T05:00:00Z America/New_York",
+   "timestamp": "2026-11-01T05:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-11-01",
+   "fn": "day_of",
+   "name": "day 2026-11-01T05:59:59Z America/New_York",
+   "timestamp": "2026-11-01T05:59:59Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-11-01",
+   "fn": "day_of",
+   "name": "day 2026-11-01T06:00:00Z America/New_York",
+   "timestamp": "2026-11-01T06:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-11-01",
+   "fn": "day_of",
+   "name": "day 2026-11-01T07:00:00Z America/New_York",
+   "timestamp": "2026-11-01T07:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-11-01",
+   "fn": "day_of",
+   "name": "day 2026-11-02T04:59:59Z America/New_York",
+   "timestamp": "2026-11-02T04:59:59Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-11-02",
+   "fn": "day_of",
+   "name": "day 2026-11-02T05:00:00Z America/New_York",
+   "timestamp": "2026-11-02T05:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "2026-10-24",
+   "fn": "day_of",
+   "name": "day 2026-10-24T21:59:59Z Europe/Berlin",
+   "timestamp": "2026-10-24T21:59:59Z",
+   "tz": "Europe/Berlin"
+  },
+  {
+   "expect": "2026-10-25",
+   "fn": "day_of",
+   "name": "day 2026-10-24T22:00:00Z Europe/Berlin",
+   "timestamp": "2026-10-24T22:00:00Z",
+   "tz": "Europe/Berlin"
+  },
+  {
+   "expect": "2026-10-25",
+   "fn": "day_of",
+   "name": "day 2026-10-25T22:59:59Z Europe/Berlin",
+   "timestamp": "2026-10-25T22:59:59Z",
+   "tz": "Europe/Berlin"
+  },
+  {
+   "expect": "2027-01-01",
+   "fn": "day_of",
+   "name": "day 2026-12-31T23:00:00Z Europe/Berlin",
+   "timestamp": "2026-12-31T23:00:00Z",
+   "tz": "Europe/Berlin"
+  },
+  {
+   "expect": "2026-12-31",
+   "fn": "day_of",
+   "name": "day 2026-12-31T23:59:59Z UTC",
+   "timestamp": "2026-12-31T23:59:59Z",
+   "tz": "UTC"
+  },
+  {
+   "expect": "2027-01-01",
+   "fn": "day_of",
+   "name": "day 2027-01-01T00:00:00Z UTC",
+   "timestamp": "2027-01-01T00:00:00Z",
+   "tz": "UTC"
+  },
+  {
+   "expect": "2026-11-01",
+   "fn": "day_of",
+   "name": "day 2026-11-01T05:30:00Z UTC",
+   "timestamp": "2026-11-01T05:30:00Z",
+   "tz": "UTC"
+  },
+  {
+   "expect": "0999-12-31",
+   "fn": "day_of",
+   "name": "day 1000-01-01T00:00:00Z America/New_York",
+   "timestamp": "1000-01-01T00:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect": "9999-01-01",
+   "fn": "day_of",
+   "name": "day 9998-12-31T23:59:59Z Europe/Berlin",
+   "timestamp": "9998-12-31T23:59:59Z",
+   "tz": "Europe/Berlin"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-offset",
+   "timestamp": "2026-11-01T05:00:00+00:00",
+   "tz": "America/New_York"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-fraction",
+   "timestamp": "2026-11-01T05:00:00.000Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-feb-30",
+   "timestamp": "2026-02-30T00:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-hour-24",
+   "timestamp": "2026-11-01T24:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-leap-second",
+   "timestamp": "2026-12-31T23:59:60Z",
+   "tz": "UTC"
+  },
+  {
+   "expect_error": "anchor_tz",
+   "fn": "day_of",
+   "name": "day-refuse-unknown-zone",
+   "timestamp": "2026-11-01T05:00:00Z",
+   "tz": "Mars/Olympus_Mons"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-trailing-lf",
+   "timestamp": "2026-11-01T05:00:00Z\n",
+   "tz": "UTC"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-fullwidth-digits",
+   "timestamp": "\uff12\uff10\uff12\uff16-11-01T05:00:00Z",
+   "tz": "UTC"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-year-0001-new-york",
+   "timestamp": "0001-01-01T00:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-year-9999-berlin",
+   "timestamp": "9999-12-31T23:59:59Z",
+   "tz": "Europe/Berlin"
+  },
+  {
+   "expect_error": "timestamp",
+   "fn": "day_of",
+   "name": "day-refuse-year-0999-utc",
+   "timestamp": "0999-12-31T23:59:59Z",
+   "tz": "UTC"
+  },
+  {
+   "expect_error": "anchor_tz",
+   "fn": "day_of",
+   "name": "day-refuse-zone-lowercase-utc",
+   "timestamp": "2026-11-01T05:00:00Z",
+   "tz": "utc"
+  },
+  {
+   "expect_error": "anchor_tz",
+   "fn": "day_of",
+   "name": "day-refuse-zone-trailing-space",
+   "timestamp": "2026-11-01T05:00:00Z",
+   "tz": "UTC "
+  },
+  {
+   "expect_error": "anchor_tz",
+   "fn": "day_of",
+   "name": "day-refuse-zone-factory",
+   "timestamp": "2026-11-01T05:00:00Z",
+   "tz": "Factory"
+  },
+  {
+   "expect_error": "anchor_tz",
+   "fn": "day_of",
+   "name": "day-refuse-zone-lowercase-new-york",
+   "timestamp": "2026-11-01T05:00:00Z",
+   "tz": "america/new_york"
+  },
+  {
+   "expect": "2e0c7f7e8868309cdf973291ed6aed0a4d5f921b66414243bc6996df11ed8e4d",
+   "fn": "header_digest",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-digest-base"
+  },
+  {
+   "expect": "0618a01847164d0b3cb3f54482aa7fb089cd5b2f4f837e6221bdefa306722bad",
+   "fn": "header_digest",
+   "header": {
+    "agent": "bot-2_b",
+    "anchor_tz": "Europe/Berlin",
+    "certifies": "a header with a non-ASCII sentence: \u00fcber alles nichts \u2014 \u65e5\u672c",
+    "created": "2027-03-01T00:00:00Z",
+    "kinds": [
+     "anchor",
+     "edit",
+     "note",
+     "send",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "name": "header-digest-berlin-unicode"
+  },
+  {
+   "agent": "kitbot",
+   "date": "2026-11-01",
+   "expect": "kitbot anchor 2026-11-01 head 8d19a85bb63dbb5a5105c15d3a519921a43f491466c77b0513b075bccf8a221d seq 23",
+   "expect_sha256": "2144a9c42fe16a3790dc7ebc00c92f38451f68f1451f41574ab63010e736e569",
+   "fn": "anchor_text",
+   "head": "8d19a85bb63dbb5a5105c15d3a519921a43f491466c77b0513b075bccf8a221d",
+   "name": "anchor-text-base",
+   "seq": 23
+  },
+  {
+   "agent": "bot-2_b",
+   "date": "2027-03-01",
+   "expect": "bot-2_b anchor 2027-03-01 head aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa seq 0",
+   "expect_sha256": "cf80c5b133ae16fd063803643d51bf38155cb560e6dffbceb8c73c2c0986fbdb",
+   "fn": "anchor_text",
+   "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "name": "anchor-text-seq-0",
+   "seq": 0
+  },
+  {
+   "agent": "Kit Bot",
+   "date": "2026-11-01",
+   "expect_error": "anchor_form",
+   "fn": "anchor_text",
+   "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "name": "anchor-refuse-agent-space",
+   "seq": 1
+  },
+  {
+   "agent": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+   "date": "2026-11-01",
+   "expect_error": "anchor_form",
+   "fn": "anchor_text",
+   "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "name": "anchor-refuse-agent-33-chars",
+   "seq": 1
+  },
+  {
+   "agent": "kitbot",
+   "date": "2026-11-01",
+   "expect_error": "anchor_form",
+   "fn": "anchor_text",
+   "head": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "name": "anchor-refuse-uppercase-head",
+   "seq": 1
+  },
+  {
+   "agent": "kitbot",
+   "date": "2026-11-01",
+   "expect_error": "anchor_form",
+   "fn": "anchor_text",
+   "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "name": "anchor-refuse-negative-seq",
+   "seq": -1
+  },
+  {
+   "agent": "kitbot\n",
+   "date": "2026-11-01",
+   "expect_error": "anchor_form",
+   "fn": "anchor_text",
+   "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "name": "anchor-refuse-agent-trailing-lf",
+   "seq": 1
+  },
+  {
+   "agent": "kitbot",
+   "date": "2026-11-01",
+   "expect_error": "anchor_form",
+   "fn": "anchor_text",
+   "head": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "name": "anchor-refuse-seq-over-2^53",
+   "seq": 9007199254740994
+  },
+  {
+   "core": {
+    "day": "2026-10-31",
+    "kind": "note",
+    "n": 2,
+    "note": "caf\u00e9 \u2615 \u2014 \ud83d\ude42",
+    "prev": "2ca18d0e6b85858ac781f3d8a23298597aa51143b5f2f3b2435a578a08e45e3f",
+    "schema": "styxx.ledger/entry/v1",
+    "seq": 3,
+    "tags": [
+     "unicode"
+    ],
+    "timestamp": "2026-10-31T14:00:00Z"
+   },
+   "expect": "2906547665c0cc7b014d9e8a0b8e0ebbfc983988c81f9b43f94bb9aafb60fd11",
+   "fn": "entry_id",
+   "name": "entry-id-base-seq-3"
+  },
+  {
+   "core": {
+    "day": "2027-03-01",
+    "kind": "note",
+    "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+    "schema": "styxx.ledger/entry/v1",
+    "seq": 1,
+    "timestamp": "2027-03-01T00:00:00Z",
+    "x": "\u00fc"
+   },
+   "expect": "2033b32a473af9cbd218bebf35504235bc41f92e1a3495e29b00e74c46f698d7",
+   "fn": "entry_id",
+   "name": "entry-id-minimal"
+  },
+  {
+   "anchor_date": "2026-10-31",
+   "expect": false,
+   "fn": "late_of",
+   "name": "late-on-time-at-cutoff-edt",
+   "timestamp": "2026-11-01T04:10:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "anchor_date": "2026-10-31",
+   "expect": true,
+   "fn": "late_of",
+   "name": "late-one-second-after-cutoff-edt",
+   "timestamp": "2026-11-01T04:10:01Z",
+   "tz": "America/New_York"
+  },
+  {
+   "anchor_date": "2026-11-01",
+   "expect": false,
+   "fn": "late_of",
+   "name": "late-on-time-at-cutoff-est",
+   "timestamp": "2026-11-02T05:10:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "anchor_date": "2026-11-01",
+   "expect": true,
+   "fn": "late_of",
+   "name": "late-one-second-after-cutoff-est",
+   "timestamp": "2026-11-02T05:10:01Z",
+   "tz": "America/New_York"
+  },
+  {
+   "anchor_date": "2026-11-01",
+   "expect": true,
+   "fn": "late_of",
+   "name": "late-next-day-at-23:59:59-local",
+   "timestamp": "2026-11-03T04:59:59Z",
+   "tz": "America/New_York"
+  },
+  {
+   "anchor_date": "2026-11-01",
+   "expect": true,
+   "fn": "late_of",
+   "name": "late-two-days-after",
+   "timestamp": "2026-11-03T05:00:00Z",
+   "tz": "America/New_York"
+  },
+  {
+   "anchor_date": "2026-12-31",
+   "expect": true,
+   "fn": "late_of",
+   "name": "late-utc-cutoff",
+   "timestamp": "2027-01-01T00:10:01Z",
+   "tz": "UTC"
+  },
+  {
+   "anchor_date": "2026-12-31",
+   "expect": false,
+   "fn": "late_of",
+   "name": "late-same-day-is-not-late",
+   "timestamp": "2026-12-31T23:00:00Z",
+   "tz": "UTC"
+  },
+  {
+   "anchor_date": "2026-10-25",
+   "expect": false,
+   "fn": "late_of",
+   "name": "late-berlin-after-dst-end",
+   "timestamp": "2026-10-25T23:10:00Z",
+   "tz": "Europe/Berlin"
+  },
+  {
+   "anchor_date": "2026-02-30",
+   "expect_error": "anchor_form",
+   "fn": "late_of",
+   "name": "late-refuse-not-a-date",
+   "timestamp": "2026-03-02T00:00:00Z",
+   "tz": "UTC"
+  },
+  {
+   "expect": "{\"day\":\"2026-10-31\",\"entry_id\":\"e103213ab7a92faf57ab61eb31da871f9a78801243bb53d325a4bf56ab8fbe42\",\"kind\":\"started\",\"prev\":\"2e0c7f7e8868309cdf973291ed6aed0a4d5f921b66414243bc6996df11ed8e4d\",\"schema\":\"styxx.ledger/entry/v1\",\"seq\":1,\"timestamp\":\"2026-10-31T13:00:01Z\",\"writer\":{\"name\":\"styxx-ledger\",\"version\":\"1.0.0a1\"}}",
+   "fields": {
+    "writer": {
+     "name": "styxx-ledger",
+     "version": "1.0.0a1"
+    }
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "started",
+   "name": "build-started",
+   "prev": "2e0c7f7e8868309cdf973291ed6aed0a4d5f921b66414243bc6996df11ed8e4d",
+   "seq": 1,
+   "timestamp": "2026-10-31T13:00:01Z"
+  },
+  {
+   "expect": "{\"day\":\"2026-11-01\",\"deep\":{\"a\":null,\"b\":[1]},\"entry_id\":\"a6068f5a472b25223012be129f090c819d76f7f68212e60ede145e60f0a7b0da\",\"kind\":\"note\",\"note\":\"23:30 EST\",\"prev\":\"6b1039469a199f253223bd29585969ea5c3a8edc992e02f0dc30f8801223edd7\",\"schema\":\"styxx.ledger/entry/v1\",\"seq\":21,\"timestamp\":\"2026-11-02T04:30:00Z\"}",
+   "fields": {
+    "deep": {
+     "a": null,
+     "b": [
+      1
+     ]
+    },
+    "note": "23:30 EST"
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "note",
+   "name": "build-note-dst-edge",
+   "prev": "6b1039469a199f253223bd29585969ea5c3a8edc992e02f0dc30f8801223edd7",
+   "seq": 21,
+   "timestamp": "2026-11-02T04:30:00Z"
+  },
+  {
+   "expect": "{\"anchor_date\":\"2026-10-31\",\"anchor_head\":\"bc09e706bac62c96169170bd53f32e35df95aef704017fcb1c84e855ad3de108\",\"anchor_head_seq\":8,\"anchor_text_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"day\":\"2026-11-01\",\"entry_id\":\"6def4447c0a12216ec01a0689ec8c233df917475bdcab8f37e8772d0797cb676\",\"kind\":\"anchor\",\"late\":false,\"prev\":\"bc09e706bac62c96169170bd53f32e35df95aef704017fcb1c84e855ad3de108\",\"schema\":\"styxx.ledger/entry/v1\",\"seq\":9,\"timestamp\":\"2026-11-01T04:00:05Z\"}",
+   "fields": {
+    "anchor_date": "2026-10-31",
+    "anchor_head": "bc09e706bac62c96169170bd53f32e35df95aef704017fcb1c84e855ad3de108",
+    "anchor_head_seq": 8,
+    "anchor_text_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "late": false
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "anchor",
+   "name": "build-anchor",
+   "prev": "bc09e706bac62c96169170bd53f32e35df95aef704017fcb1c84e855ad3de108",
+   "seq": 9,
+   "timestamp": "2026-11-01T04:00:05Z"
+  },
+  {
+   "expect": "{\"day\":\"2027-01-01\",\"entry_id\":\"57d78e147403ea88fd709f04981bf8fb28e4aabb59da5895959a3d1b6182afa9\",\"kind\":\"send\",\"prev\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"schema\":\"styxx.ledger/entry/v1\",\"sent_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"seq\":4,\"timestamp\":\"2026-12-31T23:30:00Z\"}",
+   "fields": {
+    "sent_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "bot-2_b",
+    "anchor_tz": "Europe/Berlin",
+    "certifies": "a header with a non-ASCII sentence: \u00fcber alles nichts \u2014 \u65e5\u672c",
+    "created": "2027-03-01T00:00:00Z",
+    "kinds": [
+     "anchor",
+     "edit",
+     "note",
+     "send",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "send",
+   "name": "build-berlin-new-year",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 4,
+   "timestamp": "2026-12-31T23:30:00Z"
+  },
+  {
+   "expect": "{\"anchor_date\":\"2026-11-02\",\"anchor_head\":\"7640180c82d1550c6fbd51f2136183b612f238218deaab215204c833d3e946e8\",\"anchor_head_seq\":29,\"anchor_text_sha256\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"day\":\"2026-11-03\",\"entry_id\":\"b6495ff1a27eba8dfe87eab0fd32dfc62bdb238f175737dfdb5085fc0ca58250\",\"kind\":\"anchor\",\"late\":true,\"prev\":\"7640180c82d1550c6fbd51f2136183b612f238218deaab215204c833d3e946e8\",\"schema\":\"styxx.ledger/entry/v1\",\"seq\":30,\"timestamp\":\"2026-11-03T09:00:00Z\"}",
+   "fields": {
+    "anchor_date": "2026-11-02",
+    "anchor_head": "7640180c82d1550c6fbd51f2136183b612f238218deaab215204c833d3e946e8",
+    "anchor_head_seq": 29,
+    "anchor_text_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "late": true
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "anchor",
+   "name": "build-anchor-late-by-rule",
+   "prev": "7640180c82d1550c6fbd51f2136183b612f238218deaab215204c833d3e946e8",
+   "seq": 30,
+   "timestamp": "2026-11-03T09:00:00Z"
+  },
+  {
+   "expect_error": "kind_not_declared",
+   "fields": {
+    "x": 1
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "send",
+   "name": "build-refuse-kind-not-declared",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 2,
+   "timestamp": "2026-11-01T05:00:00Z"
+  },
+  {
+   "expect_error": "reserved_field",
+   "fields": {
+    "day": "2026-11-02"
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "note",
+   "name": "build-refuse-reserved-field",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 2,
+   "timestamp": "2026-11-01T05:00:00Z"
+  },
+  {
+   "expect_error": "started_writer",
+   "fields": {
+    "note": "no writer"
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "started",
+   "name": "build-refuse-started-without-writer",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 1,
+   "timestamp": "2026-11-01T05:00:00Z"
+  },
+  {
+   "expect_error": "float",
+   "fields": {
+    "score": 0.5
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "note",
+   "name": "build-refuse-float-field",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 2,
+   "timestamp": "2026-11-01T05:00:00Z"
+  },
+  {
+   "expect_error": "timestamp",
+   "fields": {
+    "x": 1
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "note",
+   "name": "build-refuse-offset-timestamp",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 2,
+   "timestamp": "2026-11-01T01:00:00-04:00"
+  },
+  {
+   "expect_error": "anchor_form",
+   "fields": {
+    "anchor_date": "2026-10-31",
+    "anchor_head": "0000000000000000000000000000000000000000000000000000000000000000",
+    "anchor_head_seq": 8,
+    "anchor_text_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "late": true
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "anchor",
+   "name": "build-refuse-anchor-late-mark-against-rule",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 9,
+   "timestamp": "2026-11-01T04:00:05Z"
+  },
+  {
+   "expect_error": "depth",
+   "fields": {
+    "deep": {
+     "d": [
+      [
+       [
+        [
+         [
+          [
+           [
+            [
+             [
+              [
+               [
+                [
+                 [
+                  [
+                   [
+                    [
+                     [
+                      [
+                       [
+                        [
+                         [
+                          [
+                           [
+                            [
+                             [
+                              [
+                               [
+                                [
+                                 [
+                                  [
+                                   [
+                                    1
+                                   ]
+                                  ]
+                                 ]
+                                ]
+                               ]
+                              ]
+                             ]
+                            ]
+                           ]
+                          ]
+                         ]
+                        ]
+                       ]
+                      ]
+                     ]
+                    ]
+                   ]
+                  ]
+                 ]
+                ]
+               ]
+              ]
+             ]
+            ]
+           ]
+          ]
+         ]
+        ]
+       ]
+      ]
+     ]
+    }
+   },
+   "fn": "build_entry",
+   "header": {
+    "agent": "kitbot",
+    "anchor_tz": "America/New_York",
+    "certifies": "one line per event kitbot was handed, chained; the writer's clock is a statement, not evidence of order",
+    "created": "2026-10-31T13:00:00Z",
+    "kinds": [
+     "anchor",
+     "note",
+     "started"
+    ],
+    "schema": "styxx.ledger/log/v1"
+   },
+   "kind": "note",
+   "name": "build-refuse-depth-33-field",
+   "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 2,
+   "timestamp": "2026-11-01T05:00:00Z"
+  }
+ ]
+}
